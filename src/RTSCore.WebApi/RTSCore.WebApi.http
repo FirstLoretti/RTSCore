@@ -1,0 +1,6 @@
+@RTSCore.WebApi_HostAddress = http://localhost:5273
+
+GET {{RTSCore.WebApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

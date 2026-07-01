@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/RTSCore.Domain/RTSCore.Domain.csproj" />
+    <Project Path="src/RTSCore.Infrastructure/RTSCore.Infrastructure.csproj" />
+    <Project Path="src/RTSCore.WebApi/RTSCore.WebApi.csproj" />
+  </Folder>
+  <Folder Name="/test/">
+    <Project Path="test/RTSCore.Tests/RTSCore.Tests.csproj" />
+  </Folder>
+</Solution>
