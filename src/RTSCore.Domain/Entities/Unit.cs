@@ -1,54 +1,53 @@
-using RTSCore.Domain.Common;
-using RTSCore.Domain.Interfaces;
+using RTSCore.Domain.Services;
 using RTSCore.Domain.ValueObjects;
 
 namespace RTSCore.Domain.Entities;
 
-public class Unit(
-    UnitId id,
-    string displayName,
-    FactionId factionHolder,
-    int damage,
-    int maxHealth,
-    int expKillReward
-    )
+public class Unit(UnitId id, UnitTemplate template, FactionId factionHolder)
 {
-    private int _currentHealth = maxHealth;
-    private int _maxHealth = maxHealth;
-    private int _damage = damage;
-    private int _expKillReward = expKillReward;
-
     public UnitId Id { get; init; } = id;
-    public string DisplayName { get; init; } = displayName;
+    public UnitType Type { get; init; } = template.Type;
     public FactionId FactionHolder { get; init; } = factionHolder;
+    public int Health { get; private set; } = template.MaxHealth;
+    public int Damage { get; private set; } = template.Damage;
+    public int Armor { get; private set; } = template.Armor;
     public int Level { get; private set; } = 1;
     public int Experience { get; private set; } = 0;
-    public bool IsAlive => _currentHealth > 0;
+    public bool IsAlive => Health > 0;
 
-    public Result<int> TakeDamage(int amount)
+    public void TakeDamage(int amount)
     {
-        if (!IsAlive) return Error.Combat("DeadNoDamage", $"Мёртвый юнит {Id} не может получить урон");
+        if (!IsAlive) return;
 
-        _currentHealth = int.Max(0, _currentHealth - amount);
-
-        return IsAlive ? 0 : _expKillReward;
+        Health = int.Max(0, Health - int.Abs(amount));
     }
 
-    public Result<bool> AddExperience(int amount, IExperienceTable experienceTable)
+    public void AddExperience(int amount)
     {
-        if (!IsAlive) return Error.Combat("DeadNoExp", $"Мёртвый юнит {Id} не может получить опыт");
+        if (!IsAlive || Level == GameBalance.ExpToNextLevel.Length) return;
 
         Experience += int.Max(0, amount);
-        var newLevel = experienceTable.GetLevel(Experience);
 
-        while (newLevel > Level)
+        while (
+            Level < GameBalance.ExpToNextLevel.Length &&
+            Experience >= GameBalance.ExpToNextLevel[Level - 1]
+        )
         {
+            Experience -= GameBalance.ExpToNextLevel[Level - 1];
             Level++;
-            _damage = (int)MathF.Ceiling(_damage * 1.1f);
-            _maxHealth = (int)MathF.Ceiling(_maxHealth * 1.1f);
-            _expKillReward = (int)MathF.Ceiling(_expKillReward * 1.1f);
+            RecalculateStats();
         }
 
-        return true;
+        if (Level == GameBalance.ExpToNextLevel.Length)
+        {
+            Experience = GameBalance.ExpToNextLevel.Last();
+        }
+    }
+
+    private void RecalculateStats()
+    {
+        Health = GameBalance.CalculateStat(template.MaxHealth, template.HealthGrowthRate, Level);
+        Damage = GameBalance.CalculateStat(template.Damage, template.DamageGrowthRate, Level);
+        Armor = GameBalance.CalculateStat(template.Armor, template.ArmorGrowthRate, Level);
     }
 }
