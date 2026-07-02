@@ -9,6 +9,5 @@ public record struct UnitTemplate(
     int Speed,
     int ExpKillReward,
     float HealthGrowthRate,
-    float DamageGrowthRate,
-    float ArmorGrowthRate
+    float DamageGrowthRate
 );

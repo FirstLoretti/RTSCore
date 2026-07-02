@@ -19,7 +19,7 @@ public class Unit(UnitId id, UnitTemplate template, FactionId factionHolder)
     {
         if (!IsAlive) return;
 
-        Health = int.Max(0, Health - int.Abs(amount));
+        Health = int.Max(0, Health - int.Max(0, amount));
     }
 
     public void AddExperience(int amount)
@@ -48,6 +48,5 @@ public class Unit(UnitId id, UnitTemplate template, FactionId factionHolder)
     {
         Health = GameBalance.CalculateStat(template.MaxHealth, template.HealthGrowthRate, Level);
         Damage = GameBalance.CalculateStat(template.Damage, template.DamageGrowthRate, Level);
-        Armor = GameBalance.CalculateStat(template.Armor, template.ArmorGrowthRate, Level);
     }
 }

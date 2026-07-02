@@ -16,6 +16,7 @@
 
   <ItemGroup>
     <Using Include="Xunit" />
+    <ProjectReference Include="..\..\src\RTSCore.Domain\RTSCore.Domain.csproj" />
   </ItemGroup>
 
 </Project>
