@@ -1,6 +1,6 @@
 namespace RTSCore.Domain.ValueObjects;
 
-public enum FactionId
+public enum FactionType
 {
     England,
     France

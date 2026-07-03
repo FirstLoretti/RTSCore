@@ -3,17 +3,29 @@ using RTSCore.Domain.ValueObjects;
 
 namespace RTSCore.Domain.Entities;
 
-public class Unit(UnitId id, UnitTemplate template, FactionId factionHolder)
+public class Unit(
+    UnitId id,
+    UnitType type,
+    UnitTemplate template,
+    FactionType faction
+)
 {
     public UnitId Id { get; init; } = id;
-    public UnitType Type { get; init; } = template.Type;
-    public FactionId FactionHolder { get; init; } = factionHolder;
+    public UnitType Type { get; init; } = type;
+    public FactionType Faction { get; init; } = faction;
     public int Health { get; private set; } = template.MaxHealth;
     public int Damage { get; private set; } = template.Damage;
     public int Armor { get; private set; } = template.Armor;
     public int Level { get; private set; } = 1;
     public int Experience { get; private set; } = 0;
     public bool IsAlive => Health > 0;
+
+    protected Unit() : this(default, default, default, default) { }
+
+    public void LoadTemplate(UnitTemplate unitTemplate)
+    {
+        template = unitTemplate;
+    }
 
     public void TakeDamage(int amount)
     {
