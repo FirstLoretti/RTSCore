@@ -3,7 +3,7 @@ using RTSCore.Domain.ValueObjects;
 
 namespace RTSCore.Tests;
 
-public class UnitTest
+public class UnitTests
 {
     private readonly UnitTemplate _template = new(
         Type: UnitType.EnglandSwordman,
@@ -23,7 +23,12 @@ public class UnitTest
     [InlineData(150, 0, false)]
     public void TakeDamage_ShouldProcessCorrectly(int damage, int expectedHealth, bool isAlive)
     {
-        var unit = new Unit("england_swordman_1", _template, FactionType.England);
+        var unit = new Unit(
+            id: "england_swordman_1",
+            type: UnitType.EnglandSwordman,
+            template: _template,
+            faction: FactionType.England
+        );
 
         unit.TakeDamage(damage);
 
@@ -38,7 +43,12 @@ public class UnitTest
     [InlineData(1000, 4, 200)]
     public void TakeExp_ShouldProcessCorrectly(int expAmount, int expectedLevel, int remainingExp)
     {
-        var unit = new Unit("england_swordman_1", _template, FactionType.England);
+        var unit = new Unit(
+           id: "england_swordman_1",
+           type: UnitType.EnglandSwordman,
+           template: _template,
+           faction: FactionType.England
+       );
 
         unit.AddExperience(expAmount);
 
