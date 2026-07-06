@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 
 using RTSCore.Domain.Entities;
+using RTSCore.Domain.Interfaces;
 using RTSCore.Domain.ValueObjects;
 
 namespace RTSCore.Infrastructure.Persistence;
