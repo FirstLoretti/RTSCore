@@ -11,7 +11,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 
 builder.Services.AddDbContext<AppDbContext>(
-    options => options.UseSqlite("Data Source=rts.db")
+    options => options.UseSqlite("Data Source=game.db")
 );
 builder.Services.AddScoped<IUnitRepository, SqlUnitRepository>();
 

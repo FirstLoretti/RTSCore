@@ -3,20 +3,21 @@ using Microsoft.EntityFrameworkCore;
 using RTSCore.Domain.Entities;
 using RTSCore.Domain.ValueObjects;
 using RTSCore.Infrastructure.Persistence;
+using Microsoft.Data.Sqlite;
 
 namespace RTSCore.Tests;
 
 public class DatabaseIntegrationTests
 {
     [Fact]
-    public void DbContext_ShouldSaveLoadUnit()
+    public void UnitRepository_ShouldSaveAndLoadUnit()
     {
-        const string testDbName = "test_game.db";
+        const string dbName = "test.db";
 
-        if (File.Exists(testDbName)) File.Delete(testDbName);
+        if (File.Exists(dbName)) File.Delete(dbName);
 
         var options = new DbContextOptionsBuilder<AppDbContext>()
-            .UseSqlite($"Data Source={testDbName}")
+            .UseSqlite($"Data Source={dbName}")
             .Options;
 
         using (var context = new AppDbContext(options))
@@ -45,26 +46,21 @@ public class DatabaseIntegrationTests
 
         using (var context = new AppDbContext(options))
         {
-            context.Units.Add(unit);
-            context.SaveChanges();
+            var repository = new SqlUnitRepository(context);
+            repository.Save(unit);
         }
 
+        Unit? dbUnit;
         using (var context = new AppDbContext(options))
         {
-            var dbUnit = context.Units.Find(new UnitId("england_swordman_1"));
-
-            Assert.NotNull(dbUnit);
-            Assert.Equal(dbUnit.Id, unit.Id);
-            Assert.Equal(dbUnit.Type, unit.Type);
-            Assert.Equal(dbUnit.Faction, unit.Faction);
-            Assert.Equal(dbUnit.Health, unit.Health);
-            Assert.Equal(dbUnit.Damage, unit.Damage);
-            Assert.Equal(dbUnit.Armor, unit.Armor);
-            Assert.Equal(dbUnit.Level, unit.Level);
-            Assert.Equal(dbUnit.Experience, unit.Experience);
+            var repository = new SqlUnitRepository(context);
+            dbUnit = repository.GetUnit(unit.Id);
         }
 
-        Microsoft.Data.Sqlite.SqliteConnection.ClearAllPools();
-        if (File.Exists(testDbName)) File.Delete(testDbName);
+        SqliteConnection.ClearAllPools();
+        if (File.Exists(dbName)) File.Delete(dbName);
+
+        Assert.NotNull(dbUnit);
+        Assert.Equivalent(unit, dbUnit);
     }
 }

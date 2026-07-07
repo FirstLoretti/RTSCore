@@ -12,7 +12,7 @@ namespace RTSCore.WebApi.Controllers;
 public class UnitController(IUnitRepository unitRepository) : ControllerBase
 {
     [HttpPost]
-    public IActionResult Create([FromBody] CreateUnitDto dto)
+    public IActionResult Create([FromBody] UnitCreateDto dto)
     {
         var unitTemplateMock = new UnitTemplate(
             Type: UnitType.EnglandSwordman,
@@ -30,5 +30,28 @@ public class UnitController(IUnitRepository unitRepository) : ControllerBase
         unitRepository.Save(unit);
 
         return Ok(new { Message = $"Юнит {dto.Id} создан на сервере и сохранён в базу данных" });
+    }
+
+    [HttpGet("{id}")]
+    public IActionResult Get(string id)
+    {
+        var unitId = new UnitId(id);
+        var unit = unitRepository.GetUnit(unitId);
+
+        if (unit == null) return NotFound(new { Message = $"Юнит {id} не найден в базе данных" });
+
+        var dto = new UnitResponseDto()
+        {
+            Id = unitId.Value,
+            Type = unit.Type,
+            Faction = unit.Faction,
+            Health = unit.Health,
+            Damage = unit.Damage,
+            Armor = unit.Armor,
+            Level = unit.Level,
+            Experience = unit.Experience
+        };
+
+        return Ok(dto);
     }
 }

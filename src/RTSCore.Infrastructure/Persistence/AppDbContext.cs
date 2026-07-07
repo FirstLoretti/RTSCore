@@ -1,7 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 
 using RTSCore.Domain.Entities;
-using RTSCore.Domain.Interfaces;
 using RTSCore.Domain.ValueObjects;
 
 namespace RTSCore.Infrastructure.Persistence;
@@ -25,11 +24,6 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
                     );
                     builder.Property(u => u.Type).HasConversion<string>();
                     builder.Property(u => u.Faction).HasConversion<string>();
-                    builder.Property(u => u.Health).HasConversion<string>();
-                    builder.Property(u => u.Damage).HasConversion<string>();
-                    builder.Property(u => u.Armor).HasConversion<string>();
-                    builder.Property(u => u.Level).HasConversion<string>();
-                    builder.Property(u => u.Experience).HasConversion<string>();
                 }
         );
     }

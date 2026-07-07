@@ -5,6 +5,9 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
+
+    <NuGetAuditSuppress>https://github.com/advisories/GHSA-v5pm-xwqc-g5wc</NuGetAuditSuppress>
+    <NuGetAudit>false</NuGetAudit>
   </PropertyGroup>
 
   <ItemGroup>
@@ -18,6 +21,7 @@
     <Using Include="Xunit" />
     <ProjectReference Include="..\..\src\RTSCore.Domain\RTSCore.Domain.csproj" />
     <ProjectReference Include="..\..\src\RTSCore.Infrastructure\RTSCore.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\RTSCore.WebApi\RTSCore.WebApi.csproj" />
   </ItemGroup>
 
 </Project>

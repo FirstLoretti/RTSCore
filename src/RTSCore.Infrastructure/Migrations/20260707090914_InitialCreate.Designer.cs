@@ -10,8 +10,8 @@ using RTSCore.Infrastructure.Persistence;
 namespace RTSCore.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260706103252_AddUnitTypeToUnit")]
-    partial class AddUnitTypeToUnit
+    [Migration("20260707090914_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,29 +24,24 @@ namespace RTSCore.Infrastructure.Migrations
                     b.Property<string>("Id")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Armor")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
+                    b.Property<int>("Armor")
+                        .HasColumnType("INTEGER");
 
-                    b.Property<string>("Damage")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
+                    b.Property<int>("Damage")
+                        .HasColumnType("INTEGER");
 
-                    b.Property<string>("Experience")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
+                    b.Property<int>("Experience")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Faction")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Health")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
+                    b.Property<int>("Health")
+                        .HasColumnType("INTEGER");
 
-                    b.Property<string>("Level")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
+                    b.Property<int>("Level")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Type")
                         .IsRequired()

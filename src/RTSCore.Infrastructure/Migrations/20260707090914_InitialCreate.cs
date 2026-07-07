@@ -15,12 +15,13 @@ namespace RTSCore.Infrastructure.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "TEXT", nullable: false),
+                    Type = table.Column<string>(type: "TEXT", nullable: false),
                     Faction = table.Column<string>(type: "TEXT", nullable: false),
-                    Health = table.Column<string>(type: "TEXT", nullable: false),
-                    Damage = table.Column<string>(type: "TEXT", nullable: false),
-                    Armor = table.Column<string>(type: "TEXT", nullable: false),
-                    Level = table.Column<string>(type: "TEXT", nullable: false),
-                    Experience = table.Column<string>(type: "TEXT", nullable: false)
+                    Health = table.Column<int>(type: "INTEGER", nullable: false),
+                    Damage = table.Column<int>(type: "INTEGER", nullable: false),
+                    Armor = table.Column<int>(type: "INTEGER", nullable: false),
+                    Level = table.Column<int>(type: "INTEGER", nullable: false),
+                    Experience = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
