@@ -22,11 +22,6 @@ public class Unit(
 
     protected Unit() : this(default, default, default, default) { }
 
-    public void LoadTemplate(UnitTemplate unitTemplate)
-    {
-        template = unitTemplate;
-    }
-
     public void TakeDamage(int amount)
     {
         if (!IsAlive) return;
