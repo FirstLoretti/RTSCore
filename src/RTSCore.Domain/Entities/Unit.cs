@@ -1,5 +1,6 @@
-using RTSCore.Domain.Services;
 using RTSCore.Domain.ValueObjects;
+
+using static RTSCore.Domain.Services.GameBalance;
 
 namespace RTSCore.Domain.Entities;
 
@@ -31,29 +32,31 @@ public class Unit(
 
     public void AddExperience(int amount)
     {
-        if (!IsAlive || Level == GameBalance.ExpToNextLevel.Length) return;
+        if (!IsAlive || Level == Units.ExpToNextLevel.Length) return;
 
         Experience += int.Max(0, amount);
 
         while (
-            Level < GameBalance.ExpToNextLevel.Length &&
-            Experience >= GameBalance.ExpToNextLevel[Level - 1]
+            Level < Units.ExpToNextLevel.Length &&
+            Experience >= Units.ExpToNextLevel[Level - 1]
         )
         {
-            Experience -= GameBalance.ExpToNextLevel[Level - 1];
+            Experience -= Units.ExpToNextLevel[Level - 1];
             Level++;
             RecalculateStats();
         }
 
-        if (Level == GameBalance.ExpToNextLevel.Length)
+        if (Level == Units.ExpToNextLevel.Length)
         {
-            Experience = GameBalance.ExpToNextLevel.Last();
+            Experience = Units.ExpToNextLevel.Last();
         }
     }
 
     private void RecalculateStats()
     {
-        Health = GameBalance.CalculateStat(template.MaxHealth, template.HealthGrowthRate, Level);
-        Damage = GameBalance.CalculateStat(template.Damage, template.DamageGrowthRate, Level);
+        Health =
+            Units.CalculateStat(template.MaxHealth, template.HealthGrowthRate, Level);
+        Damage =
+            Units.CalculateStat(template.Damage, template.DamageGrowthRate, Level);
     }
 }

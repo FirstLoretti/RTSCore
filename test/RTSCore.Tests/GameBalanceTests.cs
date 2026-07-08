@@ -13,7 +13,7 @@ public class GameBalanceTests
         int expected
     )
     {
-        int value = GameBalance.CalculateStat(statValue, growthRate, level);
+        int value = Units.CalculateStat(statValue, growthRate, level);
 
         Assert.Equal(expected, value);
     }

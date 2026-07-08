@@ -5,6 +5,8 @@ using RTSCore.Domain.Interfaces;
 using RTSCore.Domain.ValueObjects;
 using RTSCore.WebApi.Dtos;
 
+using static RTSCore.Domain.Services.GameBalance;
+
 namespace RTSCore.WebApi.Controllers;
 
 [ApiController]
@@ -14,22 +16,24 @@ public class UnitController(IUnitRepository unitRepository) : ControllerBase
     [HttpPost]
     public IActionResult Create([FromBody] UnitCreateDto dto)
     {
-        var unitTemplateMock = new UnitTemplate(
-            Type: UnitType.EnglandSwordman,
-            DisplayName: "EnglandSwordman",
-            MaxHealth: 100,
-            Damage: 25,
-            Armor: 2,
-            Speed: 5,
-            ExpKillReward: 25,
-            HealthGrowthRate: 1.1f,
-            DamageGrowthRate: 1.15f
-        );
-        var unit = new Unit(dto.Id, dto.Type, unitTemplateMock, dto.Faction);
+        try
+        {
+            var template = Units.GetTemplate(dto.Type);
 
-        unitRepository.Save(unit);
+            var unit = new Unit(dto.Id, dto.Type, template, dto.Faction);
 
-        return Ok(new { Message = $"Юнит {dto.Id} создан на сервере и сохранён в базу данных" });
+            unitRepository.Save(unit);
+
+            return Ok(new { Message = $"Юнит {dto.Id} создан на сервере и сохранён в базу данных" });
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return BadRequest(new
+            {
+                Error = "Ошибка валидации игрового баланса",
+                Details = ex.Message
+            });
+        }
     }
 
     [HttpGet("{id}")]
