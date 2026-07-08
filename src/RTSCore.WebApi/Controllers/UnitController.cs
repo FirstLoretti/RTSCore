@@ -16,15 +16,10 @@ public class UnitController(IUnitRepository unitRepository) : ControllerBase
     [HttpPost]
     public IActionResult Create([FromBody] UnitCreateDto dto)
     {
+        UnitTemplate template;
         try
         {
-            var template = Units.GetTemplate(dto.Type);
-
-            var unit = new Unit(dto.Id, dto.Type, template, dto.Faction);
-
-            unitRepository.Save(unit);
-
-            return Ok(new { Message = $"Юнит {dto.Id} создан на сервере и сохранён в базу данных" });
+            template = Units.GetTemplate(dto.Type);
         }
         catch (KeyNotFoundException ex)
         {
@@ -34,6 +29,13 @@ public class UnitController(IUnitRepository unitRepository) : ControllerBase
                 Details = ex.Message
             });
         }
+
+        var unit = new Unit(dto.Id, dto.Type, template, dto.Faction);
+
+        unitRepository.Add(unit);
+        unitRepository.Save(unit);
+
+        return Ok(new { Message = $"Юнит {dto.Id} создан на сервере и сохранён в базу данных" });
     }
 
     [HttpGet("{id}")]
@@ -42,7 +44,7 @@ public class UnitController(IUnitRepository unitRepository) : ControllerBase
         var unitId = new UnitId(id);
         var unit = unitRepository.GetUnit(unitId);
 
-        if (unit == null) return NotFound(new { Message = $"Юнит {id} не найден в базе данных" });
+        if (unit == null) return NotFound(new { Message = $"Юнита {id} нет в базе данных" });
 
         var dto = new UnitResponseDto()
         {
@@ -57,5 +59,24 @@ public class UnitController(IUnitRepository unitRepository) : ControllerBase
         };
 
         return Ok(dto);
+    }
+
+    [HttpPost("{id}/experience")]
+    public IActionResult AddExperience(string id, [FromBody] ExperienceAddDto dto)
+    {
+        var unitId = new UnitId(id);
+        var unit = unitRepository.GetUnit(unitId);
+
+        if (unit == null) return NotFound(new { Message = $"Юнита {id} нет в базе данных" });
+
+        unit.AddExperience(dto.Amount);
+        unitRepository.Save(unit);
+
+        return Ok(new
+        {
+            Messange = $"Юниту {id} начислен опыт",
+            CurrentLevel = unit.Level,
+            CurrentExperience = unit.Experience
+        });
     }
 }

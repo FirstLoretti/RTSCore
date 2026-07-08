@@ -6,9 +6,13 @@ namespace RTSCore.Infrastructure.Persistence;
 
 public class SqlUnitRepository(AppDbContext dbContext) : IUnitRepository
 {
-    public void Save(Unit unit)
+    public void Add(Unit unit)
     {
         dbContext.Units.Add(unit);
+    }
+
+    public void Save(Unit unit)
+    {
         dbContext.SaveChanges();
     }
 

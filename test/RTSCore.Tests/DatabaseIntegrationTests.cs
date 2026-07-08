@@ -47,6 +47,7 @@ public class DatabaseIntegrationTests
         using (var context = new AppDbContext(options))
         {
             var repository = new SqlUnitRepository(context);
+            repository.Add(unit);
             repository.Save(unit);
         }
 
