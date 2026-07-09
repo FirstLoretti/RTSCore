@@ -4,24 +4,31 @@ using static RTSCore.Domain.Services.GameBalance;
 
 namespace RTSCore.Domain.Entities;
 
-public class Unit(
-    UnitId id,
-    UnitType type,
-    UnitTemplate template,
-    FactionType faction
-)
+public class Unit
 {
-    public UnitId Id { get; init; } = id;
-    public UnitType Type { get; init; } = type;
-    public FactionType Faction { get; init; } = faction;
-    public int Health { get; private set; } = template.MaxHealth;
-    public int Damage { get; private set; } = template.Damage;
-    public int Armor { get; private set; } = template.Armor;
+    public UnitId Id { get; init; }
+    public UnitType Type { get; init; }
+    public FactionType Faction { get; init; }
+    public int Health { get; private set; }
+    public int Damage { get; private set; }
+    public int Armor { get; private set; }
     public int Level { get; private set; } = 1;
     public int Experience { get; private set; } = 0;
     public bool IsAlive => Health > 0;
 
-    protected Unit() : this(default, default, default, default) { }
+    public Unit(UnitId id, UnitType type, FactionType faction)
+    {
+        Id = id;
+        Type = type;
+        Faction = faction;
+
+        var template = Units.GetTemplate(type);
+        Health = template.MaxHealth;
+        Damage = template.Damage;
+        Armor = template.Armor;
+    }
+
+    protected Unit() { }
 
     public void TakeDamage(int amount)
     {
@@ -54,6 +61,8 @@ public class Unit(
 
     private void RecalculateStats()
     {
+        var template = Units.GetTemplate(Type);
+
         Health =
             Units.CalculateStat(template.MaxHealth, template.HealthGrowthRate, Level);
         Damage =

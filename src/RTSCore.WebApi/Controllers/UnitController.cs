@@ -30,7 +30,7 @@ public class UnitController(IUnitRepository unitRepository) : ControllerBase
             });
         }
 
-        var unit = new Unit(dto.Id, dto.Type, template, dto.Faction);
+        var unit = new Unit(dto.Id, dto.Type, dto.Faction);
 
         unitRepository.Add(unit);
         unitRepository.Save(unit);

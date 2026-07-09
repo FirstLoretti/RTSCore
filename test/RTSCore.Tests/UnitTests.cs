@@ -1,39 +1,21 @@
 using RTSCore.Domain.Entities;
 using RTSCore.Domain.ValueObjects;
 
+using static RTSCore.Domain.Services.GameBalance;
+
 namespace RTSCore.Tests;
 
 public class UnitTests
 {
-    private readonly UnitTemplate _template = new(
-        Type: UnitType.EnglandSwordman,
-        DisplayName: "EnglandSwordman",
-        MaxHealth: 100,
-        Damage: 25,
-        Armor: 2,
-        Speed: 5,
-        ExpKillReward: 25,
-        HealthGrowthRate: 1.1f,
-        DamageGrowthRate: 1.15f
-    );
-
     [Theory]
-    [InlineData(-50, 100, true)]
-    [InlineData(50, 50, true)]
-    [InlineData(150, 0, false)]
+    [MemberData(nameof(TakeDamageData))]
     public void TakeDamage_ShouldDecreaseHealth_DependingOnAmount(
         int damage,
         int expectedHealth,
         bool isAlive
     )
     {
-        var unit = new Unit(
-            id: "england_swordman_1",
-            type: UnitType.EnglandSwordman,
-            template: _template,
-            faction: FactionType.England
-        );
-
+        var unit = CreateUnit();
         unit.TakeDamage(damage);
 
         Assert.Equal(expectedHealth, unit.Health);
@@ -41,26 +23,74 @@ public class UnitTests
     }
 
     [Theory]
-    [InlineData(-50, 1, 0)]
-    [InlineData(50, 2, 0)]
-    [InlineData(175, 3, 25)]
-    [InlineData(1000, 4, 200)]
-    public void TakeExp_ShouldLevelUpAndKeepRemainingExp_DependingOnAmount(
+    [MemberData(nameof(AddExperienceData))]
+    public void AddExperience_ShouldLevelUpAndKeepRemainingExp_DependingOnAmount(
         int expAmount,
         int expectedLevel,
         int remainingExp
     )
     {
-        var unit = new Unit(
-           id: "england_swordman_1",
-           type: UnitType.EnglandSwordman,
-           template: _template,
-           faction: FactionType.England
-       );
-
+        var unit = CreateUnit();
         unit.AddExperience(expAmount);
 
         Assert.Equal(expectedLevel, unit.Level);
         Assert.Equal(remainingExp, unit.Experience);
+    }
+
+    [Fact]
+    public void RecalculateStats_ShouldUpdateStats_WhenLevelUp()
+    {
+        var unit = CreateUnit();
+        var template = Units.GetTemplate(unit.Type);
+
+        var newHealth = Units.CalculateStat(unit.Health, template.HealthGrowthRate, 2);
+        var newDamage = Units.CalculateStat(unit.Damage, template.DamageGrowthRate, 2);
+
+        unit.AddExperience(Units.ExpToNextLevel[0]);
+
+        Assert.Equal(newHealth, unit.Health);
+        Assert.Equal(newDamage, unit.Damage);
+    }
+
+    public static TheoryData<int, int, int> AddExperienceData()
+    {
+        var data = new TheoryData<int, int, int>
+        {
+            { -50, 1, 0 },
+
+            { Units.ExpToNextLevel[0], 2, 0 },
+
+            { Units.ExpToNextLevel[0] + Units.ExpToNextLevel[1] + 1, 3, 1 },
+
+            { int.MaxValue, Units.ExpToNextLevel.Length, Units.ExpToNextLevel.Last() }
+        };
+
+        return data;
+    }
+
+    public static TheoryData<int, int, bool> TakeDamageData()
+    {
+        var unit = CreateUnit();
+        var baseHealth = Units.GetTemplate(unit.Type).MaxHealth;
+
+        var data = new TheoryData<int, int, bool>
+        {
+            {-50 , baseHealth, true},
+            {1, baseHealth - 1, true},
+            {int.MaxValue, 0 , false}
+        };
+
+        return data;
+    }
+
+    private static Unit CreateUnit()
+    {
+        var unit = new Unit(
+            id: "england_swordman_1",
+            type: UnitType.EnglandSwordman,
+            faction: FactionType.England
+        );
+
+        return unit;
     }
 }

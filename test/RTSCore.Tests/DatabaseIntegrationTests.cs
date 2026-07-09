@@ -4,6 +4,7 @@ using RTSCore.Domain.Entities;
 using RTSCore.Domain.ValueObjects;
 using RTSCore.Infrastructure.Persistence;
 using Microsoft.Data.Sqlite;
+using RTSCore.Domain.Services;
 
 namespace RTSCore.Tests;
 
@@ -16,34 +17,9 @@ public class DatabaseIntegrationTests
 
         if (File.Exists(dbName)) File.Delete(dbName);
 
-        var options = new DbContextOptionsBuilder<AppDbContext>()
-            .UseSqlite($"Data Source={dbName}")
-            .Options;
+        var options = CreateDb(dbName);
 
-        using (var context = new AppDbContext(options))
-        {
-            context.Database.EnsureCreated();
-        }
-
-        var unitTemplate = new UnitTemplate(
-            Type: UnitType.EnglandSwordman,
-            DisplayName: "EnglandSwordman",
-            MaxHealth: 100,
-            Damage: 25,
-            Armor: 2,
-            Speed: 5,
-            ExpKillReward: 50,
-            HealthGrowthRate: 1.1f,
-            DamageGrowthRate: 1.15f
-        );
-
-        var unit = new Unit(
-            id: "england_swordman_1",
-            type: unitTemplate.Type,
-            template: unitTemplate,
-            faction: FactionType.England
-        );
-
+        var unit = CreateUnit();
         using (var context = new AppDbContext(options))
         {
             var repository = new SqlUnitRepository(context);
@@ -63,5 +39,78 @@ public class DatabaseIntegrationTests
 
         Assert.NotNull(dbUnit);
         Assert.Equivalent(unit, dbUnit);
+    }
+
+    [Fact]
+    public void UnitRepository_ShouldUpdateUnitStats_WhenLevelUp()
+    {
+        const string dbName = "test.db";
+
+        if (File.Exists(dbName)) File.Delete(dbName);
+
+        var options = CreateDb(dbName);
+        var unit = CreateUnit();
+
+        using (var context = new AppDbContext(options))
+        {
+            var repository = new SqlUnitRepository(context);
+            repository.Add(unit);
+            repository.Save(unit);
+        }
+
+        using (var context = new AppDbContext(options))
+        {
+            var repository = new SqlUnitRepository(context);
+
+            if (repository.GetUnit(unit.Id) is not Unit dbUnit)
+            {
+                Assert.Fail("[Act] Юнит не найдет в базе данных.");
+                return;
+            }
+
+            dbUnit.AddExperience(GameBalance.Units.ExpToNextLevel[0] + 1);
+            repository.Save(dbUnit);
+        }
+
+        Unit? updatedUnit;
+        using (var context = new AppDbContext(options))
+        {
+            var repository = new SqlUnitRepository(context);
+            updatedUnit = repository.GetUnit(unit.Id);
+        }
+
+        SqliteConnection.ClearAllPools();
+        if (File.Exists(dbName)) File.Delete(dbName);
+
+        Assert.NotNull(updatedUnit);
+        Assert.True(updatedUnit.Level > unit.Level);
+        Assert.True(updatedUnit.Experience > unit.Experience);
+        Assert.True(
+            updatedUnit.Health > unit.Health,
+            $"Здоровье юнита из базы данных {updatedUnit.Health}, здоровье начального юнита {unit.Health}."
+        );
+    }
+
+    private static Unit CreateUnit()
+    {
+        var unit = new Unit(
+            id: "england_swordman_1",
+            type: UnitType.EnglandSwordman,
+            faction: FactionType.England
+        );
+
+        return unit;
+    }
+
+    private static DbContextOptions<AppDbContext> CreateDb(string dbName)
+    {
+        var options = new DbContextOptionsBuilder<AppDbContext>()
+            .UseSqlite($"Data Source={dbName}")
+            .Options;
+
+        using var context = new AppDbContext(options);
+        context.Database.EnsureCreated();
+
+        return options;
     }
 }

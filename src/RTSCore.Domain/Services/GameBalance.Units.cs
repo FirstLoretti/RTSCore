@@ -52,7 +52,7 @@ public static partial class GameBalance
         {
             return !TypeToTemplate.TryGetValue(type, out var template)
                 ? throw new ArgumentException(
-                    $"[GameBalance] Шаблон юнита {type} не найден в системе"
+                    $"[GameBalance.Units] Шаблон юнита {type} не найден в системе"
                 )
                 : template;
         }
