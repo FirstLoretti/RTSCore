@@ -5,8 +5,6 @@ using RTSCore.Domain.Interfaces;
 using RTSCore.Domain.ValueObjects;
 using RTSCore.WebApi.Dtos;
 
-using static RTSCore.Domain.Services.GameBalance;
-
 namespace RTSCore.WebApi.Controllers;
 
 [ApiController]
@@ -16,26 +14,15 @@ public class UnitController(IUnitRepository unitRepository) : ControllerBase
     [HttpPost]
     public IActionResult Create([FromBody] UnitCreateDto dto)
     {
-        UnitTemplate template;
-        try
-        {
-            template = Units.GetTemplate(dto.Type);
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return BadRequest(new
-            {
-                Error = "Ошибка валидации игрового баланса",
-                Details = ex.Message
-            });
-        }
-
         var unit = new Unit(dto.Id, dto.Type, dto.Faction);
 
         unitRepository.Add(unit);
         unitRepository.Save(unit);
 
-        return Ok(new { Message = $"Юнит {dto.Id} создан на сервере и сохранён в базу данных" });
+        return CreatedAtAction(
+            actionName: nameof(Get),
+            routeValues: new { id = unit.Id.Value },
+            value: new { Message = $"Юнит {dto.Id} создан на сервере и сохранён в базу данных" });
     }
 
     [HttpGet("{id}")]
@@ -44,7 +31,14 @@ public class UnitController(IUnitRepository unitRepository) : ControllerBase
         var unitId = new UnitId(id);
         var unit = unitRepository.GetUnit(unitId);
 
-        if (unit == null) return NotFound(new { Message = $"Юнита {id} нет в базе данных" });
+        if (unit == null)
+        {
+            return NotFound(new
+            {
+                Error = $"Сущность не найдена",
+                Message = $"Юнита {id} нет в базе данных"
+            });
+        }
 
         var dto = new UnitResponseDto()
         {
@@ -67,14 +61,21 @@ public class UnitController(IUnitRepository unitRepository) : ControllerBase
         var unitId = new UnitId(id);
         var unit = unitRepository.GetUnit(unitId);
 
-        if (unit == null) return NotFound(new { Message = $"Юнита {id} нет в базе данных" });
+        if (unit == null)
+        {
+            return NotFound(new
+            {
+                Error = $"Сущность не найдена",
+                Message = $"Юнита {id} нет в базе данных"
+            });
+        }
 
         unit.AddExperience(dto.Amount);
         unitRepository.Save(unit);
 
         return Ok(new
         {
-            Messange = $"Юниту {id} начислен опыт",
+            Message = $"Юниту {id} начислен опыт",
             CurrentLevel = unit.Level,
             CurrentExperience = unit.Experience
         });
