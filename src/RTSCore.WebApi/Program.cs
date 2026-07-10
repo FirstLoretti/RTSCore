@@ -13,7 +13,13 @@ builder.Services.AddControllers();
 builder.Services.AddDbContext<AppDbContext>(
     options => options.UseSqlite("Data Source=game.db")
 );
+
 builder.Services.AddScoped<IUnitRepository, SqlUnitRepository>();
+
+builder.Services.AddMediatR(cfg =>
+    cfg.RegisterServicesFromAssembly(
+        typeof(RTSCore.Application.Units.Commands.AddExperienceCommand).Assembly
+    ));
 
 builder.Services.AddOpenApi();
 

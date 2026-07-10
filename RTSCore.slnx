@@ -1,5 +1,6 @@
 <Solution>
   <Folder Name="/src/">
+    <Project Path="src/RTSCore.Application/RTSCore.Application.csproj" />
     <Project Path="src/RTSCore.Domain/RTSCore.Domain.csproj" />
     <Project Path="src/RTSCore.Infrastructure/RTSCore.Infrastructure.csproj" />
     <Project Path="src/RTSCore.WebApi/RTSCore.WebApi.csproj" />

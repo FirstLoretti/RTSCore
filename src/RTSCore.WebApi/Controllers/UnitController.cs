@@ -1,48 +1,51 @@
+using MediatR;
+
 using Microsoft.AspNetCore.Mvc;
 
-using RTSCore.Domain.Entities;
-using RTSCore.Domain.Interfaces;
-using RTSCore.Domain.ValueObjects;
+using RTSCore.Application.Units.Commands;
 using RTSCore.WebApi.Dtos;
 
 namespace RTSCore.WebApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class UnitController(IUnitRepository unitRepository) : ControllerBase
+public class UnitController(IMediator mediator) : ControllerBase
 {
     [HttpPost]
-    public IActionResult Create([FromBody] UnitCreateDto dto)
+    public async Task<IActionResult> Create([FromBody] UnitCreateDto dto)
     {
-        var unit = new Unit(dto.Id, dto.Type, dto.Faction);
+        var command = new CreateUnitCommand(
+            dto.Id,
+            dto.Type,
+            dto.Faction
+        );
 
-        unitRepository.Add(unit);
-        unitRepository.Save(unit);
+        var id = await mediator.Send(command);
 
         return CreatedAtAction(
             actionName: nameof(Get),
-            routeValues: new { id = unit.Id.Value },
-            value: new { Message = $"Юнит {dto.Id} создан на сервере и сохранён в базу данных" });
+            routeValues: new { id },
+            value: new { Message = $"Юнит {id} создан на сервере и сохранён в базу данных" });
     }
 
     [HttpGet("{id}")]
-    public IActionResult Get(string id)
+    public async Task<IActionResult> Get(string id)
     {
-        var unitId = new UnitId(id);
-        var unit = unitRepository.GetUnit(unitId);
+        var command = new GetUnitCommand(id);
+        var unit = await mediator.Send(command);
 
         if (unit == null)
         {
             return NotFound(new
             {
-                Error = $"Сущность не найдена",
+                Error = $"Юнит не найден",
                 Message = $"Юнита {id} нет в базе данных"
             });
         }
 
         var dto = new UnitResponseDto()
         {
-            Id = unitId.Value,
+            Id = unit.Id,
             Type = unit.Type,
             Faction = unit.Faction,
             Health = unit.Health,
@@ -56,28 +59,27 @@ public class UnitController(IUnitRepository unitRepository) : ControllerBase
     }
 
     [HttpPost("{id}/experience")]
-    public IActionResult AddExperience(string id, [FromBody] ExperienceAddDto dto)
+    public async Task<IActionResult> AddExperience(string id, [FromBody] ExperienceAddDto dto)
     {
-        var unitId = new UnitId(id);
-        var unit = unitRepository.GetUnit(unitId);
-
-        if (unit == null)
+        try
         {
-            return NotFound(new
+            var addExpCommand = new AddExperienceCommand(id, dto.Amount);
+            var (level, experience) = await mediator.Send(addExpCommand);
+
+            return Ok(new
             {
-                Error = $"Сущность не найдена",
-                Message = $"Юнита {id} нет в базе данных"
+                Message = $"Юниту {id} начислен опыт",
+                CurrentLevel = level,
+                CurrentExperience = experience
             });
         }
-
-        unit.AddExperience(dto.Amount);
-        unitRepository.Save(unit);
-
-        return Ok(new
+        catch (KeyNotFoundException ex)
         {
-            Message = $"Юниту {id} начислен опыт",
-            CurrentLevel = unit.Level,
-            CurrentExperience = unit.Experience
-        });
+            return BadRequest(new
+            {
+                Error = "Юнит не найден",
+                ex.Message
+            });
+        }
     }
 }

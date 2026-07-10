@@ -21,6 +21,7 @@
   <ItemGroup>
     <ProjectReference Include="..\RTSCore.Domain\RTSCore.Domain.csproj" />
     <ProjectReference Include="..\RTSCore.Infrastructure\RTSCore.Infrastructure.csproj" />
+    <ProjectReference Include="..\RTSCore.Application\RTSCore.Application.csproj" />
   </ItemGroup>
 
 </Project>
