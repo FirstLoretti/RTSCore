@@ -6,15 +6,10 @@ namespace RTSCore.Infrastructure.Persistence;
 
 public class SqlUnitRepository(AppDbContext dbContext) : IUnitRepository
 {
-    public void Add(Unit unit)
-    {
-        dbContext.Units.Add(unit);
-    }
+    public void Add(Unit unit) => dbContext.Units.Add(unit);
 
-    public void Save(Unit unit)
+    public async Task<Unit?> GetUnitAsync(UnitId id, CancellationToken cancellationToken)
     {
-        dbContext.SaveChanges();
+        return await dbContext.Units.FindAsync([id], cancellationToken);
     }
-
-    public Unit? GetUnit(UnitId id) => dbContext.Units.Find(id);
 }

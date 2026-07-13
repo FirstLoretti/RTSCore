@@ -9,10 +9,10 @@ namespace RTSCore.Application.Units.Commands;
 public class GetUnitCommandHandler(IUnitRepository repository) :
     IRequestHandler<GetUnitCommand, DomainUnit?>
 {
-    public Task<DomainUnit?> Handle(GetUnitCommand request, CancellationToken cancellationToken)
+    public async Task<DomainUnit?> Handle(GetUnitCommand request, CancellationToken cancellationToken)
     {
-        var unit = repository.GetUnit(request.Id);
+        var unit = await repository.GetUnitAsync(request.Id, cancellationToken);
 
-        return Task.FromResult(unit);
+        return unit;
     }
 }

@@ -5,7 +5,6 @@ namespace RTSCore.Domain.Interfaces;
 
 public interface IUnitRepository
 {
-    public void Add(Unit unit);
-    public void Save(Unit unit);
-    public Unit? GetUnit(UnitId id);
+    void Add(Unit unit);
+    Task<Unit?> GetUnitAsync(UnitId id, CancellationToken cancellationToken);
 }

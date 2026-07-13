@@ -1,5 +1,8 @@
+using MediatR;
+
 using Microsoft.EntityFrameworkCore;
 
+using RTSCore.Application.Common.Behaviors;
 using RTSCore.Domain.Interfaces;
 using RTSCore.Infrastructure.Persistence;
 
@@ -15,6 +18,8 @@ builder.Services.AddDbContext<AppDbContext>(
 );
 
 builder.Services.AddScoped<IUnitRepository, SqlUnitRepository>();
+builder.Services.AddScoped<IUnitOfWork, EfUnitOfWork>();
+builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(LoggingBehavior<,>));
 
 builder.Services.AddMediatR(cfg =>
     cfg.RegisterServicesFromAssembly(

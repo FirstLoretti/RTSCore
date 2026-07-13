@@ -4,18 +4,21 @@ using RTSCore.Domain.Interfaces;
 
 namespace RTSCore.Application.Units.Commands;
 
-public class AddExperienceCommandHandler(IUnitRepository repository) :
+public class AddExperienceCommandHandler(IUnitRepository repository, IUnitOfWork unitOfWork) :
     IRequestHandler<AddExperienceCommand, (int Level, int Experience)>
 {
-    public Task<(int Level, int Experience)> Handle(AddExperienceCommand request, CancellationToken cancellationToken)
+    public async Task<(int Level, int Experience)> Handle(
+        AddExperienceCommand request,
+        CancellationToken cancellationToken
+    )
     {
-        var unit = repository.GetUnit(request.Id)
+        var unit = await repository.GetUnitAsync(request.Id, cancellationToken)
             ?? throw new KeyNotFoundException($"Юнита {request.Id} нет в базе данных");
 
         unit.AddExperience(request.Amount);
 
-        repository.Save(unit);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return Task.FromResult((unit.Level, unit.Experience));
+        return (unit.Level, unit.Experience);
     }
 }

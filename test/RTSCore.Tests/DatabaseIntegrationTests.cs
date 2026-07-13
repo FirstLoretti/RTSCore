@@ -11,7 +11,7 @@ namespace RTSCore.Tests;
 public class DatabaseIntegrationTests
 {
     [Fact]
-    public void UnitRepository_ShouldSaveAndLoadUnit()
+    public async Task UnitRepository_ShouldSaveAndLoadUnit()
     {
         const string dbName = "test.db";
 
@@ -23,15 +23,19 @@ public class DatabaseIntegrationTests
         using (var context = new AppDbContext(options))
         {
             var repository = new SqlUnitRepository(context);
+            var unitOfWork = new EfUnitOfWork(context);
+
             repository.Add(unit);
-            repository.Save(unit);
+
+            await unitOfWork.SaveChangesAsync(CancellationToken.None);
         }
 
         Unit? dbUnit;
         using (var context = new AppDbContext(options))
         {
             var repository = new SqlUnitRepository(context);
-            dbUnit = repository.GetUnit(unit.Id);
+
+            dbUnit = await repository.GetUnitAsync(unit.Id, CancellationToken.None);
         }
 
         SqliteConnection.ClearAllPools();
@@ -42,7 +46,7 @@ public class DatabaseIntegrationTests
     }
 
     [Fact]
-    public void UnitRepository_ShouldUpdateUnitStats_WhenLevelUp()
+    public async Task UnitRepository_ShouldUpdateUnitStats_WhenLevelUp()
     {
         const string dbName = "test.db";
 
@@ -54,29 +58,37 @@ public class DatabaseIntegrationTests
         using (var context = new AppDbContext(options))
         {
             var repository = new SqlUnitRepository(context);
+            var unitOfWork = new EfUnitOfWork(context);
+
             repository.Add(unit);
-            repository.Save(unit);
+
+            await unitOfWork.SaveChangesAsync(CancellationToken.None);
         }
 
         using (var context = new AppDbContext(options))
         {
             var repository = new SqlUnitRepository(context);
+            var unitOfWork = new EfUnitOfWork(context);
 
-            if (repository.GetUnit(unit.Id) is not Unit dbUnit)
+            var dbUnit = await repository.GetUnitAsync(unit.Id, CancellationToken.None);
+
+            if (dbUnit == null)
             {
                 Assert.Fail("[Act] Юнит не найдет в базе данных.");
                 return;
             }
 
             dbUnit.AddExperience(GameBalance.Units.ExpToNextLevel[0] + 1);
-            repository.Save(dbUnit);
+
+            await unitOfWork.SaveChangesAsync(CancellationToken.None);
         }
 
         Unit? updatedUnit;
         using (var context = new AppDbContext(options))
         {
             var repository = new SqlUnitRepository(context);
-            updatedUnit = repository.GetUnit(unit.Id);
+
+            updatedUnit = await repository.GetUnitAsync(unit.Id, CancellationToken.None);
         }
 
         SqliteConnection.ClearAllPools();
@@ -87,7 +99,8 @@ public class DatabaseIntegrationTests
         Assert.True(updatedUnit.Experience > unit.Experience);
         Assert.True(
             updatedUnit.Health > unit.Health,
-            $"Здоровье юнита из базы данных {updatedUnit.Health}, здоровье начального юнита {unit.Health}."
+            $"Здоровье юнита из базы данных {updatedUnit.Health}, " +
+            $"здоровье начального юнита {unit.Health}."
         );
     }
 
