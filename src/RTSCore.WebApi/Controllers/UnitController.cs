@@ -29,10 +29,10 @@ public class UnitController(IMediator mediator) : ControllerBase
     }
 
     [HttpGet("{id}")]
-    public async Task<IActionResult> Get(string id)
+    public async Task<ActionResult<UnitResponseDto>> Get(string id)
     {
-        var command = new GetUnitCommand(id);
-        var unit = await mediator.Send(command);
+        var query = new GetUnitQuery(id);
+        var unit = await mediator.Send(query);
 
         if (unit == null)
         {

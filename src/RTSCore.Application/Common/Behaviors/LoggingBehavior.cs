@@ -21,7 +21,8 @@ public class LoggingBehavior<TRequest, TResponse>
         timer.Stop();
 
         Console.WriteLine(
-            $"[MEDIATR-FINISH] Процесс {typeof(TRequest).Name} завершился за {timer.ElapsedMilliseconds}"
+            $"[MEDIATR-FINISH] Процесс {typeof(TRequest).Name} " +
+            $"завершился за {timer.ElapsedMilliseconds}"
         );
 
         return response;

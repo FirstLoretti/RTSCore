@@ -7,10 +7,15 @@ using DomainUnit = RTSCore.Domain.Entities.Unit;
 
 namespace RTSCore.Application.Units.Commands;
 
-public class CreateUnitCommandHandler(IUnitRepository repository, IUnitOfWork unitOfWork) :
-    IRequestHandler<CreateUnitCommand, UnitId>
+public class CreateUnitCommandHandler(
+    IUnitRepository repository,
+    IUnitOfWork unitOfWork
+) : IRequestHandler<CreateUnitCommand, UnitId>
 {
-    public async Task<UnitId> Handle(CreateUnitCommand request, CancellationToken cancellationToken)
+    public async Task<UnitId> Handle(
+        CreateUnitCommand request,
+        CancellationToken cancellationToken
+    )
     {
         var unit = new DomainUnit(
             id: request.Id,

@@ -15,7 +15,7 @@ public class DatabaseIntegrationTests
     {
         const string dbName = "test.db";
 
-        if (File.Exists(dbName)) File.Delete(dbName);
+        File.Delete(dbName);
 
         var options = CreateDb(dbName);
 
@@ -39,7 +39,7 @@ public class DatabaseIntegrationTests
         }
 
         SqliteConnection.ClearAllPools();
-        if (File.Exists(dbName)) File.Delete(dbName);
+        File.Delete(dbName);
 
         Assert.NotNull(dbUnit);
         Assert.Equivalent(unit, dbUnit);
@@ -50,7 +50,7 @@ public class DatabaseIntegrationTests
     {
         const string dbName = "test.db";
 
-        if (File.Exists(dbName)) File.Delete(dbName);
+        File.Delete(dbName);
 
         var options = CreateDb(dbName);
         var unit = CreateUnit();
@@ -92,7 +92,7 @@ public class DatabaseIntegrationTests
         }
 
         SqliteConnection.ClearAllPools();
-        if (File.Exists(dbName)) File.Delete(dbName);
+        File.Delete(dbName);
 
         Assert.NotNull(updatedUnit);
         Assert.True(updatedUnit.Level > unit.Level);

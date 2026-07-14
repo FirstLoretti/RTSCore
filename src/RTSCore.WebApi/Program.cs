@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using RTSCore.Application.Common.Behaviors;
 using RTSCore.Domain.Interfaces;
 using RTSCore.Infrastructure.Persistence;
+using RTSCore.Application.Units.Commands;
 
 using Scalar.AspNetCore;
 
@@ -19,12 +20,12 @@ builder.Services.AddDbContext<AppDbContext>(
 
 builder.Services.AddScoped<IUnitRepository, SqlUnitRepository>();
 builder.Services.AddScoped<IUnitOfWork, EfUnitOfWork>();
+
 builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(LoggingBehavior<,>));
 
 builder.Services.AddMediatR(cfg =>
-    cfg.RegisterServicesFromAssembly(
-        typeof(RTSCore.Application.Units.Commands.AddExperienceCommand).Assembly
-    ));
+    cfg.RegisterServicesFromAssembly(typeof(AddExperienceCommand).Assembly)
+);
 
 builder.Services.AddOpenApi();
 
