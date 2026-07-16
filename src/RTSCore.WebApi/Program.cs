@@ -9,6 +9,10 @@ using RTSCore.Application.Units.Commands;
 
 using Scalar.AspNetCore;
 
+using FluentValidation;
+using RTSCore.WebApi.Common;
+using Microsoft.AspNetCore.Diagnostics;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,12 +24,16 @@ builder.Services.AddDbContext<AppDbContext>(
 
 builder.Services.AddScoped<IUnitRepository, SqlUnitRepository>();
 builder.Services.AddScoped<IUnitOfWork, EfUnitOfWork>();
+builder.Services.AddExceptionHandler<GlobalExeptionHandler>();
+builder.Services.AddProblemDetails();
 
 builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(LoggingBehavior<,>));
+builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidatorBehavior<,>));
 
 builder.Services.AddMediatR(cfg =>
     cfg.RegisterServicesFromAssembly(typeof(AddExperienceCommand).Assembly)
 );
+builder.Services.AddValidatorsFromAssembly(typeof(AddExperienceCommand).Assembly);
 
 builder.Services.AddOpenApi();
 
