@@ -11,7 +11,6 @@ using Scalar.AspNetCore;
 
 using FluentValidation;
 using RTSCore.WebApi.Common;
-using Microsoft.AspNetCore.Diagnostics;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -45,6 +44,9 @@ if (app.Environment.IsDevelopment())
     app.MapScalarApiReference();
 }
 
+app.UseExceptionHandler();
 app.MapControllers();
 
 app.Run();
+
+public partial class Program { }
