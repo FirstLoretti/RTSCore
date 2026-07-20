@@ -34,15 +34,6 @@ public class UnitController(IMediator mediator) : ControllerBase
         var query = new GetUnitQuery(id);
         var unit = await mediator.Send(query);
 
-        if (unit == null)
-        {
-            return NotFound(new
-            {
-                Error = $"Юнит не найден",
-                Message = $"Юнита {id} нет в базе данных"
-            });
-        }
-
         var dto = new UnitResponseDto()
         {
             Id = unit.Id,
@@ -61,25 +52,15 @@ public class UnitController(IMediator mediator) : ControllerBase
     [HttpPost("{id}/experience")]
     public async Task<IActionResult> AddExperience(string id, [FromBody] ExperienceAddDto dto)
     {
-        try
-        {
-            var addExpCommand = new AddExperienceCommand(id, dto.Amount);
-            var (level, experience) = await mediator.Send(addExpCommand);
 
-            return Ok(new
-            {
-                Message = $"Юниту {id} начислен опыт",
-                CurrentLevel = level,
-                CurrentExperience = experience
-            });
-        }
-        catch (KeyNotFoundException ex)
+        var addExpCommand = new AddExperienceCommand(id, dto.Amount);
+        var (level, experience) = await mediator.Send(addExpCommand);
+
+        return Ok(new
         {
-            return BadRequest(new
-            {
-                Error = "Юнит не найден",
-                ex.Message
-            });
-        }
+            Message = $"Юниту {id} начислен опыт",
+            CurrentLevel = level,
+            CurrentExperience = experience
+        });
     }
 }
