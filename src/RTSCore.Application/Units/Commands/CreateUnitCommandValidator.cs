@@ -8,7 +8,7 @@ public class CreateUnitCommandValidator : AbstractValidator<CreateUnitCommand>
     {
         RuleFor(c => c.Id)
             .NotEmpty()
-                .WithMessage("Id не может быть пустым или состоять из пробелов")
+                .WithMessage("Id не может быть пустым")
             .Length(3, 30)
                 .WithMessage("Длина Id должна быть от 3 до 30 символов");
 

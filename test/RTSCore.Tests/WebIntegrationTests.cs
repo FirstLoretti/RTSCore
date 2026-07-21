@@ -1,12 +1,15 @@
 using System.Net;
 using System.Net.Http.Json;
 
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
+using RTSCore.Domain.Entities;
+using RTSCore.Domain.Interfaces;
 using RTSCore.Domain.ValueObjects;
 using RTSCore.Infrastructure.Persistence;
 using RTSCore.WebApi.Dtos;
@@ -36,7 +39,7 @@ public class WebIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
         Assert.True(problemDetails.Errors.ContainsKey("Id"), "Ответ должен содержать ошибку для поля 'Id'");
         Assert.True(problemDetails.Errors.ContainsKey("Type"), "Ответ должен содержать ошибку для поля 'Type'");
         Assert.True(problemDetails.Errors.ContainsKey("Faction"), "Ответ должен содержать ошибку для поля 'Faction'");
-        Assert.Contains("Id не может быть пустым или состоять из пробелов", idErrors);
+        Assert.Contains("Id не может быть пустым", idErrors);
         Assert.Contains("Неверный тип юнита", unitTypeErrors);
         Assert.Contains("Неверный тип фракции", factionTypeErrors);
     }
@@ -74,8 +77,38 @@ public class WebIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
         Assert.Contains("Начисляемый опыт должен быть в районе 0-5000", amountError);
     }
 
+    [Fact]
+    public async Task Delete_ShouldReturn422_WhenUnitInvulnerable()
+    {
+        var unitId = "test_invulnerable";
+
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var unit = new Unit(unitId, UnitType.Invulnerable, FactionType.England);
+            var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+            context.Add(unit);
+            await context.SaveChangesAsync();
+        }
+
+        var response = await _client.DeleteAsync($"api/unit/{unitId}");
+
+        Assert.Equal(HttpStatusCode.UnprocessableEntity, response.StatusCode);
+
+        var problemDetails = await response.Content.ReadFromJsonAsync<ProblemDetails>();
+
+        Assert.NotNull(problemDetails);
+        Assert.Equal("Нарушение игровых правил", problemDetails.Title);
+        Assert.Equal(
+            $"Юнита UnitId {{ Value = test_invulnerable }} " +
+            $"с типом {UnitType.Invulnerable} нельзя удалить из базы данных",
+            problemDetails.Detail
+        );
+    }
+
     private readonly HttpClient _client;
     private readonly SqliteConnection _sqliteConnection;
+    private readonly WebApplicationFactory<Program> _factory;
 
     public void Dispose()
     {
@@ -91,7 +124,7 @@ public class WebIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
         _sqliteConnection = new SqliteConnection("Data Source=:memory:");
         _sqliteConnection.Open();
 
-        var bootstrapedFactory = factory.WithWebHostBuilder(builder => builder.ConfigureServices(
+        _factory = factory.WithWebHostBuilder(builder => builder.ConfigureServices(
                 services =>
                 {
                     var descriptor = services.SingleOrDefault(d =>
@@ -106,9 +139,9 @@ public class WebIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
                         options.UseSqlite(_sqliteConnection));
                 }));
 
-        _client = bootstrapedFactory.CreateClient();
+        _client = _factory.CreateClient();
 
-        using var scope = bootstrapedFactory.Services.CreateScope();
+        using var scope = _factory.Services.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         dbContext.Database.EnsureCreated();
     }

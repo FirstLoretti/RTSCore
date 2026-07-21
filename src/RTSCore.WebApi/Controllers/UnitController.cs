@@ -63,4 +63,12 @@ public class UnitController(IMediator mediator) : ControllerBase
             CurrentExperience = experience
         });
     }
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> Delete(string id)
+    {
+        await mediator.Send(new DeleteUnitCommand(id));
+
+        return NoContent();
+    }
 }

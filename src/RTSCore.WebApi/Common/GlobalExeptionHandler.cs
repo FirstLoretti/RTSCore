@@ -25,6 +25,7 @@ public class GlobalExeptionHandler(ILogger<GlobalExeptionHandler> logger)
         {
             ValidationException validationException => HandleValidation(validationException, problemDetails),
             NotFoundException => true,
+            GameRuleException => true,
             _ => false
         };
 
@@ -53,18 +54,28 @@ public class GlobalExeptionHandler(ILogger<GlobalExeptionHandler> logger)
 
     private static ProblemDetails CreateProblemDetails(Exception exception, HttpContext httpContext)
     {
-        var (statusCode, title) = exception switch
+        var (statusCode, title, details) = exception switch
         {
-            ValidationException => (StatusCodes.Status400BadRequest, "Ошибка валидации данных"),
-            NotFoundException => (StatusCodes.Status404NotFound, "Сущность не найдена"),
-            _ => (StatusCodes.Status500InternalServerError, "Ошибка сервера")
+            ValidationException =>
+                (StatusCodes.Status400BadRequest,
+                "Ошибка валидации данных",
+                "Один или несколько параметров запроса не прошли проверку"),
+            NotFoundException =>
+                (StatusCodes.Status404NotFound,
+                 "Сущность не найдена",
+                 exception.Message),
+            GameRuleException =>
+                (StatusCodes.Status422UnprocessableEntity,
+                "Нарушение игровых правил",
+                exception.Message),
+            _ => (StatusCodes.Status500InternalServerError, "Ошибка сервера", exception.Message)
         };
 
         var problemDetails = new ProblemDetails()
         {
             Status = statusCode,
             Title = title,
-            Detail = "Один или несколько параметров запроса не прошли проверку",
+            Detail = details,
             Instance = httpContext.Request.Path
         };
 

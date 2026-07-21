@@ -42,6 +42,19 @@ public static partial class GameBalance
                         ExpKillReward: 50,
                         HealthGrowthRate: 1.15f,
                         DamageGrowthRate: 1.10f)
+                },
+                {
+                    UnitType.Invulnerable,
+                    new UnitTemplate(
+                        Type: UnitType.Invulnerable,
+                        DisplayName: "Invulnerable",
+                        MaxHealth: 1,
+                        Damage: 1,
+                        Armor: 1,
+                        Speed: 1,
+                        ExpKillReward: 1,
+                        HealthGrowthRate: 1f,
+                        DamageGrowthRate: 1f)
                 }
             };
 
