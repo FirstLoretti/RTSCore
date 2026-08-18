@@ -17,4 +17,12 @@ public class BuildingController(IMediator mediator) : ControllerBase
 
         return NoContent();
     }
+
+    [HttpPost("cancel-train")]
+    public async Task<IActionResult> CancelTrain(CancelTrainUnitCommand command)
+    {
+        await mediator.Send(command);
+
+        return NoContent();
+    }
 }

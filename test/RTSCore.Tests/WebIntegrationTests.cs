@@ -1,8 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
 
-using FluentValidation;
-
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -111,8 +109,9 @@ public class WebIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
     #endregion
 
     #region BuildingController
+
     [Fact]
-    public async Task Train_ShouldAddUnitToQueue_AndReturnNoContent_WhenDataIsValid()
+    public async Task Train_ShouldAddUnitToQueue_AndReturnNoContent_WhenQueueIsNotFull()
     {
         var barrackId = "barrack_testId";
 
@@ -166,7 +165,7 @@ public class WebIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
     }
 
     [Fact]
-    public async Task Train_ShouldReturn422_WhenBarrackQueueIsFull()
+    public async Task Train_ShouldReturn422_WhenQueueIsFull()
     {
         var barrackId = $"barrack_{Guid.NewGuid().ToString()[..10]}";
 
@@ -200,6 +199,46 @@ public class WebIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
         Assert.NotNull(problemDetails);
         Assert.Equal("Нарушение игровых правил", problemDetails.Title);
         Assert.Contains("не имеет свободных слотов под найм", problemDetails.Detail);
+    }
+
+    [Fact]
+    public async Task CancelTrain_ShouldRemoveUnitFromQueue_AndReturnNoContent_WhenQueueIsNotEmpty()
+    {
+        var buildingId = $"building_{Guid.NewGuid().ToString()[..10]}";
+
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var buildingTemplate = new BuildingTemplate(
+                BuildingType.EnglandBarrack,
+                FactionType.England,
+                "Test Barrack",
+                1,
+                1
+            );
+            var barrack = new Barrack(buildingId, buildingTemplate);
+
+            barrack.AddUnitToQueue();
+
+            var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            context.Set<Barrack>().Add(barrack);
+
+            await context.SaveChangesAsync();
+        }
+
+        var command = new CancelTrainUnitCommand(buildingId, "unit_mock");
+
+        var response = await _client.PostAsJsonAsync("api/building/cancel-train", command);
+
+        Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            var building = await context.Buildings.FindAsync(new BuildingId(buildingId));
+
+            Assert.NotNull(building);
+            Assert.Equal(0, ((Barrack)building).ActiveRecruitmentSlots);
+        }
     }
 
     #endregion
