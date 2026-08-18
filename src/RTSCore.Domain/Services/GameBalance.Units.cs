@@ -21,7 +21,7 @@ public static partial class GameBalance
                     UnitType.EnglandSwordman,
                     new UnitTemplate(
                         Type: UnitType.EnglandSwordman,
-                        DisplayName: "EnglandSwordman",
+                        DisplayName: "England Swordman",
                         MaxHealth: 100,
                         Damage: 25,
                         Armor: 2,
@@ -30,11 +30,12 @@ public static partial class GameBalance
                         HealthGrowthRate: 1.1f,
                         DamageGrowthRate: 1.15f)
                 },
+
                 {
                     UnitType.FranceSwordman,
                     new UnitTemplate(
                         Type: UnitType.FranceSwordman,
-                        DisplayName: "FranceSwordman",
+                        DisplayName: "France Swordman",
                         MaxHealth: 115,
                         Damage: 20,
                         Armor: 3,
@@ -43,6 +44,7 @@ public static partial class GameBalance
                         HealthGrowthRate: 1.15f,
                         DamageGrowthRate: 1.10f)
                 },
+
                 {
                     UnitType.Invulnerable,
                     new UnitTemplate(

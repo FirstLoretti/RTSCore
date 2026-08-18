@@ -1,6 +1,8 @@
 using System.Net;
 using System.Net.Http.Json;
 
+using FluentValidation;
+
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -8,8 +10,8 @@ using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
+using RTSCore.Application.Buildings.Commands;
 using RTSCore.Domain.Entities;
-using RTSCore.Domain.Interfaces;
 using RTSCore.Domain.ValueObjects;
 using RTSCore.Infrastructure.Persistence;
 using RTSCore.WebApi.Dtos;
@@ -18,6 +20,7 @@ namespace RTSCore.Tests;
 
 public class WebIntegrationTests : IClassFixture<WebApplicationFactory<Program>>, IDisposable
 {
+    #region UnitController
     [Fact]
     public async Task Create_ShouldHandleInvalidDto_AndReturnBadRequestResponse()
     {
@@ -105,7 +108,103 @@ public class WebIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
             problemDetails.Detail
         );
     }
+    #endregion
 
+    #region BuildingController
+    [Fact]
+    public async Task Train_ShouldAddUnitToQueue_AndReturnNoContent_WhenDataIsValid()
+    {
+        var barrackId = "barrack_testId";
+
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var buildintTemplate = new BuildingTemplate(
+                BuildingType.EnglandBarrack,
+                FactionType.England,
+                "Test Barrack",
+                1,
+                1
+            );
+            var barrack = new Barrack(barrackId, buildintTemplate);
+
+            var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            context.Set<Barrack>().Add(barrack);
+
+            await context.SaveChangesAsync();
+        }
+
+        var command = new TrainUnitCommand(barrackId, "test_unit");
+
+        var response = await _client.PostAsJsonAsync("api/building/train", command);
+
+        Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            var barrack = await context.Buildings.FindAsync(new BuildingId(barrackId));
+
+            Assert.NotNull(barrack);
+            Assert.Equal(1, ((Barrack)barrack).ActiveRecruitmentSlots);
+        }
+    }
+
+    [Fact]
+    public async Task Train_ShouldReturn400_WhenBuildingIdIsTooShort()
+    {
+        var command = new TrainUnitCommand("1", "unit_mock");
+
+        var response = await _client.PostAsJsonAsync("api/building/train", command);
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+
+        var problemDetails = await response.Content.ReadFromJsonAsync<ValidationProblemDetails>();
+
+        Assert.NotNull(problemDetails);
+        Assert.Equal("Ошибка валидации данных", problemDetails.Title);
+        Assert.True(problemDetails.Errors.ContainsKey("BuildingId"));
+    }
+
+    [Fact]
+    public async Task Train_ShouldReturn422_WhenBarrackQueueIsFull()
+    {
+        var barrackId = $"barrack_{Guid.NewGuid().ToString()[..10]}";
+
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var buildintTemplate = new BuildingTemplate(
+                BuildingType.EnglandBarrack,
+                FactionType.England,
+                "Test Barrack",
+                1,
+                1
+            );
+            var barrack = new Barrack(barrackId, buildintTemplate);
+
+            barrack.AddUnitToQueue();
+
+            var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            context.Set<Barrack>().Add(barrack);
+
+            await context.SaveChangesAsync();
+        }
+
+        var command = new TrainUnitCommand(barrackId, "unit_mock");
+
+        var response = await _client.PostAsJsonAsync("api/building/train", command);
+
+        Assert.Equal(HttpStatusCode.UnprocessableEntity, response.StatusCode);
+
+        var problemDetails = await response.Content.ReadFromJsonAsync<ProblemDetails>();
+
+        Assert.NotNull(problemDetails);
+        Assert.Equal("Нарушение игровых правил", problemDetails.Title);
+        Assert.Contains("не имеет свободных слотов под найм", problemDetails.Detail);
+    }
+
+    #endregion
+
+    #region Shared
     private readonly HttpClient _client;
     private readonly SqliteConnection _sqliteConnection;
     private readonly WebApplicationFactory<Program> _factory;
@@ -145,4 +244,5 @@ public class WebIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
         var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         dbContext.Database.EnsureCreated();
     }
+    #endregion
 }

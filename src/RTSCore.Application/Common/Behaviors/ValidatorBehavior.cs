@@ -5,7 +5,7 @@ using MediatR;
 namespace RTSCore.Application.Common.Behaviors;
 
 public class ValidatorBehavior<TRequest, TResponse>(IEnumerable<IValidator<TRequest>> validators) :
-    IPipelineBehavior<TRequest, TResponse> where TRequest : IRequest<TResponse>
+    IPipelineBehavior<TRequest, TResponse> where TRequest : notnull
 {
     public async Task<TResponse> Handle(
         TRequest request,

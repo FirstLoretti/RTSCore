@@ -1,5 +1,6 @@
 using MediatR;
 
+using RTSCore.Application.Common;
 using RTSCore.Domain.Interfaces;
 
 namespace RTSCore.Application.Units.Commands;
@@ -13,7 +14,7 @@ public class AddExperienceCommandHandler(IUnitRepository repository, IUnitOfWork
     )
     {
         var unit = await repository.GetUnitAsync(request.Id, cancellationToken)
-            ?? throw new KeyNotFoundException($"Юнита {request.Id} нет в базе данных");
+            ?? throw new NotFoundException($"Юнита {request.Id} нет в базе данных");
 
         unit.AddExperience(request.Amount);
 

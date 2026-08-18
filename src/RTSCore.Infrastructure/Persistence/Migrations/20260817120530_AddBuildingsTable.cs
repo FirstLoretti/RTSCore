@@ -2,30 +2,27 @@
 
 #nullable disable
 
-namespace RTSCore.Infrastructure.Migrations
+namespace RTSCore.Infrastructure.Persistence.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class AddBuildingsTable : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Units",
+                name: "Buildings",
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "TEXT", nullable: false),
                     Type = table.Column<string>(type: "TEXT", nullable: false),
                     Faction = table.Column<string>(type: "TEXT", nullable: false),
                     Health = table.Column<int>(type: "INTEGER", nullable: false),
-                    Damage = table.Column<int>(type: "INTEGER", nullable: false),
-                    Armor = table.Column<int>(type: "INTEGER", nullable: false),
-                    Level = table.Column<int>(type: "INTEGER", nullable: false),
-                    Experience = table.Column<int>(type: "INTEGER", nullable: false)
+                    Level = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Units", x => x.Id);
+                    table.PrimaryKey("PK_Buildings", x => x.Id);
                 });
         }
 
@@ -33,7 +30,7 @@ namespace RTSCore.Infrastructure.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Units");
+                name: "Buildings");
         }
     }
 }

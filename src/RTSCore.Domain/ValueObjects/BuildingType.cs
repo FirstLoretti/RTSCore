@@ -1,9 +1,9 @@
 namespace RTSCore.Domain.ValueObjects;
 
-public enum UnitType
+public enum BuildingType
 {
     None,
     Invulnerable,
-    EnglandSwordman,
-    FranceSwordman,
+    EnglandBarrack,
+    FranceBarrack
 }

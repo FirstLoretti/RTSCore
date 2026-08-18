@@ -3,6 +3,7 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 using RTSCore.Application.Units.Commands;
+using RTSCore.Application.Units.Queries;
 using RTSCore.WebApi.Dtos;
 
 namespace RTSCore.WebApi.Controllers;
@@ -12,7 +13,7 @@ namespace RTSCore.WebApi.Controllers;
 public class UnitController(IMediator mediator) : ControllerBase
 {
     [HttpPost]
-    public async Task<IActionResult> Create([FromBody] UnitCreateDto dto)
+    public async Task<IActionResult> Create(UnitCreateDto dto)
     {
         var command = new CreateUnitCommand(
             dto.Id,
@@ -50,7 +51,7 @@ public class UnitController(IMediator mediator) : ControllerBase
     }
 
     [HttpPost("{id}/experience")]
-    public async Task<IActionResult> AddExperience(string id, [FromBody] ExperienceAddDto dto)
+    public async Task<IActionResult> AddExperience(string id, ExperienceAddDto dto)
     {
 
         var addExpCommand = new AddExperienceCommand(id, dto.Amount);

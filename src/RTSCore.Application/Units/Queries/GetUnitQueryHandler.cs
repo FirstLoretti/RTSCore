@@ -5,7 +5,7 @@ using RTSCore.Domain.Interfaces;
 
 using DomainUnit = RTSCore.Domain.Entities.Unit;
 
-namespace RTSCore.Application.Units.Commands;
+namespace RTSCore.Application.Units.Queries;
 
 public class GetUnitQueryHandler(IUnitRepository repository) :
     IRequestHandler<GetUnitQuery, DomainUnit>

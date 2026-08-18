@@ -11,6 +11,7 @@ using Scalar.AspNetCore;
 
 using FluentValidation;
 using RTSCore.WebApi.Common;
+using RTSCore.Application.Buildings.Commands;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -26,12 +27,15 @@ builder.Services.AddScoped<IUnitOfWork, EfUnitOfWork>();
 builder.Services.AddExceptionHandler<GlobalExeptionHandler>();
 builder.Services.AddProblemDetails();
 
-builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(LoggingBehavior<,>));
-builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidatorBehavior<,>));
-
 builder.Services.AddMediatR(cfg =>
-    cfg.RegisterServicesFromAssembly(typeof(AddExperienceCommand).Assembly)
-);
+{
+    cfg.AddOpenBehavior(typeof(LoggingBehavior<,>));
+
+    cfg.AddOpenBehavior(typeof(ValidatorBehavior<,>));
+
+    cfg.RegisterServicesFromAssembly(typeof(AddExperienceCommand).Assembly);
+});
+
 builder.Services.AddValidatorsFromAssembly(typeof(AddExperienceCommand).Assembly);
 
 builder.Services.AddOpenApi();

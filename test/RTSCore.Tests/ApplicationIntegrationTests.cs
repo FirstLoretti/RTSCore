@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 using RTSCore.Application.Common.Behaviors;
 using RTSCore.Application.Units.Commands;
+using RTSCore.Application.Units.Queries;
 using RTSCore.Domain.Interfaces;
 using RTSCore.Domain.ValueObjects;
 using RTSCore.Infrastructure.Persistence;

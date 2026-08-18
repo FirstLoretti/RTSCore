@@ -9,8 +9,7 @@ public readonly record struct UnitId
         Value = !string.IsNullOrWhiteSpace(value)
             ? value.Trim().ToLowerInvariant()
             : throw new ArgumentException(
-                "UnitId не может быть пустым или состоять из пробелов", nameof(value)
-            );
+                "UnitId не может быть пустым или состоять из пробелов", nameof(value));
     }
 
     public static implicit operator UnitId(string value) => new(value);
