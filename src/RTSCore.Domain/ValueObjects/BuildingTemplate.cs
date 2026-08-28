@@ -1,9 +1,8 @@
 namespace RTSCore.Domain.ValueObjects;
 
-public readonly record struct BuildingTemplate(
+public record BuildingTemplate(
     BuildingType Type,
-    FactionType Faction,
     string DisplayName,
-    int MaxHealth,
-    int MaxRecruitmentSlots
+    int Cost,
+    int TurnsToConstruct
 );

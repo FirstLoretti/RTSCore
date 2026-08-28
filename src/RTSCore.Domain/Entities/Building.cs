@@ -7,18 +7,32 @@ public class Building
 {
     public BuildingId Id { get; init; }
     public BuildingType Type { get; init; }
-    public FactionType Faction { get; init; }
-    public int Health { get; init; }
-    public int Level { get; init; } = 1;
-    public bool IsAlive => Health > 0;
+    public FactionType OwnerFaction { get; init; }
+    public CityId CityId { get; init; }
+    public bool IsConstructed { get; private set; }
+    public int TurnsToConstruct { get; private set; }
 
-    public Building(BuildingId id, BuildingType type, FactionType faction)
+    public Building(BuildingId id, BuildingType type, FactionType ownerFaction, CityId cityId)
     {
         Id = id;
         Type = type;
-        Faction = faction;
+        OwnerFaction = ownerFaction;
+        CityId = cityId;
 
         var template = GameBalance.Buildings.GetTemplate(type);
-        Health = template.MaxHealth;
+        TurnsToConstruct = template.TurnsToConstruct;
+    }
+
+    protected Building() { }
+
+    public void AdvanceConstruction()
+    {
+        if (IsConstructed) return;
+
+        TurnsToConstruct--;
+        if (TurnsToConstruct <= 0)
+        {
+            IsConstructed = true;
+        }
     }
 }

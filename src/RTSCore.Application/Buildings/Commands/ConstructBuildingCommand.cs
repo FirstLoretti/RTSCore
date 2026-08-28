@@ -4,7 +4,7 @@ using RTSCore.Domain.ValueObjects;
 
 namespace RTSCore.Application.Buildings.Commands;
 
-public readonly record struct CancelTrainUnitCommand(
-    string BuildingId,
-    string UnitId
+public record struct ConstructBuildingCommand(
+    string CityId,
+    BuildingType BuildingType
 ) : IRequest;

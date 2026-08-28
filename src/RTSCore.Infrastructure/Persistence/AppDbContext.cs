@@ -8,6 +8,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 {
     public DbSet<Unit> Units { get; set; }
     public DbSet<Building> Buildings { get; set; }
+    public DbSet<City> Cities { get; set; }
+    public DbSet<Faction> Factions { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

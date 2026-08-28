@@ -2,7 +2,7 @@ namespace RTSCore.Domain.ValueObjects;
 
 public readonly record struct BuildingId
 {
-    public readonly string Value => field ?? "empty_id";
+    public string Value => field ?? "empty_id";
 
     public BuildingId(string value)
     {

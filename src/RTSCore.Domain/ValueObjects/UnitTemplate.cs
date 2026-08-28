@@ -1,6 +1,6 @@
 namespace RTSCore.Domain.ValueObjects;
 
-public readonly record struct UnitTemplate(
+public record UnitTemplate(
     UnitType Type,
     string DisplayName,
     int MaxHealth,

@@ -2,8 +2,8 @@ namespace RTSCore.Domain.ValueObjects;
 
 public enum BuildingType
 {
-    None,
+    None = 0,
     Invulnerable,
-    EnglandBarrack,
-    FranceBarrack
+    Barrack,
+    Market
 }

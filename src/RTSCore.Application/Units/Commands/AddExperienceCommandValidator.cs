@@ -6,8 +6,6 @@ public class AddExperienceCommandValidator : AbstractValidator<AddExperienceComm
 {
     public AddExperienceCommandValidator()
     {
-        RuleFor(c => c.Amount)
-            .ExclusiveBetween(0, 5000)
-            .WithMessage("Начисляемый опыт должен быть в районе 0-5000");
+        RuleFor(c => c.Amount).ExclusiveBetween(0, 5000);
     }
 }

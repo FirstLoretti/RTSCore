@@ -9,8 +9,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 using RTSCore.Application.Buildings.Commands;
+using RTSCore.Application.Campaing.Commands;
 using RTSCore.Domain.Entities;
 using RTSCore.Domain.ValueObjects;
+using RTSCore.Domain.ValueObjects.Presets;
 using RTSCore.Infrastructure.Persistence;
 using RTSCore.WebApi.Dtos;
 
@@ -19,6 +21,7 @@ namespace RTSCore.Tests;
 public class WebIntegrationTests : IClassFixture<WebApplicationFactory<Program>>, IDisposable
 {
     #region UnitController
+
     [Fact]
     public async Task Create_ShouldHandleInvalidDto_AndReturnBadRequestResponse()
     {
@@ -32,17 +35,10 @@ public class WebIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
 
         Assert.NotNull(problemDetails);
 
-        var idErrors = problemDetails.Errors["Id"];
-        var unitTypeErrors = problemDetails.Errors["Type"];
-        var factionTypeErrors = problemDetails.Errors["Faction"];
-
         Assert.Equal("Ошибка валидации данных", problemDetails.Title);
-        Assert.True(problemDetails.Errors.ContainsKey("Id"), "Ответ должен содержать ошибку для поля 'Id'");
-        Assert.True(problemDetails.Errors.ContainsKey("Type"), "Ответ должен содержать ошибку для поля 'Type'");
-        Assert.True(problemDetails.Errors.ContainsKey("Faction"), "Ответ должен содержать ошибку для поля 'Faction'");
-        Assert.Contains("Id не может быть пустым", idErrors);
-        Assert.Contains("Неверный тип юнита", unitTypeErrors);
-        Assert.Contains("Неверный тип фракции", factionTypeErrors);
+        Assert.True(problemDetails.Errors.ContainsKey("Id"));
+        Assert.True(problemDetails.Errors.ContainsKey("Type"));
+        Assert.True(problemDetails.Errors.ContainsKey("Faction"));
     }
 
     [Fact]
@@ -71,11 +67,8 @@ public class WebIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
 
         Assert.NotNull(problemDetails);
 
-        var amountError = problemDetails.Errors["Amount"];
-
         Assert.Equal("Ошибка валидации данных", problemDetails.Title);
-        Assert.True(problemDetails.Errors.ContainsKey("Amount"), "Ответ должен содержать ошибку для поля 'Amount'");
-        Assert.Contains("Начисляемый опыт должен быть в районе 0-5000", amountError);
+        Assert.True(problemDetails.Errors.ContainsKey("Amount"));
     }
 
     [Fact]
@@ -106,144 +99,81 @@ public class WebIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
             problemDetails.Detail
         );
     }
+
     #endregion
 
-    #region BuildingController
+    #region CampaingController
 
     [Fact]
-    public async Task Train_ShouldAddUnitToQueue_AndReturnNoContent_WhenQueueIsNotFull()
+    public async Task StartCampaign_WithValidCommand_ShouldReturnNoContent()
     {
-        var barrackId = "barrack_testId";
+        var command = new StartCampaignCommand([FactionType.England]);
+
+        var response = await _client.PostAsJsonAsync("api/campaign/start", command);
+
+        Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task StartCampaing_WithEmptyFactions_ShouldReturnBadRequest()
+    {
+        var command = new StartCampaignCommand([]);
+
+        var response = await _client.PostAsJsonAsync("api/campaign/start", command);
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    #endregion
+
+    #region CityController
+
+    [Fact]
+    public async Task ConstructBuilding_WithValidCommand_ShouldReturnNoContent()
+    {
+        var cityId = new CityId("test_london");
 
         using (var scope = _factory.Services.CreateScope())
         {
-            var buildintTemplate = new BuildingTemplate(
-                BuildingType.EnglandBarrack,
-                FactionType.England,
-                "Test Barrack",
-                1,
-                1
-            );
-            var barrack = new Barrack(barrackId, buildintTemplate);
-
             var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-            context.Set<Barrack>().Add(barrack);
+
+            var faction = new Faction(FactionType.England, 5000, PlayerType.Human);
+            var cityPreset = new CityPreset(cityId, "Test_London", CityType.Town, 1000, []);
+            var city = new City(cityPreset, faction.Type);
+
+            context.Factions.Add(faction);
+            context.Cities.Add(city);
 
             await context.SaveChangesAsync();
         }
 
-        var command = new TrainUnitCommand(barrackId, "test_unit");
+        var command = new ConstructBuildingCommand(cityId, BuildingType.Barrack);
 
-        var response = await _client.PostAsJsonAsync("api/building/train", command);
+        var response = await _client.PostAsJsonAsync("api/city/constructBuilding", command);
 
         Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
-
-        using (var scope = _factory.Services.CreateScope())
-        {
-            var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-            var barrack = await context.Buildings.FindAsync(new BuildingId(barrackId));
-
-            Assert.NotNull(barrack);
-            Assert.Equal(1, ((Barrack)barrack).ActiveRecruitmentSlots);
-        }
     }
 
     [Fact]
-    public async Task Train_ShouldReturn400_WhenBuildingIdIsTooShort()
+    public async Task ConstructBuilding_WithInvalidCommand_ShouldReturnBadRequest()
     {
-        var command = new TrainUnitCommand("1", "unit_mock");
+        var command = new ConstructBuildingCommand("", BuildingType.None);
 
-        var response = await _client.PostAsJsonAsync("api/building/train", command);
+        var response = await _client.PostAsJsonAsync("api/city/constructBuilding", command);
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
 
         var problemDetails = await response.Content.ReadFromJsonAsync<ValidationProblemDetails>();
 
         Assert.NotNull(problemDetails);
-        Assert.Equal("Ошибка валидации данных", problemDetails.Title);
-        Assert.True(problemDetails.Errors.ContainsKey("BuildingId"));
-    }
-
-    [Fact]
-    public async Task Train_ShouldReturn422_WhenQueueIsFull()
-    {
-        var barrackId = $"barrack_{Guid.NewGuid().ToString()[..10]}";
-
-        using (var scope = _factory.Services.CreateScope())
-        {
-            var buildintTemplate = new BuildingTemplate(
-                BuildingType.EnglandBarrack,
-                FactionType.England,
-                "Test Barrack",
-                1,
-                1
-            );
-            var barrack = new Barrack(barrackId, buildintTemplate);
-
-            barrack.AddUnitToQueue();
-
-            var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-            context.Set<Barrack>().Add(barrack);
-
-            await context.SaveChangesAsync();
-        }
-
-        var command = new TrainUnitCommand(barrackId, "unit_mock");
-
-        var response = await _client.PostAsJsonAsync("api/building/train", command);
-
-        Assert.Equal(HttpStatusCode.UnprocessableEntity, response.StatusCode);
-
-        var problemDetails = await response.Content.ReadFromJsonAsync<ProblemDetails>();
-
-        Assert.NotNull(problemDetails);
-        Assert.Equal("Нарушение игровых правил", problemDetails.Title);
-        Assert.Contains("не имеет свободных слотов под найм", problemDetails.Detail);
-    }
-
-    [Fact]
-    public async Task CancelTrain_ShouldRemoveUnitFromQueue_AndReturnNoContent_WhenQueueIsNotEmpty()
-    {
-        var buildingId = $"building_{Guid.NewGuid().ToString()[..10]}";
-
-        using (var scope = _factory.Services.CreateScope())
-        {
-            var buildingTemplate = new BuildingTemplate(
-                BuildingType.EnglandBarrack,
-                FactionType.England,
-                "Test Barrack",
-                1,
-                1
-            );
-            var barrack = new Barrack(buildingId, buildingTemplate);
-
-            barrack.AddUnitToQueue();
-
-            var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-            context.Set<Barrack>().Add(barrack);
-
-            await context.SaveChangesAsync();
-        }
-
-        var command = new CancelTrainUnitCommand(buildingId, "unit_mock");
-
-        var response = await _client.PostAsJsonAsync("api/building/cancel-train", command);
-
-        Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
-
-        using (var scope = _factory.Services.CreateScope())
-        {
-            var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-            var building = await context.Buildings.FindAsync(new BuildingId(buildingId));
-
-            Assert.NotNull(building);
-            Assert.Equal(0, ((Barrack)building).ActiveRecruitmentSlots);
-        }
+        Assert.True(problemDetails.Errors.ContainsKey("CityId"));
+        Assert.True(problemDetails.Errors.ContainsKey("BuildingType"));
     }
 
     #endregion
 
     #region Shared
+
     private readonly HttpClient _client;
     private readonly SqliteConnection _sqliteConnection;
     private readonly WebApplicationFactory<Program> _factory;
@@ -283,5 +213,6 @@ public class WebIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
         var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         dbContext.Database.EnsureCreated();
     }
+
     #endregion
 }

@@ -1,6 +1,6 @@
 using MediatR;
 
-using RTSCore.Application.Common;
+using RTSCore.Domain.Exeptions;
 using RTSCore.Domain.Interfaces;
 
 namespace RTSCore.Application.Units.Commands;

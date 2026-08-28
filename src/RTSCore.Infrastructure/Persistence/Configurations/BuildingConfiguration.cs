@@ -17,11 +17,19 @@ public class BuildingConfiguration : IEntityTypeConfiguration<Building>
             dbValue => new BuildingId(dbValue)
         );
 
-        builder.Property(b => b.Type).HasConversion<string>();
-        builder.Property(b => b.Faction).HasConversion<string>();
+        builder.Property(b => b.CityId).HasConversion(
+            id => id.Value,
+            dbValue => new CityId(dbValue)
+        );
 
-        builder.HasDiscriminator<string>("Discriminator")
-            .HasValue<Building>("Building")
-            .HasValue<Barrack>("Barrack");
+        builder.Property(b => b.Type).HasConversion<string>();
+        builder.Property(b => b.OwnerFaction).HasConversion<string>();
+        builder.Property(b => b.IsConstructed).HasConversion<bool>();
+        builder.Property(b => b.TurnsToConstruct).HasConversion<int>();
+
+        builder.HasOne<City>()
+            .WithMany(c => c.Buildings)
+            .HasForeignKey(b => b.CityId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

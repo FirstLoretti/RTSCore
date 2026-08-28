@@ -1,5 +1,3 @@
-using MediatR;
-
 using Microsoft.EntityFrameworkCore;
 
 using RTSCore.Application.Common.Behaviors;
@@ -11,7 +9,7 @@ using Scalar.AspNetCore;
 
 using FluentValidation;
 using RTSCore.WebApi.Common;
-using RTSCore.Application.Buildings.Commands;
+using RTSCore.Domain.ValueObjects.Presets;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -24,6 +22,11 @@ builder.Services.AddDbContext<AppDbContext>(
 
 builder.Services.AddScoped<IUnitRepository, SqlUnitRepository>();
 builder.Services.AddScoped<IUnitOfWork, EfUnitOfWork>();
+builder.Services.AddScoped<IBuildingRepository, SqlBuildingRepository>();
+builder.Services.AddScoped<IFactionRepository, SqlFactionRepository>();
+builder.Services.AddScoped<ICityRepository, SqlCityRepository>();
+builder.Services.AddSingleton(Array.Empty<FactionPreset>());
+
 builder.Services.AddExceptionHandler<GlobalExeptionHandler>();
 builder.Services.AddProblemDetails();
 

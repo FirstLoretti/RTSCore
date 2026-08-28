@@ -6,8 +6,16 @@ namespace RTSCore.Infrastructure.Persistence;
 
 public class SqlBuildingRepository(AppDbContext context) : IBuildingRepository
 {
+    public void Add(Building building) => context.Buildings.Add(building);
+    public void Remove(Building building) => context.Buildings.Remove(building);
+
     public async Task<Building?> GetBuildingAsync(BuildingId id, CancellationToken cancellationToken)
     {
         return await context.Buildings.FindAsync([id], cancellationToken);
+    }
+
+    public void AddRange(IEnumerable<Building> buildings)
+    {
+        context.Buildings.AddRange(buildings);
     }
 }

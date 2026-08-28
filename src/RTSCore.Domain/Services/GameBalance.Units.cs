@@ -5,7 +5,7 @@ using RTSCore.Domain.ValueObjects;
 
 namespace RTSCore.Domain.Services;
 
-public static partial class GameBalance
+public partial class GameBalance
 {
     public static class Units
     {
@@ -67,7 +67,7 @@ public static partial class GameBalance
         {
             return !TypeToTemplate.TryGetValue(type, out var template)
                 ? throw new ArgumentException(
-                    $"[GameBalance.Units] Шаблон юнита {type} не найден в системе"
+                    $"[{nameof(Units)}] Шаблон юнита {type} не найден в системе"
                 )
                 : template;
         }

@@ -2,7 +2,7 @@ namespace RTSCore.Domain.ValueObjects;
 
 public enum UnitType
 {
-    None,
+    None = 0,
     Invulnerable,
     EnglandSwordman,
     FranceSwordman,
