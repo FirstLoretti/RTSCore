@@ -6,7 +6,7 @@ using RTSCore.Domain.Interfaces;
 using RTSCore.Domain.Services;
 using RTSCore.Domain.ValueObjects;
 
-namespace RTSCore.Application.Buildings.Commands;
+namespace RTSCore.Application.Cities.Commands;
 
 public class ConstructBuildingCommandHandler(IUnitOfWork unitOfWork) : IRequestHandler<ConstructBuildingCommand>
 {

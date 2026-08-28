@@ -8,7 +8,7 @@ using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
-using RTSCore.Application.Buildings.Commands;
+using RTSCore.Application.Cities.Commands;
 using RTSCore.Application.Campaing.Commands;
 using RTSCore.Domain.Entities;
 using RTSCore.Domain.ValueObjects;
@@ -124,6 +124,14 @@ public class WebIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
 
+    [Fact]
+    public async Task EndTurn_ShouldReturnNoContent()
+    {
+        var responce = await _client.PostAsJsonAsync("api/campaign/endTurn", new EndTurnCommand());
+
+        Assert.Equal(HttpStatusCode.NoContent, responce.StatusCode);
+    }
+
     #endregion
 
     #region CityController
@@ -168,6 +176,41 @@ public class WebIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
         Assert.NotNull(problemDetails);
         Assert.True(problemDetails.Errors.ContainsKey("CityId"));
         Assert.True(problemDetails.Errors.ContainsKey("BuildingType"));
+    }
+
+    [Fact]
+    public async Task CancelBuildingConstruction_ShouldReturnNoContent()
+    {
+        var buildingId = new BuildingId("test_building");
+
+        using (var scope = _factory.Services.CreateScope())
+        {
+
+            var cityPreset = new CityPreset("test_london", "Test London", CityType.Town, 1500, []);
+            var city = new City(cityPreset, FactionType.England);
+
+            var building = Building.CreateWithCustomStatusForTests(
+                buildingId,
+                BuildingType.Barrack,
+                FactionType.England,
+                "test_london",
+                false,
+                2
+            );
+
+            var faction = new Faction(FactionType.England, 1000, PlayerType.Human);
+
+            var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            context.Buildings.Add(building);
+            context.Factions.Add(faction);
+            context.Cities.Add(city);
+
+            await context.SaveChangesAsync();
+        }
+
+        var responce = await _client.DeleteAsync($"api/city/cancelBuildingConstruction_{buildingId}");
+
+        Assert.Equal(HttpStatusCode.NoContent, responce.StatusCode);
     }
 
     #endregion

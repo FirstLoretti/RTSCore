@@ -32,7 +32,12 @@ public class Faction
     public void EarnGold(int amount)
     {
         ArgumentOutOfRangeException.ThrowIfNegative(amount);
+        Gold += amount;
+    }
 
+    public void RefundGold(int amount)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegative(amount);
         Gold += amount;
     }
 }

@@ -25,6 +25,35 @@ public class Building
 
     protected Building() { }
 
+    private Building(
+        BuildingId id,
+        BuildingType type,
+        FactionType ownerFaction,
+        CityId cityId,
+        bool isConstructed,
+        int turnsToConstruct
+    )
+    {
+        Id = id;
+        Type = type;
+        OwnerFaction = ownerFaction;
+        CityId = cityId;
+        IsConstructed = isConstructed;
+        TurnsToConstruct = turnsToConstruct;
+    }
+
+    public static Building CreateWithCustomStatusForTests(
+        BuildingId id,
+        BuildingType type,
+        FactionType ownerFaction,
+        CityId cityId,
+        bool isConstructed,
+        int turnsToConstruct
+    )
+    {
+        return new Building(id, type, ownerFaction, cityId, isConstructed, turnsToConstruct);
+    }
+
     public void AdvanceConstruction()
     {
         if (IsConstructed) return;

@@ -1,3 +1,5 @@
+using Microsoft.EntityFrameworkCore;
+
 using RTSCore.Domain.Entities;
 using RTSCore.Domain.Interfaces;
 using RTSCore.Domain.ValueObjects;
@@ -17,5 +19,10 @@ public class SqlBuildingRepository(AppDbContext context) : IBuildingRepository
     public void AddRange(IEnumerable<Building> buildings)
     {
         context.Buildings.AddRange(buildings);
+    }
+
+    public async Task<IEnumerable<Building>> GetUnderConstructionAsync(CancellationToken cancellationToken)
+    {
+        return await context.Buildings.Where(b => !b.IsConstructed).ToListAsync(cancellationToken);
     }
 }

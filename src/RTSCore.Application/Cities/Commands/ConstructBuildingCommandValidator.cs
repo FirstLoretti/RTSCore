@@ -2,7 +2,7 @@ using FluentValidation;
 
 using RTSCore.Domain.ValueObjects;
 
-namespace RTSCore.Application.Buildings.Commands;
+namespace RTSCore.Application.Cities.Commands;
 
 public class ConstructBuildingCommandValidator : AbstractValidator<ConstructBuildingCommand>
 {

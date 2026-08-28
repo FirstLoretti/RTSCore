@@ -14,7 +14,13 @@ public class CampaignController(IMediator mediator) : ControllerBase
     public async Task<IActionResult> Start(StartCampaignCommand command, CancellationToken cancellationToken)
     {
         await mediator.Send(command, cancellationToken);
+        return NoContent();
+    }
 
+    [HttpPost("endTurn")]
+    public async Task<IActionResult> EndTurn(EndTurnCommand command, CancellationToken cancellationToken)
+    {
+        await mediator.Send(command, cancellationToken);
         return NoContent();
     }
 }

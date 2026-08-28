@@ -14,4 +14,6 @@ public readonly record struct BuildingId
 
     public static implicit operator BuildingId(string value) => new(value);
     public static implicit operator string(BuildingId id) => id.Value;
+
+    public override string ToString() => Value;
 }

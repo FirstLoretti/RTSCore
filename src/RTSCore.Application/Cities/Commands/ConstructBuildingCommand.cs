@@ -2,7 +2,7 @@ using MediatR;
 
 using RTSCore.Domain.ValueObjects;
 
-namespace RTSCore.Application.Buildings.Commands;
+namespace RTSCore.Application.Cities.Commands;
 
 public record struct ConstructBuildingCommand(
     string CityId,

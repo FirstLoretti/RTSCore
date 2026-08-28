@@ -10,4 +10,5 @@ public interface IBuildingRepository
     void AddRange(IEnumerable<Building> buildings);
 
     Task<Building?> GetBuildingAsync(BuildingId id, CancellationToken cancellationToken);
+    Task<IEnumerable<Building>> GetUnderConstructionAsync(CancellationToken cancellationToken);
 }
