@@ -4,6 +4,7 @@ public enum BuildingType
 {
     None = 0,
     Invulnerable,
-    Barrack,
+    ReqruitBarrack,
+    MilitiaBarrack,
     Market
 }

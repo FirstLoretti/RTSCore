@@ -3,7 +3,7 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 using RTSCore.Application.Cities.Commands;
-using RTSCore.Domain.ValueObjects;
+using RTSCore.Application.Cities.Queries;
 
 namespace RTSCore.WebApi.Controllers;
 
@@ -23,5 +23,12 @@ public class CityController(IMediator mediator) : ControllerBase
     {
         await mediator.Send(new CancelConstructBuildingCommand(buildingId));
         return NoContent();
+    }
+
+    [HttpGet("{cityId}/getConstructionOptions")]
+    public async Task<ActionResult<IEnumerable<ConstructionOptionDto>>> GetConstructionOptionsAsync(string cityId)
+    {
+        var result = await mediator.Send(new GetConstructionOptionsQuery(cityId));
+        return Ok(result);
     }
 }

@@ -4,7 +4,5 @@ public enum CityType
 {
     None = 0,
     Village,
-    Town,
-    WoodenCastle,
-    StoneCastle
+    Settlement
 }

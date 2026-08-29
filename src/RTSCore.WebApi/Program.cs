@@ -10,6 +10,8 @@ using Scalar.AspNetCore;
 using FluentValidation;
 using RTSCore.WebApi.Common;
 using RTSCore.Domain.ValueObjects.Presets;
+using RTSCore.Domain.ValueObjects;
+using RTSCore.Domain.Services;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -26,6 +28,7 @@ builder.Services.AddScoped<IBuildingRepository, SqlBuildingRepository>();
 builder.Services.AddScoped<IFactionRepository, SqlFactionRepository>();
 builder.Services.AddScoped<ICityRepository, SqlCityRepository>();
 builder.Services.AddSingleton(Array.Empty<FactionPreset>());
+builder.Services.AddSingleton(GameBalance.Buildings.AllTemplates);
 
 builder.Services.AddExceptionHandler<GlobalExeptionHandler>();
 builder.Services.AddProblemDetails();

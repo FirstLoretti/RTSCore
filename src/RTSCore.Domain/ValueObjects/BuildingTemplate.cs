@@ -4,5 +4,7 @@ public record BuildingTemplate(
     BuildingType Type,
     string DisplayName,
     int Cost,
-    int TurnsToConstruct
+    int TurnsToConstruct,
+    CityType[] AllowedCityTypes,
+    BuildingType? RequiredPreviousTier = null
 );

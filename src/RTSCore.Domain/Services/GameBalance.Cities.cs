@@ -24,29 +24,11 @@ public partial class GameBalance
                 },
 
                 {
-                    CityType.Town,
+                    CityType.Settlement,
                     new CityTemplate(
-                        DisplayName : "Город",
-                        Type: CityType.Town,
-                        MaxPopulation: 4000
-                    )
-                },
-
-                {
-                    CityType.WoodenCastle,
-                    new CityTemplate(
-                        DisplayName: "Деревянный замок",
-                        Type: CityType.WoodenCastle,
-                        MaxPopulation: 500
-                    )
-                },
-
-                {
-                    CityType.StoneCastle,
-                    new CityTemplate(
-                        DisplayName: "Каменный замок",
-                        Type: CityType.StoneCastle,
-                        MaxPopulation: 1500
+                        DisplayName : "Посёлок",
+                        Type: CityType.Settlement,
+                        MaxPopulation: 3000
                     )
                 }
             };

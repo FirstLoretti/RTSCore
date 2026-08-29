@@ -3,10 +3,14 @@ using MediatR;
 using RTSCore.Domain.Exeptions;
 using RTSCore.Domain.Interfaces;
 using RTSCore.Domain.Services;
+using RTSCore.Domain.ValueObjects;
 
 namespace RTSCore.Application.Cities.Commands;
 
-public class CancelConstructBuildingCommandHandler(IUnitOfWork unitOfWork) : IRequestHandler<CancelConstructBuildingCommand>
+public class CancelConstructBuildingCommandHandler(
+    IUnitOfWork unitOfWork,
+    IReadOnlyCollection<BuildingTemplate> buildingTemplates
+) : IRequestHandler<CancelConstructBuildingCommand>
 {
     public async Task Handle(CancelConstructBuildingCommand request, CancellationToken cancellationToken)
     {
@@ -28,8 +32,13 @@ public class CancelConstructBuildingCommandHandler(IUnitOfWork unitOfWork) : IRe
                 $"Фракции {building.OwnerFaction} нет на карте кампании"
             );
 
-        var template = GameBalance.Buildings.GetTemplate(building.Type);
-        faction.RefundGold(template.Cost / 2);
+        var template = buildingTemplates.FirstOrDefault(b => b.Type == building.Type)
+            ?? throw new NotFoundException(
+                $"[{nameof(ConstructBuildingCommandHandler)}] " +
+                $"Шаблон здания для типа {building.Type} не содержится в {nameof(GameBalance.Buildings)}"
+            );
+
+        faction.RefundGold(template.Cost);
         unitOfWork.BuildingRepository.Remove(building);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);

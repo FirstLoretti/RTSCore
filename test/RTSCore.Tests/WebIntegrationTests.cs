@@ -15,6 +15,7 @@ using RTSCore.Domain.ValueObjects;
 using RTSCore.Domain.ValueObjects.Presets;
 using RTSCore.Infrastructure.Persistence;
 using RTSCore.WebApi.Dtos;
+using RTSCore.Application.Cities.Queries;
 
 namespace RTSCore.Tests;
 
@@ -146,7 +147,7 @@ public class WebIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
             var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
             var faction = new Faction(FactionType.England, 5000, PlayerType.Human);
-            var cityPreset = new CityPreset(cityId, "Test_London", CityType.Town, 1000, []);
+            var cityPreset = new CityPreset(cityId, "Test_London", CityType.Settlement, 1000, []);
             var city = new City(cityPreset, faction.Type);
 
             context.Factions.Add(faction);
@@ -155,7 +156,7 @@ public class WebIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
             await context.SaveChangesAsync();
         }
 
-        var command = new ConstructBuildingCommand(cityId, BuildingType.Barrack);
+        var command = new ConstructBuildingCommand(cityId, BuildingType.ReqruitBarrack);
 
         var response = await _client.PostAsJsonAsync("api/city/constructBuilding", command);
 
@@ -186,12 +187,12 @@ public class WebIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
         using (var scope = _factory.Services.CreateScope())
         {
 
-            var cityPreset = new CityPreset("test_london", "Test London", CityType.Town, 1500, []);
+            var cityPreset = new CityPreset("test_london", "Test London", CityType.Settlement, 1500, []);
             var city = new City(cityPreset, FactionType.England);
 
             var building = Building.CreateWithCustomStatusForTests(
                 buildingId,
-                BuildingType.Barrack,
+                BuildingType.ReqruitBarrack,
                 FactionType.England,
                 "test_london",
                 false,
@@ -211,6 +212,39 @@ public class WebIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
         var responce = await _client.DeleteAsync($"api/city/cancelBuildingConstruction_{buildingId}");
 
         Assert.Equal(HttpStatusCode.NoContent, responce.StatusCode);
+    }
+
+    [Fact]
+    public async Task GetConstructionOptions_ShouldReturnOk_AndValidCatalog()
+    {
+        var cityId = new CityId("london_test");
+
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+            var faction = new Faction(FactionType.England, 1000, PlayerType.Human);
+            var cityPreset = new CityPreset(cityId, "London Test", CityType.Settlement, 1500, []);
+            var city = new City(cityPreset, faction.Type);
+
+            context.Cities.Add(city);
+            context.Factions.Add(faction);
+
+            await context.SaveChangesAsync();
+        }
+
+        var responce = await _client.GetAsync($"api/city/{cityId}/getConstructionOptions");
+
+        Assert.NotNull(responce);
+        Assert.Equal(HttpStatusCode.OK, responce.StatusCode);
+
+        var catalog = await responce.Content.ReadFromJsonAsync<IEnumerable<ConstructionOptionDto>>();
+
+        Assert.NotNull(catalog);
+        Assert.Equal(2, catalog.Count());
+
+        var reqruitBarrack = catalog.FirstOrDefault(b => b.Type == BuildingType.ReqruitBarrack);
+        Assert.NotNull(reqruitBarrack);
     }
 
     #endregion

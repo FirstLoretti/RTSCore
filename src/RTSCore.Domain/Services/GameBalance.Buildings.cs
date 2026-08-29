@@ -10,17 +10,32 @@ public partial class GameBalance
     {
         private static readonly FrozenDictionary<BuildingType, BuildingTemplate> TypeToTemplate;
 
+        public static IReadOnlyCollection<BuildingTemplate> AllTemplates => TypeToTemplate.Values;
+
         static Buildings()
         {
             Dictionary<BuildingType, BuildingTemplate> temporary = new()
             {
                 {
-                    BuildingType.Barrack,
+                    BuildingType.ReqruitBarrack,
                     new BuildingTemplate(
-                        Type: BuildingType.Barrack,
+                        Type: BuildingType.ReqruitBarrack,
                         DisplayName: "Казарма",
                         Cost: 1000,
-                        1
+                        TurnsToConstruct: 2,
+                        AllowedCityTypes: [CityType.Settlement,CityType.Village]
+                    )
+                },
+
+                {
+                    BuildingType.MilitiaBarrack,
+                    new BuildingTemplate(
+                        Type: BuildingType.MilitiaBarrack,
+                        DisplayName: "Казарма Ополченцев",
+                        Cost: 3000,
+                        TurnsToConstruct: 4,
+                        AllowedCityTypes: [CityType.Settlement],
+                        RequiredPreviousTier: BuildingType.ReqruitBarrack
                     )
                 },
 
@@ -30,7 +45,8 @@ public partial class GameBalance
                         Type: BuildingType.Market,
                         DisplayName: "Рынок",
                         Cost: 1500,
-                        2
+                        TurnsToConstruct: 2,
+                        AllowedCityTypes: [CityType.Settlement,CityType.Village]
                     )
                 }
             };
