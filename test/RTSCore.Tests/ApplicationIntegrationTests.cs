@@ -152,23 +152,26 @@ public class ApplicationIntegrationTests
     }
 
     [Fact]
-    public async Task Mediator_EndTurn_ShouldAdvanceConstruction_MarkAsConstructed_AndIncreasePopulation()
+    public async Task Mediator_EndTurn_ShouldAdvanceConstruction_CollectTaxes_AndIncreasePopulation()
     {
         var (dbName, serviceProvider) = Arrange();
 
         var barrackId = new BuildingId("test_barrack");
         var cityId = new CityId("test_london");
         var startingPopulation = 1000;
+        var startingGold = 1000;
+        var factionType = FactionType.England;
 
         using (var scope = serviceProvider.CreateScope())
         {
+            var faction = new Faction(factionType, startingGold, PlayerType.Human);
             var cityPreset = new CityPreset(cityId, "Test_London", CityType.Settlement, startingPopulation, []);
-            var city = new City(cityPreset, FactionType.England);
+            var city = new City(cityPreset, factionType);
 
             var barrack = Building.CreateWithCustomStatusForTests(
                 barrackId,
                 BuildingType.ReqruitBarrack,
-                FactionType.England,
+                factionType,
                 city.Id,
                 isConstructed: false,
                 turnsToConstruct: 1
@@ -177,7 +180,7 @@ public class ApplicationIntegrationTests
             var field = Building.CreateWithCustomStatusForTests(
                 "test_field",
                 BuildingType.CultivatedField,
-                FactionType.England,
+                factionType,
                 city.Id,
                 isConstructed: true,
                 turnsToConstruct: 0
@@ -188,6 +191,7 @@ public class ApplicationIntegrationTests
 
             var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
             context.Cities.Add(city);
+            context.Factions.Add(faction);
 
             await context.SaveChangesAsync();
         }
@@ -201,6 +205,7 @@ public class ApplicationIntegrationTests
 
         Building dbBarrack;
         City dbCity;
+        Faction dbFaction;
 
         using (var scope = serviceProvider.CreateScope())
         {
@@ -208,13 +213,16 @@ public class ApplicationIntegrationTests
 
             dbBarrack = await context.Buildings.FirstAsync(b => b.Id == barrackId);
             dbCity = await context.Cities.FirstAsync(c => c.Id == cityId);
+            dbFaction = await context.Factions.FirstAsync(f => f.Type == factionType);
         }
 
         DeleteDatabase(dbName);
 
+        // Assert: продвижение строительства
         Assert.True(dbBarrack.IsConstructed);
         Assert.Equal(0, dbBarrack.TurnsToConstruct);
 
+        // Assert: увеличение роста населения
         var template = GameBalance.Buildings.GetTemplate(BuildingType.CultivatedField);
         var fieldGrowthBonus = template.Effects
             .Where(e => e.Type == BuildingEffectType.PopulationGrowth)
@@ -224,7 +232,12 @@ public class ApplicationIntegrationTests
         var expectedPopulation = startingPopulation + populationGrowth;
 
         Assert.Equal(expectedPopulation, dbCity.Population);
+
+        // Assert: сбор и начисление налогов
+        var expectedGold = (int)(startingGold + startingPopulation * GameBalance.Economy.TaxRatePerCitizen);
+        Assert.Equal(expectedGold, dbFaction.Gold);
     }
+
     #endregion
 
     #region CityCommands

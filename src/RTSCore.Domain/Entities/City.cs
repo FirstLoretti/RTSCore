@@ -40,4 +40,9 @@ public class City
     {
         _buildings.Add(building);
     }
+
+    public int CalculateTaxIncome(float taxRatePerCitizen)
+    {
+        return (int)(Population * taxRatePerCitizen);
+    }
 }

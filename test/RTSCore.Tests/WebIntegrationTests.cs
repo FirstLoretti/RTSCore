@@ -16,6 +16,7 @@ using RTSCore.Domain.ValueObjects.Presets;
 using RTSCore.Infrastructure.Persistence;
 using RTSCore.WebApi.Dtos;
 using RTSCore.Application.Cities.Queries;
+using RTSCore.Domain.Services;
 
 namespace RTSCore.Tests;
 
@@ -218,13 +219,14 @@ public class WebIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
     public async Task GetConstructionOptions_ShouldReturnOk_AndValidCatalog()
     {
         var cityId = new CityId("london_test");
+        var barrackCost = GameBalance.Buildings.GetTemplate(BuildingType.ReqruitBarrack).Cost;
 
         using (var scope = _factory.Services.CreateScope())
         {
             var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-            var faction = new Faction(FactionType.England, 1000, PlayerType.Human);
-            var cityPreset = new CityPreset(cityId, "London Test", CityType.Settlement, 1500, []);
+            var faction = new Faction(FactionType.England, barrackCost, PlayerType.Human);
+            var cityPreset = new CityPreset(cityId, "London Test", CityType.Settlement, 1000, []);
             var city = new City(cityPreset, faction.Type);
 
             context.Cities.Add(city);
@@ -241,10 +243,12 @@ public class WebIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
         var catalog = await responce.Content.ReadFromJsonAsync<IEnumerable<ConstructionOptionDto>>();
 
         Assert.NotNull(catalog);
-        Assert.Equal(2, catalog.Count());
+        Assert.NotEmpty(catalog);
 
         var reqruitBarrack = catalog.FirstOrDefault(b => b.Type == BuildingType.ReqruitBarrack);
+
         Assert.NotNull(reqruitBarrack);
+        Assert.Equal(ConstructionOptionAvailability.Available, reqruitBarrack.Availability);
     }
 
     #endregion

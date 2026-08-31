@@ -1,5 +1,6 @@
 using MediatR;
 
+using RTSCore.Domain.Exeptions;
 using RTSCore.Domain.Interfaces;
 using RTSCore.Domain.Services;
 
@@ -20,6 +21,15 @@ public class EndTurnCommandHandler(IUnitOfWork unitOfWork) : IRequestHandler<End
 
         foreach (var city in cities)
         {
+            var faction = await unitOfWork.FactionRepository.GetFactionAsync(city.OwnerFaction, cancellationToken)
+                ?? throw new NotFoundException(
+                    $"[{nameof(EndTurnCommandHandler)}] " +
+                    $"Фракции {city.OwnerFaction} нет на карте кампании"
+                );
+
+            var taxIncome = city.CalculateTaxIncome(GameBalance.Economy.TaxRatePerCitizen);
+            faction.EarnGold(taxIncome);
+
             var growthRate = GameBalance.Population.CalculateGrowthRate(city);
             city.GrowPopulation(growthRate);
         }
