@@ -6,5 +6,9 @@ public record BuildingTemplate(
     int Cost,
     int TurnsToConstruct,
     CityType[] AllowedCityTypes,
-    BuildingType? RequiredPreviousTier = null
-);
+    BuildingType? RequiredPreviousTier = null,
+    BuildingEffect[]? Effects = null
+)
+{
+    public BuildingEffect[] Effects { get; init; } = Effects ?? [];
+}

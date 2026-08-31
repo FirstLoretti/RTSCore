@@ -11,4 +11,5 @@ public interface ICityRepository
 
     Task<City?> GetCityAsync(CityId id, CancellationToken cancellationToken);
     Task<City?> GetCityWithBuildingsAsync(CityId id, CancellationToken cancellationToken);
+    Task<IReadOnlyCollection<City>> GetCitiesWithBuildingsAsync(CancellationToken cancellationToken);
 }

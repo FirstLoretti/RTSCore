@@ -48,6 +48,30 @@ public partial class GameBalance
                         TurnsToConstruct: 2,
                         AllowedCityTypes: [CityType.Settlement,CityType.Village]
                     )
+                },
+
+                {
+                    BuildingType.CultivatedField,
+                    new BuildingTemplate(
+                        Type: BuildingType.CultivatedField,
+                        DisplayName: "Обрабатываемое Поле",
+                        Cost: 500,
+                        TurnsToConstruct: 2,
+                        AllowedCityTypes: [CityType.Settlement, CityType.Village],
+                        Effects: [new(BuildingEffectType.PopulationGrowth, 0.05f)]
+                    )
+                },
+
+                {
+                    BuildingType.CultivatedFieldsComplex,
+                    new BuildingTemplate(
+                        Type: BuildingType.CultivatedFieldsComplex,
+                        DisplayName: "Комплекс Обрабатываемых Полей",
+                        Cost: 1500,
+                        TurnsToConstruct: 4,
+                        AllowedCityTypes: [CityType.Settlement],
+                        Effects: [new(BuildingEffectType.PopulationGrowth, 0.1f)]
+                    )
                 }
             };
 
@@ -58,7 +82,7 @@ public partial class GameBalance
         {
             return !TypeToTemplate.TryGetValue(type, out var template)
                 ? throw new ArgumentException(
-                    $"[{nameof(Buildings)}] Шаблон здания {type} не найдён в системе"
+                    $"[{nameof(Buildings)}] Шаблон здания {type} не найден в системе"
                 )
                 : template;
         }

@@ -6,5 +6,7 @@ public enum BuildingType
     Invulnerable,
     ReqruitBarrack,
     MilitiaBarrack,
-    Market
+    Market,
+    CultivatedField,
+    CultivatedFieldsComplex
 }

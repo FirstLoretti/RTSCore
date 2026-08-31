@@ -25,15 +25,18 @@ public class City
 
     protected City() { }
 
-    public void GrowPopulation(int amount)
+    public void GrowPopulation(float growthRate)
     {
-        if (amount <= 0) return;
+        if (growthRate <= 0) return;
 
         var template = GameBalance.Cities.GetCityTemplate(Type);
-        Population = Math.Min(Population + amount, template.MaxPopulation);
+        var growthBonus = (int)(Population * growthRate);
+        Population = Math.Min(Population + growthBonus, template.MaxPopulation);
+
+        if (Population < 0) Population = 0;
     }
 
-    public void ConstructBuilding(Building building)
+    public void RegisterBuilding(Building building)
     {
         _buildings.Add(building);
     }

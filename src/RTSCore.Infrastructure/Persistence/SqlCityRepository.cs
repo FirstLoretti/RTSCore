@@ -23,6 +23,13 @@ public class SqlCityRepository(AppDbContext context) : ICityRepository
             .FirstOrDefaultAsync(c => c.Id == id, cancellationToken);
     }
 
+    public async Task<IReadOnlyCollection<City>> GetCitiesWithBuildingsAsync(CancellationToken cancellationToken)
+    {
+        return await context.Cities
+            .Include(c => c.Buildings)
+            .ToArrayAsync(cancellationToken);
+    }
+
     public void AddRange(IEnumerable<City> cities)
     {
         context.Cities.AddRange(cities);

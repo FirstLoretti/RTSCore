@@ -152,29 +152,42 @@ public class ApplicationIntegrationTests
     }
 
     [Fact]
-    public async Task Mediator_EndTurn_ShouldAdvanceConstruction_AndMarkAsConstructed()
+    public async Task Mediator_EndTurn_ShouldAdvanceConstruction_MarkAsConstructed_AndIncreasePopulation()
     {
         var (dbName, serviceProvider) = Arrange();
 
-        var buildingId = new BuildingId("test_building");
+        var barrackId = new BuildingId("test_barrack");
+        var cityId = new CityId("test_london");
+        var startingPopulation = 1000;
 
         using (var scope = serviceProvider.CreateScope())
         {
-            var cityPreset = new CityPreset("test_london", "Test_London", CityType.Settlement, 1000, []);
+            var cityPreset = new CityPreset(cityId, "Test_London", CityType.Settlement, startingPopulation, []);
             var city = new City(cityPreset, FactionType.England);
 
-            var building = Building.CreateWithCustomStatusForTests(
-                id: buildingId,
-                type: BuildingType.ReqruitBarrack,
-                ownerFaction: FactionType.England,
-                cityId: city.Id,
+            var barrack = Building.CreateWithCustomStatusForTests(
+                barrackId,
+                BuildingType.ReqruitBarrack,
+                FactionType.England,
+                city.Id,
                 isConstructed: false,
                 turnsToConstruct: 1
             );
 
+            var field = Building.CreateWithCustomStatusForTests(
+                "test_field",
+                BuildingType.CultivatedField,
+                FactionType.England,
+                city.Id,
+                isConstructed: true,
+                turnsToConstruct: 0
+            );
+
+            city.RegisterBuilding(barrack);
+            city.RegisterBuilding(field);
+
             var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
             context.Cities.Add(city);
-            context.Buildings.Add(building);
 
             await context.SaveChangesAsync();
         }
@@ -186,19 +199,31 @@ public class ApplicationIntegrationTests
             await mediator.Send(new EndTurnCommand());
         }
 
-        Building dbBuilding;
+        Building dbBarrack;
+        City dbCity;
 
         using (var scope = serviceProvider.CreateScope())
         {
             var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-            dbBuilding = await context.Buildings.FirstAsync(b => b.Id == buildingId);
+            dbBarrack = await context.Buildings.FirstAsync(b => b.Id == barrackId);
+            dbCity = await context.Cities.FirstAsync(c => c.Id == cityId);
         }
 
         DeleteDatabase(dbName);
 
-        Assert.True(dbBuilding.IsConstructed);
-        Assert.Equal(0, dbBuilding.TurnsToConstruct);
+        Assert.True(dbBarrack.IsConstructed);
+        Assert.Equal(0, dbBarrack.TurnsToConstruct);
+
+        var template = GameBalance.Buildings.GetTemplate(BuildingType.CultivatedField);
+        var fieldGrowthBonus = template.Effects
+            .Where(e => e.Type == BuildingEffectType.PopulationGrowth)
+            .Sum(e => e.Value);
+
+        var populationGrowth = (int)(startingPopulation * (GameBalance.Population.BaseGrowthRate + fieldGrowthBonus));
+        var expectedPopulation = startingPopulation + populationGrowth;
+
+        Assert.Equal(expectedPopulation, dbCity.Population);
     }
     #endregion
 
@@ -305,7 +330,7 @@ public class ApplicationIntegrationTests
             dbGold,
             setupPreviousTier: false,
             previousBuildingType: default,
-            building
+            buildingInCity: building
         );
 
         using (var scope = serviceProvider.CreateScope())
@@ -481,7 +506,7 @@ public class ApplicationIntegrationTests
         int factionGold,
         bool setupPreviousTier,
         BuildingType previousBuildingType = BuildingType.ReqruitBarrack,
-        Building? building = null
+        Building? buildingInCity = null
     )
     {
         using var scope = serviceProvider.CreateScope();
@@ -502,11 +527,11 @@ public class ApplicationIntegrationTests
                 turnsToConstruct: 0
             );
 
-            city.ConstructBuilding(previousBuilding);
+            city.RegisterBuilding(previousBuilding);
         }
-        if (building != null)
+        if (buildingInCity != null)
         {
-            city.ConstructBuilding(building);
+            city.RegisterBuilding(buildingInCity);
         }
 
         context.Factions.Add(faction);
