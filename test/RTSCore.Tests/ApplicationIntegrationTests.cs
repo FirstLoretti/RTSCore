@@ -152,7 +152,7 @@ public class ApplicationIntegrationTests
     }
 
     [Fact]
-    public async Task Mediator_EndTurn_ShouldAdvanceConstruction_CollectTaxes_AndIncreasePopulation()
+    public async Task Mediator_EndTurn_ShouldAdvanceConstruction_CollectTaxes_IncreasePopulation_CollectBuildingIncome()
     {
         var (dbName, serviceProvider) = Arrange();
 
@@ -169,25 +169,26 @@ public class ApplicationIntegrationTests
             var city = new City(cityPreset, factionType);
 
             var barrack = Building.CreateWithCustomStatusForTests(
-                barrackId,
-                BuildingType.ReqruitBarrack,
-                factionType,
-                city.Id,
+                barrackId, BuildingType.ReqruitBarrack, factionType, city.Id,
                 isConstructed: false,
                 turnsToConstruct: 1
             );
 
             var field = Building.CreateWithCustomStatusForTests(
-                "test_field",
-                BuildingType.CultivatedField,
-                factionType,
-                city.Id,
+                "test_field", BuildingType.CultivatedField, factionType, city.Id,
+                isConstructed: true,
+                turnsToConstruct: 0
+            );
+
+            var market = Building.CreateWithCustomStatusForTests(
+                "test_market", BuildingType.Market, factionType, cityId,
                 isConstructed: true,
                 turnsToConstruct: 0
             );
 
             city.RegisterBuilding(barrack);
             city.RegisterBuilding(field);
+            city.RegisterBuilding(market);
 
             var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
             context.Cities.Add(city);
@@ -222,7 +223,7 @@ public class ApplicationIntegrationTests
         Assert.True(dbBarrack.IsConstructed);
         Assert.Equal(0, dbBarrack.TurnsToConstruct);
 
-        // Assert: увеличение роста населения
+        // Assert: увеличение населения
         var template = GameBalance.Buildings.GetTemplate(BuildingType.CultivatedField);
         var fieldGrowthBonus = template.Effects
             .Where(e => e.Type == BuildingEffectType.PopulationGrowth)
@@ -233,8 +234,13 @@ public class ApplicationIntegrationTests
 
         Assert.Equal(expectedPopulation, dbCity.Population);
 
-        // Assert: сбор и начисление налогов
-        var expectedGold = (int)(startingGold + startingPopulation * GameBalance.Economy.TaxRatePerCitizen);
+        // Assert: начисление дохода от налогов и здания
+        var expectedTaxIncome = startingPopulation * GameBalance.Economy.TaxRatePerCitizen;
+        var expectedBuildingIncome = GameBalance.Buildings.GetTemplate(BuildingType.Market).Effects
+            .Single(e => e.Type == BuildingEffectType.GoldIncome)
+            .Value;
+        var expectedGold = startingGold + expectedTaxIncome + expectedBuildingIncome;
+
         Assert.Equal(expectedGold, dbFaction.Gold);
     }
 

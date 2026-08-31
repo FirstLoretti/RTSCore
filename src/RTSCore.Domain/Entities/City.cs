@@ -45,4 +45,14 @@ public class City
     {
         return (int)(Population * taxRatePerCitizen);
     }
+
+    public int CalculateBuildingsIncome()
+    {
+        return (int)Buildings
+            .Where(b => b.IsConstructed)
+            .Select(b => GameBalance.Buildings.GetTemplate(b.Type))
+            .SelectMany(t => t.Effects)
+            .Where(e => e.Type == BuildingEffectType.GoldIncome)
+            .Sum(e => e.Value);
+    }
 }

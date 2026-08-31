@@ -46,7 +46,8 @@ public partial class GameBalance
                         DisplayName: "Рынок",
                         Cost: 1500,
                         TurnsToConstruct: 2,
-                        AllowedCityTypes: [CityType.Settlement,CityType.Village]
+                        AllowedCityTypes: [CityType.Settlement,CityType.Village],
+                        Effects: [new(BuildingEffectType.GoldIncome, 150)]
                     )
                 },
 

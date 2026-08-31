@@ -28,7 +28,9 @@ public class EndTurnCommandHandler(IUnitOfWork unitOfWork) : IRequestHandler<End
                 );
 
             var taxIncome = city.CalculateTaxIncome(GameBalance.Economy.TaxRatePerCitizen);
-            faction.EarnGold(taxIncome);
+            var buildingsIncome = city.CalculateBuildingsIncome();
+
+            faction.EarnGold(taxIncome + buildingsIncome);
 
             var growthRate = GameBalance.Population.CalculateGrowthRate(city);
             city.GrowPopulation(growthRate);
