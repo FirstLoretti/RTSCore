@@ -10,7 +10,7 @@ public partial class GameBalance
     {
         private static readonly FrozenDictionary<BuildingType, BuildingTemplate> TypeToTemplate;
 
-        public static IReadOnlyCollection<BuildingTemplate> AllTemplates => TypeToTemplate.Values;
+        public static IReadOnlyCollection<BuildingTemplate> GetAllTemplates => TypeToTemplate.Values;
 
         static Buildings()
         {
@@ -59,7 +59,7 @@ public partial class GameBalance
                         Cost: 500,
                         TurnsToConstruct: 2,
                         AllowedCityTypes: [CityType.Settlement, CityType.Village],
-                        Effects: [new(BuildingEffectType.PopulationGrowth, 0.05f)]
+                        Effects: [new(BuildingEffectType.PopulationGrowth, 0.05f), new(BuildingEffectType.GoldIncome, 25f)]
                     )
                 },
 

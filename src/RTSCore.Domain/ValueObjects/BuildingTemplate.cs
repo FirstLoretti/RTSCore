@@ -1,3 +1,5 @@
+using RTSCore.Domain.Interfaces;
+
 namespace RTSCore.Domain.ValueObjects;
 
 public record BuildingTemplate(
@@ -8,7 +10,7 @@ public record BuildingTemplate(
     CityType[] AllowedCityTypes,
     BuildingType? RequiredPreviousTier = null,
     BuildingEffect[]? Effects = null
-)
+) : ICatalogOption<BuildingType>
 {
     public BuildingEffect[] Effects { get; init; } = Effects ?? [];
 }

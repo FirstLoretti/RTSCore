@@ -11,6 +11,8 @@ public partial class GameBalance
     {
         public static readonly ImmutableArray<int> ExpToNextLevel = [50, 100, 150, 200];
 
+        public static IReadOnlyCollection<UnitTemplate> GetAllTemplates => TypeToTemplate.Values;
+
         private static readonly FrozenDictionary<UnitType, UnitTemplate> TypeToTemplate;
 
         static Units()
@@ -22,6 +24,7 @@ public partial class GameBalance
                     new UnitTemplate(
                         Type: UnitType.EnglandSwordman,
                         DisplayName: "England Swordman",
+                        Cost: 250,
                         MaxHealth: 100,
                         Damage: 25,
                         Armor: 2,
@@ -36,6 +39,7 @@ public partial class GameBalance
                     new UnitTemplate(
                         Type: UnitType.FranceSwordman,
                         DisplayName: "France Swordman",
+                        Cost: 250,
                         MaxHealth: 115,
                         Damage: 20,
                         Armor: 3,
@@ -50,6 +54,7 @@ public partial class GameBalance
                     new UnitTemplate(
                         Type: UnitType.Invulnerable,
                         DisplayName: "Invulnerable",
+                        Cost: 0,
                         MaxHealth: 1,
                         Damage: 1,
                         Armor: 1,

@@ -9,6 +9,7 @@ public class Unit
     public UnitId Id { get; init; }
     public UnitType Type { get; init; }
     public FactionType Faction { get; init; }
+    public CityId? CurrentCityId { get; private set; }
     public int Health { get; private set; }
     public int Damage { get; private set; }
     public int Armor { get; private set; }
@@ -16,11 +17,12 @@ public class Unit
     public int Experience { get; private set; } = 0;
     public bool IsAlive => Health > 0;
 
-    public Unit(UnitId id, UnitType type, FactionType faction)
+    public Unit(UnitId id, UnitType type, FactionType faction, CityId? currentCityId = null)
     {
         Id = id;
         Type = type;
         Faction = faction;
+        CurrentCityId = currentCityId;
 
         var template = Units.GetTemplate(type);
         Health = template.MaxHealth;

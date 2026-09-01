@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Mvc;
 
 using RTSCore.Application.Cities.Commands;
 using RTSCore.Application.Cities.Queries;
+using RTSCore.Application.Units.Queries;
+using RTSCore.Domain.ValueObjects;
 
 namespace RTSCore.WebApi.Controllers;
 
@@ -26,9 +28,16 @@ public class CityController(IMediator mediator) : ControllerBase
     }
 
     [HttpGet("{cityId}/getConstructionOptions")]
-    public async Task<ActionResult<IEnumerable<ConstructionOptionDto>>> GetConstructionOptionsAsync(string cityId)
+    public async Task<ActionResult<IEnumerable<CityCatalogOptionDto<BuildingType>>>> GetConstructionOptionsAsync(string cityId)
     {
-        var result = await mediator.Send(new GetConstructionOptionsQuery(cityId));
+        var result = await mediator.Send(new GetCityConstructionOptionsQuery(cityId));
+        return Ok(result);
+    }
+
+    [HttpGet("{cityId}/getRecruitOptions")]
+    public async Task<ActionResult<IEnumerable<CityCatalogOptionDto<UnitType>>>> GetRecruitOptionsAsync(string cityId)
+    {
+        var result = await mediator.Send(new GetCityRecruitOptionsQuery(cityId));
         return Ok(result);
     }
 }

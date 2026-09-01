@@ -19,6 +19,7 @@ using RTSCore.Infrastructure.Persistence;
 using Unit = RTSCore.Domain.Entities.Unit;
 using RTSCore.Domain.Services;
 using RTSCore.Application.Cities.Queries;
+using RTSCore.Application.Cities.Queries;
 
 namespace RTSCore.Tests;
 
@@ -235,11 +236,14 @@ public class ApplicationIntegrationTests
         Assert.Equal(expectedPopulation, dbCity.Population);
 
         // Assert: начисление дохода от налогов и здания
+        BuildingType[] testBuildingsType = [BuildingType.CultivatedField, BuildingType.ReqruitBarrack, BuildingType.Market];
         var expectedTaxIncome = startingPopulation * GameBalance.Economy.TaxRatePerCitizen;
-        var expectedBuildingIncome = GameBalance.Buildings.GetTemplate(BuildingType.Market).Effects
-            .Single(e => e.Type == BuildingEffectType.GoldIncome)
-            .Value;
-        var expectedGold = startingGold + expectedTaxIncome + expectedBuildingIncome;
+        var expectedBuildingsIncome = (int)testBuildingsType
+            .Select(t => GameBalance.Buildings.GetTemplate(t))
+            .SelectMany(t => t.Effects)
+            .Where(e => e.Type == BuildingEffectType.GoldIncome)
+            .Sum(e => e.Value);
+        var expectedGold = startingGold + expectedTaxIncome + expectedBuildingsIncome;
 
         Assert.Equal(expectedGold, dbFaction.Gold);
     }
@@ -397,17 +401,17 @@ public class ApplicationIntegrationTests
     #region CityQueries
 
     [Theory]
-    [InlineData(CityType.Village, BuildingType.ReqruitBarrack, 1000, false, ConstructionOptionAvailability.Available, true)]
+    [InlineData(CityType.Village, BuildingType.ReqruitBarrack, 1000, false, CityCatalogOptionAvailability.Available, true)]
     [InlineData(CityType.Village, BuildingType.MilitiaBarrack, 1000, true, null, false)]
-    [InlineData(CityType.Village, BuildingType.ReqruitBarrack, 0, false, ConstructionOptionAvailability.Locked, true)]
+    [InlineData(CityType.Village, BuildingType.ReqruitBarrack, 0, false, CityCatalogOptionAvailability.Locked, true)]
     [InlineData(CityType.Settlement, BuildingType.MilitiaBarrack, 1000, false, null, false)]
-    [InlineData(CityType.Settlement, BuildingType.MilitiaBarrack, 1000, true, ConstructionOptionAvailability.Available, true)]
+    [InlineData(CityType.Settlement, BuildingType.MilitiaBarrack, 1000, true, CityCatalogOptionAvailability.Available, true)]
     public async Task Mediator_GetAvailableToConstructBuildings_ShouldReturnCorrectedCatalog(
         CityType cityType,
         BuildingType buildingTypeToConstruct,
         int factionGold,
         bool setupPreviousTier,
-        ConstructionOptionAvailability? expectedAvailability,
+        CityCatalogOptionAvailability? expectedAvailability,
         bool shouldBeInCatalog
     )
     {
@@ -421,13 +425,13 @@ public class ApplicationIntegrationTests
 
         await SeedCampaingInitialStateAsync(serviceProvider, cityId, cityType, factionType, factionGold, setupPreviousTier);
 
-        IEnumerable<ConstructionOptionDto> catalog;
+        IEnumerable<CityCatalogOptionDto<BuildingType>> catalog;
 
         using (var scope = serviceProvider.CreateScope())
         {
             var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
 
-            catalog = await mediator.Send(new GetConstructionOptionsQuery(cityId));
+            catalog = await mediator.Send(new GetCityConstructionOptionsQuery(cityId));
         }
 
         DeleteDatabase(dbName);
@@ -439,7 +443,7 @@ public class ApplicationIntegrationTests
             Assert.NotNull(catalogBuilding);
             Assert.Equal(expectedAvailability!.Value, catalogBuilding.Availability);
 
-            if (expectedAvailability == ConstructionOptionAvailability.Locked)
+            if (expectedAvailability == CityCatalogOptionAvailability.Locked)
             {
                 Assert.Equal("Недостаточно средств", catalogBuilding.LockReason);
             }
@@ -451,6 +455,67 @@ public class ApplicationIntegrationTests
         else
         {
             Assert.Null(catalogBuilding);
+        }
+    }
+
+    [Theory]
+    [InlineData(false, 100, null, false)]
+    [InlineData(true, 100, CityCatalogOptionAvailability.Available, true)]
+    [InlineData(true, 100, CityCatalogOptionAvailability.Locked, true)]
+    public async Task Mediator_GetCityRecruitOptions_ShouldReturnCorrectCatalog(
+        bool isBarrackConstructed,
+        int startingGold,
+        CityCatalogOptionAvailability? expectedAvailability,
+        bool shouldBeInCatalog
+    )
+    {
+        var templateCost = expectedAvailability == CityCatalogOptionAvailability.Available
+        ? startingGold
+        : startingGold * 2;
+
+        var cityId = new CityId("test_london");
+        var factionType = FactionType.England;
+
+        var unitTemplates = new UnitTemplate[]
+        {
+            new(
+                UnitType.EnglandSwordman, "Test Unit", templateCost, 1,1,1,1,1,1,1,
+                RequiredBuildingForRecruitment: BuildingType.ReqruitBarrack
+            )
+        };
+        var barrack = Building.CreateWithCustomStatusForTests(
+            "test_reqruit_barrack", BuildingType.ReqruitBarrack, factionType, cityId, isBarrackConstructed,
+            turnsToConstruct: isBarrackConstructed ? 0 : 1
+        );
+
+        var (dbName, serviceProvider) = Arrange(services =>
+            services.AddSingleton<IReadOnlyCollection<UnitTemplate>>(unitTemplates)
+        );
+
+        await SeedCampaingInitialStateAsync(
+            serviceProvider, cityId, CityType.Village, factionType, startingGold, false, default, barrack
+        );
+
+        IEnumerable<CityCatalogOptionDto<UnitType>> catalog;
+
+        using (var scope = serviceProvider.CreateScope())
+        {
+            var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+            catalog = await mediator.Send(new GetCityRecruitOptionsQuery(cityId));
+        }
+
+        DeleteDatabase(dbName);
+
+        var unitOption = catalog.FirstOrDefault(u => u.Type == UnitType.EnglandSwordman);
+
+        if (shouldBeInCatalog)
+        {
+            Assert.NotNull(unitOption);
+            Assert.Equal(expectedAvailability, unitOption.Availability);
+        }
+        else
+        {
+            Assert.Null(unitOption);
         }
     }
 
@@ -475,7 +540,7 @@ public class ApplicationIntegrationTests
         services.AddScoped<ICityRepository, SqlCityRepository>();
         services.AddScoped<IFactionRepository, SqlFactionRepository>();
         services.AddScoped<IBuildingRepository, SqlBuildingRepository>();
-        services.AddSingleton(GameBalance.Buildings.AllTemplates);
+        services.AddSingleton(GameBalance.Buildings.GetAllTemplates);
 
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(LoggingBehavior<,>));
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(

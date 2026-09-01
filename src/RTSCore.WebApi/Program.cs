@@ -28,7 +28,8 @@ builder.Services.AddScoped<IBuildingRepository, SqlBuildingRepository>();
 builder.Services.AddScoped<IFactionRepository, SqlFactionRepository>();
 builder.Services.AddScoped<ICityRepository, SqlCityRepository>();
 builder.Services.AddSingleton(Array.Empty<FactionPreset>());
-builder.Services.AddSingleton(GameBalance.Buildings.AllTemplates);
+builder.Services.AddSingleton(GameBalance.Buildings.GetAllTemplates);
+builder.Services.AddSingleton(GameBalance.Units.GetAllTemplates);
 
 builder.Services.AddExceptionHandler<GlobalExeptionHandler>();
 builder.Services.AddProblemDetails();

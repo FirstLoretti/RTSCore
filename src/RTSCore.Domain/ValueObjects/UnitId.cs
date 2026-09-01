@@ -14,4 +14,6 @@ public readonly record struct UnitId
 
     public static implicit operator UnitId(string value) => new(value);
     public static implicit operator string(UnitId id) => id.Value;
+
+    public override string ToString() => Value;
 }

@@ -1,6 +1,6 @@
 namespace RTSCore.Application.Cities.Queries;
 
-public enum ConstructionOptionAvailability
+public enum CityCatalogOptionAvailability
 {
     None = 0,
     Available,

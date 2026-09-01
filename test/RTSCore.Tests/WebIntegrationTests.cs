@@ -15,8 +15,8 @@ using RTSCore.Domain.ValueObjects;
 using RTSCore.Domain.ValueObjects.Presets;
 using RTSCore.Infrastructure.Persistence;
 using RTSCore.WebApi.Dtos;
-using RTSCore.Application.Cities.Queries;
 using RTSCore.Domain.Services;
+using RTSCore.Application.Cities.Queries;
 
 namespace RTSCore.Tests;
 
@@ -96,7 +96,7 @@ public class WebIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
         Assert.NotNull(problemDetails);
         Assert.Equal("Нарушение игровых правил", problemDetails.Title);
         Assert.Equal(
-            $"Юнита UnitId {{ Value = test_invulnerable }} " +
+            $"Юнита {unitId} " +
             $"с типом {UnitType.Invulnerable} нельзя удалить из базы данных",
             problemDetails.Detail
         );
@@ -142,20 +142,9 @@ public class WebIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
     public async Task ConstructBuilding_WithValidCommand_ShouldReturnNoContent()
     {
         var cityId = new CityId("test_london");
+        var barrackCost = GameBalance.Buildings.GetTemplate(BuildingType.ReqruitBarrack).Cost;
 
-        using (var scope = _factory.Services.CreateScope())
-        {
-            var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-
-            var faction = new Faction(FactionType.England, 5000, PlayerType.Human);
-            var cityPreset = new CityPreset(cityId, "Test_London", CityType.Settlement, 1000, []);
-            var city = new City(cityPreset, faction.Type);
-
-            context.Factions.Add(faction);
-            context.Cities.Add(city);
-
-            await context.SaveChangesAsync();
-        }
+        await SeedTestWorld(cityId, barrackCost);
 
         var command = new ConstructBuildingCommand(cityId, BuildingType.ReqruitBarrack);
 
@@ -184,35 +173,19 @@ public class WebIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
     public async Task CancelBuildingConstruction_ShouldReturnNoContent()
     {
         var buildingId = new BuildingId("test_building");
+        var cityId = new CityId("test_london");
 
-        using (var scope = _factory.Services.CreateScope())
-        {
+        var building = Building.CreateWithCustomStatusForTests(
+            buildingId, BuildingType.ReqruitBarrack, FactionType.England, "test_london",
+            isConstructed: false,
+            turnsToConstruct: 2
+        );
 
-            var cityPreset = new CityPreset("test_london", "Test London", CityType.Settlement, 1500, []);
-            var city = new City(cityPreset, FactionType.England);
+        await SeedTestWorld(cityId, buildingToRegister: building);
 
-            var building = Building.CreateWithCustomStatusForTests(
-                buildingId,
-                BuildingType.ReqruitBarrack,
-                FactionType.England,
-                "test_london",
-                false,
-                2
-            );
+        var response = await _client.DeleteAsync($"api/city/cancelBuildingConstruction_{buildingId}");
 
-            var faction = new Faction(FactionType.England, 1000, PlayerType.Human);
-
-            var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-            context.Buildings.Add(building);
-            context.Factions.Add(faction);
-            context.Cities.Add(city);
-
-            await context.SaveChangesAsync();
-        }
-
-        var responce = await _client.DeleteAsync($"api/city/cancelBuildingConstruction_{buildingId}");
-
-        Assert.Equal(HttpStatusCode.NoContent, responce.StatusCode);
+        Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
     }
 
     [Fact]
@@ -221,26 +194,14 @@ public class WebIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
         var cityId = new CityId("london_test");
         var barrackCost = GameBalance.Buildings.GetTemplate(BuildingType.ReqruitBarrack).Cost;
 
-        using (var scope = _factory.Services.CreateScope())
-        {
-            var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        await SeedTestWorld(cityId, barrackCost);
 
-            var faction = new Faction(FactionType.England, barrackCost, PlayerType.Human);
-            var cityPreset = new CityPreset(cityId, "London Test", CityType.Settlement, 1000, []);
-            var city = new City(cityPreset, faction.Type);
+        var response = await _client.GetAsync($"api/city/{cityId}/getConstructionOptions");
 
-            context.Cities.Add(city);
-            context.Factions.Add(faction);
+        Assert.NotNull(response);
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-            await context.SaveChangesAsync();
-        }
-
-        var responce = await _client.GetAsync($"api/city/{cityId}/getConstructionOptions");
-
-        Assert.NotNull(responce);
-        Assert.Equal(HttpStatusCode.OK, responce.StatusCode);
-
-        var catalog = await responce.Content.ReadFromJsonAsync<IEnumerable<ConstructionOptionDto>>();
+        var catalog = await response.Content.ReadFromJsonAsync<IEnumerable<CityCatalogOptionDto<BuildingType>>>();
 
         Assert.NotNull(catalog);
         Assert.NotEmpty(catalog);
@@ -248,7 +209,29 @@ public class WebIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
         var reqruitBarrack = catalog.FirstOrDefault(b => b.Type == BuildingType.ReqruitBarrack);
 
         Assert.NotNull(reqruitBarrack);
-        Assert.Equal(ConstructionOptionAvailability.Available, reqruitBarrack.Availability);
+        Assert.Equal(CityCatalogOptionAvailability.Available, reqruitBarrack.Availability);
+    }
+
+    [Fact]
+    public async Task GetRecruitOptions_ShouldReturnOk_AndValidCatalog()
+    {
+        var cityId = new CityId("test_london");
+        var unitCost = GameBalance.Units.GetTemplate(UnitType.EnglandSwordman).Cost;
+
+        await SeedTestWorld(cityId, unitCost);
+
+        var response = await _client.GetAsync($"api/city/{cityId}/getRecruitOptions");
+
+        Assert.NotNull(response);
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var catalog = await response.Content.ReadFromJsonAsync<IEnumerable<CityCatalogOptionDto<UnitType>>>();
+
+        Assert.NotNull(catalog);
+        Assert.Contains(catalog, dto => dto.Type == UnitType.EnglandSwordman);
+
+        var unit = catalog.First(u => u.Type == UnitType.EnglandSwordman);
+        Assert.Equal(CityCatalogOptionAvailability.Available, unit.Availability);
     }
 
     #endregion
@@ -258,15 +241,6 @@ public class WebIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
     private readonly HttpClient _client;
     private readonly SqliteConnection _sqliteConnection;
     private readonly WebApplicationFactory<Program> _factory;
-
-    public void Dispose()
-    {
-        _sqliteConnection.Close();
-        _sqliteConnection.Dispose();
-        _client.Dispose();
-
-        GC.SuppressFinalize(this);
-    }
 
     public WebIntegrationTests(WebApplicationFactory<Program> factory)
     {
@@ -293,6 +267,36 @@ public class WebIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
         using var scope = _factory.Services.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         dbContext.Database.EnsureCreated();
+    }
+
+    public void Dispose()
+    {
+        _sqliteConnection.Close();
+        _sqliteConnection.Dispose();
+        _client.Dispose();
+
+        GC.SuppressFinalize(this);
+    }
+
+    private async Task SeedTestWorld(CityId cityId, int? entityCost = 0, Building? buildingToRegister = null)
+    {
+        using var scope = _factory.Services.CreateScope();
+
+        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+        var faction = new Faction(FactionType.England, entityCost ?? 0, PlayerType.Human);
+        var cityPreset = new CityPreset(cityId, "London Test", CityType.Settlement, 1000, []);
+        var city = new City(cityPreset, faction.Type);
+
+        if (buildingToRegister != null)
+        {
+            city.RegisterBuilding(buildingToRegister);
+        }
+
+        context.Cities.Add(city);
+        context.Factions.Add(faction);
+
+        await context.SaveChangesAsync();
     }
 
     #endregion
