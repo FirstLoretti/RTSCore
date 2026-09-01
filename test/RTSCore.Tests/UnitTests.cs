@@ -85,11 +85,7 @@ public class UnitTests
 
     private static Unit CreateUnit()
     {
-        var unit = new Unit(
-            id: "england_swordman_1",
-            type: UnitType.EnglandSwordman,
-            faction: FactionType.England
-        );
+        var unit = new Unit("england_swordman_1", FactionType.England, Units.GetTemplate(UnitType.EnglandPeasant));
 
         return unit;
     }

@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 using RTSCore.Application.Cities.Commands;
 using RTSCore.Application.Cities.Queries;
-using RTSCore.Application.Units.Queries;
+using RTSCore.Application.Cities.Queries.Common;
 using RTSCore.Domain.ValueObjects;
 
 namespace RTSCore.WebApi.Controllers;
@@ -20,10 +20,24 @@ public class CityController(IMediator mediator) : ControllerBase
         return NoContent();
     }
 
+    [HttpPost("trainUnit")]
+    public async Task<IActionResult> TrainUnit(RecruitUnitCommand command)
+    {
+        await mediator.Send(command);
+        return NoContent();
+    }
+
     [HttpDelete("cancelBuildingConstruction_{buildingId}")]
     public async Task<IActionResult> CancelBuildingConstruction(string buildingId)
     {
         await mediator.Send(new CancelConstructBuildingCommand(buildingId));
+        return NoContent();
+    }
+
+    [HttpDelete("cancelUnitRecruiting_{unitId}")]
+    public async Task<IActionResult> CancelUnitRecruiting(string unitId)
+    {
+        await mediator.Send(new CancelRecruitUnitCommand(unitId));
         return NoContent();
     }
 

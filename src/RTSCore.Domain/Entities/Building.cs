@@ -42,7 +42,7 @@ public class Building
         TurnsToConstruct = turnsToConstruct;
     }
 
-    public static Building CreateWithCustomStatusForTests(
+    public static Building CreateWithCustomStatus(
         BuildingId id,
         BuildingType type,
         FactionType ownerFaction,

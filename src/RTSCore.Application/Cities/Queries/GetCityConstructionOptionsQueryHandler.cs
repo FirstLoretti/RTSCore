@@ -1,4 +1,4 @@
-using RTSCore.Application.Cities.Queries;
+using RTSCore.Application.Cities.Queries.Common;
 using RTSCore.Domain.Entities;
 using RTSCore.Domain.Entities.Rules;
 using RTSCore.Domain.Interfaces;
@@ -15,6 +15,6 @@ public class GetCityConstructionOptionsQueryHandler(
     {
         var isAlreadyBuilded = city.Buildings.Any(b => b.Type == template.Type && b.IsConstructed);
 
-        return !isAlreadyBuilded && BuildingRules.CanConstruct(template, city.Type, city.Buildings, out _);
+        return !isAlreadyBuilded && BuildingChainRules.CanConstruct(template, city.Type, city.Buildings, out _);
     }
 }

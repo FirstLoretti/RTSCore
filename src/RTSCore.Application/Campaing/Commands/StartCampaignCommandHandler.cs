@@ -21,7 +21,6 @@ public class StartCampaignCommanHandler(
 
         var factions = new List<Faction>();
         var cities = new List<City>();
-        var buildings = new List<Building>();
 
         foreach (var faction in factionPresets)
         {
@@ -33,18 +32,10 @@ public class StartCampaignCommanHandler(
             foreach (var city in faction.Cities)
             {
                 cities.Add(new City(city, faction.Type));
-
-                foreach (var building in city.Buildings)
-                {
-                    var buildingId = new BuildingId($"building_{city.Id}_{building.ToString().ToLower()}");
-
-                    buildings.Add(new Building(buildingId, building, faction.Type, city.Id));
-                }
             }
         }
 
         unitOfWork.FactionRepository.AddRange(factions);
-        unitOfWork.BuildingRepository.AddRange(buildings);
         unitOfWork.CityRepository.AddRange(cities);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);

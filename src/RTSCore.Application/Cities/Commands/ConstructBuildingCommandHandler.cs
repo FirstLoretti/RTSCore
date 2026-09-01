@@ -22,7 +22,7 @@ public class ConstructBuildingCommandHandler(
                 $"Поселения {request.CityId} нет на карте кампании"
             );
 
-        var player = await unitOfWork.FactionRepository.GetFactionAsync(city.OwnerFaction, cancellationToken)
+        var faction = await unitOfWork.FactionRepository.GetFactionAsync(city.OwnerFaction, cancellationToken)
             ?? throw new NotFoundException(
                 $"[{nameof(ConstructBuildingCommandHandler)}] " +
                 $"Поселение {city.Id} принадлежит {city.OwnerFaction}, " +
@@ -35,22 +35,25 @@ public class ConstructBuildingCommandHandler(
                 $"Шаблон здания для типа {request.BuildingType} не содержится в {nameof(GameBalance.Buildings)}"
             );
 
-        if (!BuildingRules.CanConstruct(template, city.Type, city.Buildings, out var lockReason))
+
+        if (faction.Gold < template.Cost)
+        {
+            throw new GameRuleException(
+                $"[{nameof(ConstructBuildingCommandHandler)}] Недостаточно средств"
+            );
+        }
+
+        if (!BuildingChainRules.CanConstruct(template, city.Type, city.Buildings, out var lockReason))
         {
             throw new GameRuleException(
                 $"[{nameof(ConstructBuildingCommandHandler)}] Нарушение цепочки строительства: {lockReason}"
             );
         }
 
-        player.SpendGold(template.Cost);
+        faction.SpendGold(template.Cost);
 
-        var buildingId = new BuildingId($"building_{city.Id}_{request.BuildingType.ToString().ToLower()}");
-        var building = new Building(
-            buildingId,
-            request.BuildingType,
-            city.OwnerFaction,
-            city.Id
-        );
+        var buildingId = new BuildingId($"building_{city.Id}_{request.BuildingType}");
+        var building = new Building(buildingId, request.BuildingType, city.OwnerFaction, city.Id);
 
         unitOfWork.BuildingRepository.Add(building);
 

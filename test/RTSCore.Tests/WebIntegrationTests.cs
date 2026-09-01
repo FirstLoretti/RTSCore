@@ -14,64 +14,13 @@ using RTSCore.Domain.Entities;
 using RTSCore.Domain.ValueObjects;
 using RTSCore.Domain.ValueObjects.Presets;
 using RTSCore.Infrastructure.Persistence;
-using RTSCore.WebApi.Dtos;
 using RTSCore.Domain.Services;
-using RTSCore.Application.Cities.Queries;
-
+using RTSCore.Application.Cities.Queries.Common;
 namespace RTSCore.Tests;
 
 public class WebIntegrationTests : IClassFixture<WebApplicationFactory<Program>>, IDisposable
 {
     #region UnitController
-
-    [Fact]
-    public async Task Create_ShouldHandleInvalidDto_AndReturnBadRequestResponse()
-    {
-        var invalidDto = new UnitCreateDto("", (UnitType)999, (FactionType)999);
-
-        var response = await _client.PostAsJsonAsync("api/unit", invalidDto);
-
-        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-
-        var problemDetails = await response.Content.ReadFromJsonAsync<ValidationProblemDetails>();
-
-        Assert.NotNull(problemDetails);
-
-        Assert.Equal("Ошибка валидации данных", problemDetails.Title);
-        Assert.True(problemDetails.Errors.ContainsKey("Id"));
-        Assert.True(problemDetails.Errors.ContainsKey("Type"));
-        Assert.True(problemDetails.Errors.ContainsKey("Faction"));
-    }
-
-    [Fact]
-    public async Task Get_ShouldHandleInvalidDto_AndReturnNotFoundResponse()
-    {
-        var response = await _client.GetAsync($"api/unit/{999}");
-
-        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
-
-        var problemDetails = await response.Content.ReadFromJsonAsync<ProblemDetails>();
-
-        Assert.NotNull(problemDetails);
-        Assert.Equal("Сущность не найдена", problemDetails.Title);
-    }
-
-    [Fact]
-    public async Task AddExperience_ShouldHandleInvalidDto_AndReturnBadRequest()
-    {
-        var dto = new ExperienceAddDto(int.MaxValue);
-
-        var response = await _client.PostAsJsonAsync($"api/unit/{"test"}/experience", dto);
-
-        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-
-        var problemDetails = await response.Content.ReadFromJsonAsync<ValidationProblemDetails>();
-
-        Assert.NotNull(problemDetails);
-
-        Assert.Equal("Ошибка валидации данных", problemDetails.Title);
-        Assert.True(problemDetails.Errors.ContainsKey("Amount"));
-    }
 
     [Fact]
     public async Task Delete_ShouldReturn422_WhenUnitInvulnerable()
@@ -80,7 +29,7 @@ public class WebIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
 
         using (var scope = _factory.Services.CreateScope())
         {
-            var unit = new Unit(unitId, UnitType.Invulnerable, FactionType.England);
+            var unit = new Unit(unitId, FactionType.England, GameBalance.Units.GetTemplate(UnitType.Invulnerable));
             var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
             context.Add(unit);
@@ -144,7 +93,7 @@ public class WebIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
         var cityId = new CityId("test_london");
         var barrackCost = GameBalance.Buildings.GetTemplate(BuildingType.ReqruitBarrack).Cost;
 
-        await SeedTestWorld(cityId, barrackCost);
+        using var scope = await SeedTestWorldAsync(cityId, barrackCost);
 
         var command = new ConstructBuildingCommand(cityId, BuildingType.ReqruitBarrack);
 
@@ -154,9 +103,30 @@ public class WebIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
     }
 
     [Fact]
-    public async Task ConstructBuilding_WithInvalidCommand_ShouldReturnBadRequest()
+    public async Task TrainUnit_WithValidCommand_ShouldReturnNoContent()
     {
-        var command = new ConstructBuildingCommand("", BuildingType.None);
+        var cityId = new CityId("test_london");
+        var unitType = UnitType.EnglandPeasant;
+        var unitCost = GameBalance.Units.GetTemplate(unitType).Cost;
+        var ownerFaction = FactionType.England;
+        var building = Building.CreateWithCustomStatus(
+            "test_barrack", BuildingType.ReqruitBarrack, ownerFaction, cityId,
+            isConstructed: true, turnsToConstruct: 0
+        );
+
+        using var scope = await SeedTestWorldAsync(cityId, unitCost, building);
+
+        var command = new RecruitUnitCommand(cityId, unitType, ownerFaction);
+
+        var response = await _client.PostAsJsonAsync("api/city/trainUnit", command);
+
+        Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task ConstructBuilding_WithInvalidCityId_ShouldReturnBadRequest()
+    {
+        var command = new ConstructBuildingCommand("x", BuildingType.None);
 
         var response = await _client.PostAsJsonAsync("api/city/constructBuilding", command);
 
@@ -165,8 +135,12 @@ public class WebIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
         var problemDetails = await response.Content.ReadFromJsonAsync<ValidationProblemDetails>();
 
         Assert.NotNull(problemDetails);
-        Assert.True(problemDetails.Errors.ContainsKey("CityId"));
-        Assert.True(problemDetails.Errors.ContainsKey("BuildingType"));
+        Assert.True(
+            problemDetails.Errors.Keys.Any(k => k.Contains("CityId")), "Ключ с ошибкой CityId не найден"
+        );
+        Assert.True(
+            problemDetails.Errors.Keys.Any(k => k.Contains("BuildingType")), "Ключ с ошибкой BuildingType не найден"
+        );
     }
 
     [Fact]
@@ -175,17 +149,49 @@ public class WebIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
         var buildingId = new BuildingId("test_building");
         var cityId = new CityId("test_london");
 
-        var building = Building.CreateWithCustomStatusForTests(
+        var building = Building.CreateWithCustomStatus(
             buildingId, BuildingType.ReqruitBarrack, FactionType.England, "test_london",
             isConstructed: false,
             turnsToConstruct: 2
         );
 
-        await SeedTestWorld(cityId, buildingToRegister: building);
+        using var scope = await SeedTestWorldAsync(cityId, buildingToRegister: building);
 
         var response = await _client.DeleteAsync($"api/city/cancelBuildingConstruction_{buildingId}");
 
         Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task CancelUnitTraining_ShouldReturnNoContent()
+    {
+        var unitCost = 1000;
+        var buildingType = BuildingType.ReqruitBarrack;
+        var ownerFaction = FactionType.England;
+        var unitId = new UnitId("test_unit");
+        var cityId = "test_city";
+        var building = Building.CreateWithCustomStatus(
+            "test_building", buildingType, ownerFaction, cityId,
+            isConstructed: true, turnsToConstruct: 0
+        );
+
+        using var scope = await SeedTestWorldAsync(cityId, unitCost, buildingToRegister: building);
+
+        var template = new UnitTemplate(
+            UnitType.EnglandPeasant, "Test Peasant", unitCost, 1, 1, 1, 1, 1, 1, 1,
+            TurnsToRecruit: 1, RequiredBuilding: buildingType);
+        var unit = Unit.CreateWithCustomStatus(
+            unitId, ownerFaction, template,
+            turnsToRecruit: 1, currentCityId: cityId
+        );
+
+        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        context.Units.Add(unit);
+        await context.SaveChangesAsync();
+
+        var responce = await _client.DeleteAsync($"api/city/cancelUnitRecruiting_{unitId}");
+
+        Assert.Equal(HttpStatusCode.NoContent, responce.StatusCode);
     }
 
     [Fact]
@@ -194,7 +200,7 @@ public class WebIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
         var cityId = new CityId("london_test");
         var barrackCost = GameBalance.Buildings.GetTemplate(BuildingType.ReqruitBarrack).Cost;
 
-        await SeedTestWorld(cityId, barrackCost);
+        using var scope = await SeedTestWorldAsync(cityId, barrackCost);
 
         var response = await _client.GetAsync($"api/city/{cityId}/getConstructionOptions");
 
@@ -216,9 +222,14 @@ public class WebIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
     public async Task GetRecruitOptions_ShouldReturnOk_AndValidCatalog()
     {
         var cityId = new CityId("test_london");
-        var unitCost = GameBalance.Units.GetTemplate(UnitType.EnglandSwordman).Cost;
+        var unitCost = GameBalance.Units.GetTemplate(UnitType.EnglandPeasant).Cost;
+        var building = Building.CreateWithCustomStatus(
+            "test_building", BuildingType.ReqruitBarrack, FactionType.England, cityId,
+            isConstructed: true,
+            turnsToConstruct: 0
+        );
 
-        await SeedTestWorld(cityId, unitCost);
+        using var scope = await SeedTestWorldAsync(cityId, unitCost, building);
 
         var response = await _client.GetAsync($"api/city/{cityId}/getRecruitOptions");
 
@@ -228,15 +239,15 @@ public class WebIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
         var catalog = await response.Content.ReadFromJsonAsync<IEnumerable<CityCatalogOptionDto<UnitType>>>();
 
         Assert.NotNull(catalog);
-        Assert.Contains(catalog, dto => dto.Type == UnitType.EnglandSwordman);
+        Assert.Contains(catalog, dto => dto.Type == UnitType.EnglandPeasant);
 
-        var unit = catalog.First(u => u.Type == UnitType.EnglandSwordman);
+        var unit = catalog.First(u => u.Type == UnitType.EnglandPeasant);
         Assert.Equal(CityCatalogOptionAvailability.Available, unit.Availability);
     }
 
     #endregion
 
-    #region Shared
+    #region Common
 
     private readonly HttpClient _client;
     private readonly SqliteConnection _sqliteConnection;
@@ -278,10 +289,9 @@ public class WebIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
         GC.SuppressFinalize(this);
     }
 
-    private async Task SeedTestWorld(CityId cityId, int? entityCost = 0, Building? buildingToRegister = null)
+    private async Task<IServiceScope> SeedTestWorldAsync(CityId cityId, int? entityCost = 0, Building? buildingToRegister = null)
     {
-        using var scope = _factory.Services.CreateScope();
-
+        var scope = _factory.Services.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
         var faction = new Faction(FactionType.England, entityCost ?? 0, PlayerType.Human);
@@ -297,6 +307,8 @@ public class WebIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
         context.Factions.Add(faction);
 
         await context.SaveChangesAsync();
+
+        return scope;
     }
 
     #endregion

@@ -21,9 +21,19 @@ public class City
         Type = cityPreset.Type;
         OwnerFaction = ownerFaction;
         Population = cityPreset.CurrentPopulation;
+
+        foreach (var buildingType in cityPreset.BuildingTypes)
+        {
+            var buildingId = new BuildingId($"building_{Id}_{buildingType}");
+
+            _buildings.Add(Building.CreateWithCustomStatus(
+                buildingId, buildingType, ownerFaction, cityPreset.Id,
+                isConstructed: true, turnsToConstruct: 0
+            ));
+        }
     }
 
-    protected City() { }
+    private City() { }
 
     public void GrowPopulation(float growthRate)
     {

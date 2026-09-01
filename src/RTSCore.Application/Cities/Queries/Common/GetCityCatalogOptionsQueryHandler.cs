@@ -4,7 +4,7 @@ using RTSCore.Domain.Entities;
 using RTSCore.Domain.Exeptions;
 using RTSCore.Domain.Interfaces;
 
-namespace RTSCore.Application.Cities.Queries;
+namespace RTSCore.Application.Cities.Queries.Common;
 
 public abstract class GetCityCatalogOptionsQueryHandler<Query, T, Template>(
     IUnitOfWork unitOfWork,

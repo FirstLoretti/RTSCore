@@ -20,25 +20,28 @@ public partial class GameBalance
             Dictionary<UnitType, UnitTemplate> temporary = new()
             {
                 {
-                    UnitType.EnglandSwordman,
+                    UnitType.EnglandPeasant,
                     new UnitTemplate(
-                        Type: UnitType.EnglandSwordman,
-                        DisplayName: "England Swordman",
-                        Cost: 250,
+                        Type: UnitType.EnglandPeasant,
+                        DisplayName: "Peasant",
+                        Cost: 150,
                         MaxHealth: 100,
                         Damage: 25,
                         Armor: 2,
                         Speed: 5,
                         ExpKillReward: 50,
                         HealthGrowthRate: 1.1f,
-                        DamageGrowthRate: 1.15f)
+                        DamageGrowthRate: 1.15f,
+                        TurnsToRecruit: 1,
+                        RequiredBuilding: BuildingType.ReqruitBarrack
+                    )
                 },
 
                 {
-                    UnitType.FranceSwordman,
+                    UnitType.EnglandMilitia,
                     new UnitTemplate(
-                        Type: UnitType.FranceSwordman,
-                        DisplayName: "France Swordman",
+                        Type: UnitType.EnglandMilitia,
+                        DisplayName: "Militia",
                         Cost: 250,
                         MaxHealth: 115,
                         Damage: 20,
@@ -46,7 +49,10 @@ public partial class GameBalance
                         Speed: 5,
                         ExpKillReward: 50,
                         HealthGrowthRate: 1.15f,
-                        DamageGrowthRate: 1.10f)
+                        DamageGrowthRate: 1.10f,
+                        TurnsToRecruit: 2,
+                        RequiredBuilding: BuildingType.MilitiaBarrack
+                    )
                 },
 
                 {
@@ -61,7 +67,9 @@ public partial class GameBalance
                         Speed: 1,
                         ExpKillReward: 1,
                         HealthGrowthRate: 1f,
-                        DamageGrowthRate: 1f)
+                        DamageGrowthRate: 1f,
+                        TurnsToRecruit: 1
+                    )
                 }
             };
 

@@ -1,9 +1,9 @@
 using MediatR;
 
-using RTSCore.Application.Cities.Queries;
+using RTSCore.Application.Cities.Queries.Common;
 using RTSCore.Domain.ValueObjects;
 
-namespace RTSCore.Application.Units.Queries;
+namespace RTSCore.Application.Cities.Queries;
 
 public record GetCityRecruitOptionsQuery(CityId CityId)
     : IRequest<IReadOnlyCollection<CityCatalogOptionDto<UnitType>>>, ICityQuery;

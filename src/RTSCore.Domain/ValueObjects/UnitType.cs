@@ -4,6 +4,6 @@ public enum UnitType
 {
     None = 0,
     Invulnerable,
-    EnglandSwordman,
-    FranceSwordman,
+    EnglandPeasant,
+    EnglandMilitia,
 }

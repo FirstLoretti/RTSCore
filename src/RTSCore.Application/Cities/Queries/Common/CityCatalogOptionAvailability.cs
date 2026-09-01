@@ -1,4 +1,4 @@
-namespace RTSCore.Application.Cities.Queries;
+namespace RTSCore.Application.Cities.Queries.Common;
 
 public enum CityCatalogOptionAvailability
 {

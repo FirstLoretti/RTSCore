@@ -1,6 +1,6 @@
 using RTSCore.Domain.ValueObjects;
 
-namespace RTSCore.Application.Cities.Queries;
+namespace RTSCore.Application.Cities.Queries.Common;
 
 public interface ICityQuery
 {

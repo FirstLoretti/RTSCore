@@ -27,6 +27,6 @@ public class UnitConfigurations : IEntityTypeConfiguration<Unit>
             .HasConversion(cityIdConverter)
             .IsRequired(false);
         builder.Property(u => u.Type).HasConversion<string>();
-        builder.Property(u => u.Faction).HasConversion<string>();
+        builder.Property(u => u.OwnerFaction).HasConversion<string>();
     }
 }

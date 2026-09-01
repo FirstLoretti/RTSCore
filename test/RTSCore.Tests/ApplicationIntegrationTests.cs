@@ -7,8 +7,6 @@ using Microsoft.Extensions.DependencyInjection;
 using RTSCore.Application.Cities.Commands;
 using RTSCore.Application.Campaing.Commands;
 using RTSCore.Application.Common.Behaviors;
-using RTSCore.Application.Units.Commands;
-using RTSCore.Application.Units.Queries;
 using RTSCore.Domain.Entities;
 using RTSCore.Domain.Exeptions;
 using RTSCore.Domain.Interfaces;
@@ -19,72 +17,12 @@ using RTSCore.Infrastructure.Persistence;
 using Unit = RTSCore.Domain.Entities.Unit;
 using RTSCore.Domain.Services;
 using RTSCore.Application.Cities.Queries;
-using RTSCore.Application.Cities.Queries;
+using RTSCore.Application.Cities.Queries.Common;
 
 namespace RTSCore.Tests;
 
 public class ApplicationIntegrationTests
 {
-    #region UnitCommands
-
-    [Fact]
-    public async Task Mediator_ShouldRouteCreateAndGetUnitCommandToHandlers()
-    {
-        var (dbName, serviceProvider) = Arrange();
-
-        UnitId dbUnitId;
-        using (var scope = serviceProvider.CreateScope())
-        {
-            var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
-            var command = new CreateUnitCommand("unit", UnitType.EnglandSwordman, FactionType.England);
-
-            dbUnitId = await mediator.Send(command);
-        }
-
-        Unit? dbUnit;
-        using (var scope = serviceProvider.CreateScope())
-        {
-            var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
-            var request = new GetUnitQuery(dbUnitId);
-
-            dbUnit = await mediator.Send(request);
-        }
-
-        DeleteDatabase(dbName);
-
-        Assert.NotNull(dbUnit);
-        Assert.Equal(dbUnitId, dbUnit.Id);
-    }
-
-    [Fact]
-    public async Task Mediator_ShouldRouteAddExperienceCommandToHandler_AndChageLvlAndExp()
-    {
-        var (dbName, serviceProvider) = Arrange();
-
-        UnitId dbUnitId;
-        using (var scope = serviceProvider.CreateScope())
-        {
-            var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
-            var command = new CreateUnitCommand("unit", UnitType.EnglandSwordman, FactionType.England);
-            dbUnitId = await mediator.Send(command);
-        }
-
-        int finalLevel, finalExperience;
-        using (var scope = serviceProvider.CreateScope())
-        {
-            var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
-            var command = new AddExperienceCommand(dbUnitId, int.MaxValue);
-            (finalLevel, finalExperience) = await mediator.Send(command);
-        }
-
-        DeleteDatabase(dbName);
-
-        Assert.True(finalLevel > 1);
-        Assert.True(finalExperience > 0);
-    }
-
-    #endregion
-
     #region CampaingCommands
 
     [Theory]
@@ -96,7 +34,7 @@ public class ApplicationIntegrationTests
         PlayerType francePlayerType
     )
     {
-        var (dbName, serviceProvider) = Arrange(services =>
+        var (dbName, serviceProvider) = SetupTestInvironment(services =>
         {
             var factionPresets = new FactionPreset[]
             {
@@ -155,7 +93,7 @@ public class ApplicationIntegrationTests
     [Fact]
     public async Task Mediator_EndTurn_ShouldAdvanceConstruction_CollectTaxes_IncreasePopulation_CollectBuildingIncome()
     {
-        var (dbName, serviceProvider) = Arrange();
+        var (dbName, serviceProvider) = SetupTestInvironment();
 
         var barrackId = new BuildingId("test_barrack");
         var cityId = new CityId("test_london");
@@ -169,19 +107,19 @@ public class ApplicationIntegrationTests
             var cityPreset = new CityPreset(cityId, "Test_London", CityType.Settlement, startingPopulation, []);
             var city = new City(cityPreset, factionType);
 
-            var barrack = Building.CreateWithCustomStatusForTests(
+            var barrack = Building.CreateWithCustomStatus(
                 barrackId, BuildingType.ReqruitBarrack, factionType, city.Id,
                 isConstructed: false,
                 turnsToConstruct: 1
             );
 
-            var field = Building.CreateWithCustomStatusForTests(
+            var field = Building.CreateWithCustomStatus(
                 "test_field", BuildingType.CultivatedField, factionType, city.Id,
                 isConstructed: true,
                 turnsToConstruct: 0
             );
 
-            var market = Building.CreateWithCustomStatusForTests(
+            var market = Building.CreateWithCustomStatus(
                 "test_market", BuildingType.Market, factionType, cityId,
                 isConstructed: true,
                 turnsToConstruct: 0
@@ -267,7 +205,7 @@ public class ApplicationIntegrationTests
     {
         var mockTemplates = CreateMockTemplates();
 
-        var (dbName, serviceProvider) = Arrange(services =>
+        var (dbName, serviceProvider) = SetupTestInvironment(services =>
             services.AddSingleton<IReadOnlyCollection<BuildingTemplate>>(mockTemplates));
 
         var targetTemplate = mockTemplates.First(t => t.Type == buildingToConstruct);
@@ -275,7 +213,7 @@ public class ApplicationIntegrationTests
         var cityId = new CityId("test_london");
         var factionType = FactionType.England;
 
-        await SeedCampaingInitialStateAsync(serviceProvider, cityId, cityType, factionType, factionGold, setupPreviousTier);
+        await SeedTestWorldAsync(serviceProvider, cityId, cityType, factionType, factionGold, setupPreviousTier);
 
         using (var scope = serviceProvider.CreateScope())
         {
@@ -322,6 +260,90 @@ public class ApplicationIntegrationTests
     [Theory]
     [InlineData(false, true)]
     [InlineData(true, false)]
+    public async Task Mediator_CancelTrain_ShouldHandleRulesCorrectly(bool isTrained, bool shouldSucceed)
+    {
+        var cityId = new CityId("test_london");
+        var cityType = CityType.Village;
+        var ownerFaction = FactionType.England;
+        var initialGold = 1000;
+        var unitId = new UnitId("test_unit");
+
+        var unitTemplates = new UnitTemplate[]
+        {
+            new(
+                UnitType.EnglandPeasant, "Test Peasant", 1000, 1, 1, 1, 1, 1, 1, 1,
+                TurnsToRecruit: isTrained ? 0 : 1, RequiredBuilding: BuildingType.ReqruitBarrack
+            )
+        };
+
+        var (dbName, serviceProvider) = SetupTestInvironment(service =>
+            service.AddSingleton<IReadOnlyCollection<UnitTemplate>>(unitTemplates)
+        );
+
+        using (var scope = serviceProvider.CreateScope())
+        {
+            var faction = new Faction(ownerFaction, initialGold, PlayerType.Human);
+            var cityPreset = new CityPreset(cityId, "Test London", cityType, 1, [BuildingType.ReqruitBarrack]);
+            var city = new City(cityPreset, ownerFaction);
+            var unit = Unit.CreateWithCustomStatus(
+                unitId, ownerFaction, unitTemplates[0],
+                turnsToRecruit: unitTemplates[0].TurnsToRecruit, currentCityId: cityId
+            );
+
+            var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+            context.Factions.Add(faction);
+            context.Cities.Add(city);
+            context.Units.Add(unit);
+
+            await context.SaveChangesAsync();
+        }
+
+        using (var scope = serviceProvider.CreateScope())
+        {
+            var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+            var command = new CancelRecruitUnitCommand(unitId);
+
+            if (shouldSucceed)
+            {
+                await mediator.Send(command);
+            }
+            else
+            {
+                await Assert.ThrowsAsync<GameRuleException>(async () => await mediator.Send(command));
+            }
+        }
+
+        Unit? dbUnit;
+        Faction? dbFaction;
+
+        using (var scope = serviceProvider.CreateScope())
+        {
+            var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+            dbFaction = await context.Factions.FirstOrDefaultAsync();
+            dbUnit = await context.Units.FirstOrDefaultAsync();
+        }
+
+        DeleteDatabase(dbName);
+
+        Assert.NotNull(dbFaction);
+        if (shouldSucceed)
+        {
+            Assert.Null(dbUnit);
+            Assert.Equal(initialGold + unitTemplates[0].Cost, dbFaction.Gold);
+        }
+        else
+        {
+            Assert.NotNull(dbUnit);
+            Assert.True(dbUnit.IsRecruited);
+            Assert.Equal(initialGold, dbFaction.Gold);
+        }
+    }
+
+    [Theory]
+    [InlineData(false, true)]
+    [InlineData(true, false)]
     public async Task Mediator_CancelConstruction_ShouldHandleRulesCorrectly(bool isConstructed, bool shouldSucceed)
     {
         var buildingId = new BuildingId("test_building");
@@ -331,7 +353,7 @@ public class ApplicationIntegrationTests
 
         var mockTemplates = CreateMockTemplates();
         var buildingTemplate = mockTemplates.First();
-        var building = Building.CreateWithCustomStatusForTests(
+        var building = Building.CreateWithCustomStatus(
             buildingId,
             buildingTemplate.Type,
             factionType,
@@ -340,20 +362,15 @@ public class ApplicationIntegrationTests
             turnsToConstruct: isConstructed ? 0 : 1
         );
 
-        var (dbName, serviceProvider) = Arrange(services =>
+        var (dbName, serviceProvider) = SetupTestInvironment(services =>
             services.AddSingleton<IReadOnlyCollection<BuildingTemplate>>(mockTemplates));
 
         var dbGold = factionGold - buildingTemplate.Cost;
 
-        await SeedCampaingInitialStateAsync(
-            serviceProvider,
-            cityId,
-            CityType.Settlement,
-            factionType,
-            dbGold,
+        await SeedTestWorldAsync(serviceProvider, cityId, CityType.Settlement, factionType, dbGold,
             setupPreviousTier: false,
             previousBuildingType: default,
-            buildingInCity: building
+            registerBuilding: building
         );
 
         using (var scope = serviceProvider.CreateScope())
@@ -416,14 +433,14 @@ public class ApplicationIntegrationTests
     )
     {
         var mockTemplates = CreateMockTemplates();
-        var (dbName, serviceProvider) = Arrange(services =>
+        var (dbName, serviceProvider) = SetupTestInvironment(services =>
             services.AddSingleton<IReadOnlyCollection<BuildingTemplate>>(mockTemplates)
         );
 
         var cityId = new CityId("Test London");
         var factionType = FactionType.England;
 
-        await SeedCampaingInitialStateAsync(serviceProvider, cityId, cityType, factionType, factionGold, setupPreviousTier);
+        await SeedTestWorldAsync(serviceProvider, cityId, cityType, factionType, factionGold, setupPreviousTier);
 
         IEnumerable<CityCatalogOptionDto<BuildingType>> catalog;
 
@@ -479,20 +496,20 @@ public class ApplicationIntegrationTests
         var unitTemplates = new UnitTemplate[]
         {
             new(
-                UnitType.EnglandSwordman, "Test Unit", templateCost, 1,1,1,1,1,1,1,
-                RequiredBuildingForRecruitment: BuildingType.ReqruitBarrack
+                UnitType.EnglandPeasant, "Test Unit", templateCost, 1,1,1,1,1,1,1,1,
+                RequiredBuilding: BuildingType.ReqruitBarrack
             )
         };
-        var barrack = Building.CreateWithCustomStatusForTests(
+        var barrack = Building.CreateWithCustomStatus(
             "test_reqruit_barrack", BuildingType.ReqruitBarrack, factionType, cityId, isBarrackConstructed,
             turnsToConstruct: isBarrackConstructed ? 0 : 1
         );
 
-        var (dbName, serviceProvider) = Arrange(services =>
+        var (dbName, serviceProvider) = SetupTestInvironment(services =>
             services.AddSingleton<IReadOnlyCollection<UnitTemplate>>(unitTemplates)
         );
 
-        await SeedCampaingInitialStateAsync(
+        await SeedTestWorldAsync(
             serviceProvider, cityId, CityType.Village, factionType, startingGold, false, default, barrack
         );
 
@@ -506,7 +523,7 @@ public class ApplicationIntegrationTests
 
         DeleteDatabase(dbName);
 
-        var unitOption = catalog.FirstOrDefault(u => u.Type == UnitType.EnglandSwordman);
+        var unitOption = catalog.FirstOrDefault(u => u.Type == UnitType.EnglandPeasant);
 
         if (shouldBeInCatalog)
         {
@@ -519,15 +536,110 @@ public class ApplicationIntegrationTests
         }
     }
 
+    [Theory]
+    [InlineData(true, 1000, true)]
+    [InlineData(false, 1000, false)]
+    [InlineData(true, 0, false)]
+    public async Task Mediator_CreateUnit_ChouldHandleRulesCorrectly(
+        bool isBarrackConstructed, int initialGold, bool shouldSucceed)
+    {
+        var cityId = new CityId("test_london");
+        var ownerFaction = FactionType.England;
+        var cityType = CityType.Village;
+        var buildingType = BuildingType.ReqruitBarrack;
+        var unitType = UnitType.EnglandPeasant;
+
+        var unitTemplates = new UnitTemplate[]
+        {
+            new(
+                unitType, "Test Peasant", 1000, 1, 1, 1, 1, 1, 1, 1, 1,
+                RequiredBuilding: BuildingType.ReqruitBarrack
+            )
+        };
+
+        var buildingTemplates = new BuildingTemplate[]
+        {
+            new(
+                buildingType, "Test Barrack", 1000, 1, [cityType]
+            )
+        };
+
+        var (dbName, serviceProvider) = SetupTestInvironment(services =>
+        {
+            services.AddSingleton<IReadOnlyCollection<UnitTemplate>>(unitTemplates);
+            services.AddSingleton<IReadOnlyCollection<BuildingTemplate>>(buildingTemplates);
+        });
+
+        using (var scope = serviceProvider.CreateScope())
+        {
+            var faction = new Faction(FactionType.England, initialGold, PlayerType.Human);
+            var cityPreset = new CityPreset(cityId, "Test London", cityType, 1, []);
+            var city = new City(cityPreset, ownerFaction);
+            var barrack = Building.CreateWithCustomStatus(
+                "test_barrack", buildingType, ownerFaction, cityId,
+                isConstructed: isBarrackConstructed,
+                turnsToConstruct: isBarrackConstructed ? 0 : 1
+            );
+
+            city.RegisterBuilding(barrack);
+
+            var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+            context.Factions.Add(faction);
+            context.Cities.Add(city);
+
+            await context.SaveChangesAsync();
+        }
+
+        var command = new RecruitUnitCommand(cityId, unitType, ownerFaction);
+
+        using (var scope = serviceProvider.CreateScope())
+        {
+            var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+
+            if (shouldSucceed)
+            {
+                await mediator.Send(command);
+            }
+            else
+            {
+                await Assert.ThrowsAsync<GameRuleException>(async () => await mediator.Send(command));
+            }
+        }
+
+        Faction dbFaction;
+        Unit? dbUnit;
+
+        using (var scope = serviceProvider.CreateScope())
+        {
+            var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+            dbFaction = await context.Factions.FirstAsync(f => f.Type == ownerFaction);
+            dbUnit = await context.Units.FirstOrDefaultAsync(u => u.Type == unitType);
+        }
+
+        DeleteDatabase(dbName);
+
+        if (shouldSucceed)
+        {
+            Assert.NotNull(dbUnit);
+            Assert.Equal(cityId, dbUnit.CurrentCityId);
+            Assert.Equal(initialGold - unitTemplates.First().Cost, dbFaction.Gold);
+        }
+        else
+        {
+            Assert.Null(dbUnit);
+            Assert.Equal(initialGold, dbFaction.Gold);
+        }
+    }
+
     #endregion
 
-    #region Shared
+    #region Common
 
-    private static (string, ServiceProvider) Arrange(Action<IServiceCollection>? configure = null)
+    private static (string, ServiceProvider) SetupTestInvironment(Action<IServiceCollection>? configure = null)
     {
         string dbName = $"app_test_{Guid.NewGuid():N}.db";
-
-        File.Delete(dbName);
 
         var services = new ServiceCollection();
 
@@ -544,7 +656,7 @@ public class ApplicationIntegrationTests
 
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(LoggingBehavior<,>));
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(
-            typeof(CreateUnitCommand).Assembly
+            typeof(RecruitUnitCommand).Assembly
         ));
 
         configure?.Invoke(services);
@@ -582,7 +694,7 @@ public class ApplicationIntegrationTests
         return mockTemplates;
     }
 
-    private static async Task SeedCampaingInitialStateAsync(
+    private static async Task SeedTestWorldAsync(
         IServiceProvider serviceProvider,
         CityId cityId,
         CityType cityType,
@@ -590,7 +702,7 @@ public class ApplicationIntegrationTests
         int factionGold,
         bool setupPreviousTier,
         BuildingType previousBuildingType = BuildingType.ReqruitBarrack,
-        Building? buildingInCity = null
+        Building? registerBuilding = null
     )
     {
         using var scope = serviceProvider.CreateScope();
@@ -602,7 +714,7 @@ public class ApplicationIntegrationTests
 
         if (setupPreviousTier)
         {
-            var previousBuilding = Building.CreateWithCustomStatusForTests(
+            var previousBuilding = Building.CreateWithCustomStatus(
                 id: $"building_{cityId.Value}_{previousBuildingType.ToString().ToLower()}",
                 type: previousBuildingType,
                 ownerFaction: factionType,
@@ -613,9 +725,9 @@ public class ApplicationIntegrationTests
 
             city.RegisterBuilding(previousBuilding);
         }
-        if (buildingInCity != null)
+        if (registerBuilding != null)
         {
-            city.RegisterBuilding(buildingInCity);
+            city.RegisterBuilding(registerBuilding);
         }
 
         context.Factions.Add(faction);

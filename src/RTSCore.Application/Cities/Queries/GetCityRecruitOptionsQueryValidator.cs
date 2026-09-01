@@ -1,6 +1,6 @@
 using FluentValidation;
 
-namespace RTSCore.Application.Units.Queries;
+namespace RTSCore.Application.Cities.Queries;
 
 public class GetCityRecruitOptionsQueryValidator : AbstractValidator<GetCityRecruitOptionsQuery>
 {

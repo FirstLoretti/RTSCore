@@ -2,7 +2,7 @@ using RTSCore.Domain.ValueObjects;
 
 namespace RTSCore.Domain.Entities.Rules;
 
-public static class BuildingRules
+public static class BuildingChainRules
 {
     public static bool CanConstruct(
         BuildingTemplate template,
@@ -29,10 +29,7 @@ public static class BuildingRules
 
             if (!hasPreviousTier)
             {
-                lockReason =
-                    $"Нельзя построить {template.DisplayName}. " +
-                    $"Сначала постройте {requiredType}";
-
+                lockReason = $"Нельзя построить {template.DisplayName}. Сначала постройте {requiredType}";
                 return false;
             }
         }

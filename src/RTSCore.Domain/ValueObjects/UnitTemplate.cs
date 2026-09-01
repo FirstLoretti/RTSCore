@@ -13,5 +13,6 @@ public record UnitTemplate(
     int ExpKillReward,
     float HealthGrowthRate,
     float DamageGrowthRate,
-    BuildingType? RequiredBuildingForRecruitment = null
+    int TurnsToRecruit,
+    BuildingType? RequiredBuilding = null
 ) : ICatalogOption<UnitType>;
