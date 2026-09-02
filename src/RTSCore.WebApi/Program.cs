@@ -3,7 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using RTSCore.Application.Common.Behaviors;
 using RTSCore.Domain.Interfaces;
 using RTSCore.Infrastructure.Persistence;
-using RTSCore.Application.Units.Commands;
 
 using Scalar.AspNetCore;
 
@@ -12,6 +11,7 @@ using RTSCore.WebApi.Common;
 using RTSCore.Domain.ValueObjects.Presets;
 
 using RTSCore.Domain.Services;
+using RTSCore.Application.Campaing.Commands;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -40,10 +40,10 @@ builder.Services.AddMediatR(cfg =>
 
     cfg.AddOpenBehavior(typeof(ValidatorBehavior<,>));
 
-    cfg.RegisterServicesFromAssembly(typeof(AddExperienceCommand).Assembly);
+    cfg.RegisterServicesFromAssembly(typeof(StartCampaignCommand).Assembly);
 });
 
-builder.Services.AddValidatorsFromAssembly(typeof(AddExperienceCommand).Assembly);
+builder.Services.AddValidatorsFromAssembly(typeof(StartCampaignCommand).Assembly);
 
 builder.Services.AddOpenApi();
 
