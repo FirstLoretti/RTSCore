@@ -18,11 +18,84 @@ using Unit = RTSCore.Domain.Entities.Unit;
 using RTSCore.Domain.Services;
 using RTSCore.Application.Cities.Queries;
 using RTSCore.Application.Cities.Queries.Common;
+using RTSCore.Application.Units.Commands;
 
 namespace RTSCore.Tests;
 
 public class ApplicationIntegrationTests
 {
+    #region UnitCommands
+
+    [Theory]
+    [InlineData(UnitType.EnglandPeasant, 0, true)]
+    [InlineData(UnitType.EnglandPeasant, 1, false)]
+    [InlineData(UnitType.Invulnerable, 0, false)]
+    public async Task Mediator_DisbandUnit_ShouldHandleRulesCorrectly(
+        UnitType unitType,
+        int turnsToRecruit,
+        bool shouldSucceed
+    )
+    {
+        var unitId = new UnitId("test_unit");
+
+        var templates = new UnitTemplate[]
+        {
+            new (UnitType.EnglandPeasant, "Test Peasant", 1, 1, 1, 1, 1, 1, 1, 1, 1),
+            new (UnitType.Invulnerable, "Test Invulnerable", 1, 1, 1, 1, 1, 1, 1, 1, 1)
+        };
+
+        var (dbName, serviceProvider) = SetupTestInvironment(service =>
+            service.AddSingleton<IReadOnlyCollection<UnitTemplate>>(templates));
+
+        using (var scope = serviceProvider.CreateScope())
+        {
+            var unit = Unit.CreateWithCustomStatus(
+                 unitId, FactionType.England, templates.First(u => u.Type == unitType), turnsToRecruit
+            );
+            var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+            context.Units.Add(unit);
+            await context.SaveChangesAsync();
+        }
+
+        var command = new DisbandUnitCommand(unitId);
+
+        using (var scope = serviceProvider.CreateScope())
+        {
+            var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+
+            if (shouldSucceed)
+            {
+                await mediator.Send(command);
+            }
+            else
+            {
+                await Assert.ThrowsAsync<GameRuleException>(async () => await mediator.Send(command));
+            }
+        }
+
+        Unit? dbUnit;
+
+        using (var scope = serviceProvider.CreateScope())
+        {
+            var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            dbUnit = await context.Units.FirstOrDefaultAsync();
+        }
+
+        DeleteDatabase(dbName);
+
+        if (shouldSucceed)
+        {
+            Assert.Null(dbUnit);
+        }
+        else
+        {
+            Assert.NotNull(dbUnit);
+        }
+    }
+
+    #endregion
+
     #region CampaingCommands
 
     [Theory]

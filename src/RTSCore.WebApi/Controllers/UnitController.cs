@@ -11,9 +11,9 @@ namespace RTSCore.WebApi.Controllers;
 public class UnitController(IMediator mediator) : ControllerBase
 {
     [HttpDelete("{id}")]
-    public async Task<IActionResult> Delete(string id)
+    public async Task<IActionResult> Disband(string id)
     {
-        await mediator.Send(new DeleteUnitCommand(id));
+        await mediator.Send(new DisbandUnitCommand(id));
 
         return NoContent();
     }

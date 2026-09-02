@@ -16,6 +16,7 @@ using RTSCore.Domain.ValueObjects.Presets;
 using RTSCore.Infrastructure.Persistence;
 using RTSCore.Domain.Services;
 using RTSCore.Application.Cities.Queries.Common;
+using RTSCore.Application.Units.Commands;
 namespace RTSCore.Tests;
 
 public class WebIntegrationTests : IClassFixture<WebApplicationFactory<Program>>, IDisposable
@@ -23,7 +24,31 @@ public class WebIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
     #region UnitController
 
     [Fact]
-    public async Task Delete_ShouldReturn422_WhenUnitInvulnerable()
+    public async Task Disband_WithValidCommand_ShoulReturnNoContent()
+    {
+        var unitId = new UnitId("test_unit");
+
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var template = new UnitTemplate(
+                UnitType.EnglandMilitia, "Test Unit", 1, 1, 1, 1, 1, 1, 1, 1,
+                TurnsToRecruit: 0
+            );
+            var unit = Unit.CreateWithCustomStatus(unitId, FactionType.England, template, turnsToRecruit: 0);
+
+            var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+            context.Units.Add(unit);
+            await context.SaveChangesAsync();
+        }
+
+        var response = await _client.DeleteAsync($"api/unit/{unitId}");
+
+        Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Disband_ShouldReturn422_WhenUnitInvulnerable()
     {
         var unitId = "test_invulnerable";
 
@@ -45,11 +70,12 @@ public class WebIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
         Assert.NotNull(problemDetails);
         Assert.Equal("Нарушение игровых правил", problemDetails.Title);
         Assert.Equal(
-            $"Юнита {unitId} " +
-            $"с типом {UnitType.Invulnerable} нельзя удалить из базы данных",
+            $"[{nameof(DisbandUnitCommand)}] " +
+            $"Юнита {unitId} с типом {UnitType.Invulnerable} нельзя удалить из базы данных",
             problemDetails.Detail
         );
     }
+
 
     #endregion
 
