@@ -17,10 +17,46 @@ using RTSCore.Infrastructure.Persistence;
 using RTSCore.Domain.Services;
 using RTSCore.Application.Cities.Queries.Common;
 using RTSCore.Application.Units.Commands;
+using RTSCore.Application.Campaing.Commands.Diplomacy;
 namespace RTSCore.Tests;
 
 public class WebIntegrationTests : IClassFixture<WebApplicationFactory<Program>>, IDisposable
 {
+    #region DiplomacyController
+
+    [Fact]
+    public async Task SendTradeOffer_WithValidCommand_ShouldReturnOkWithGuid()
+    {
+
+        var initiator = FactionType.England;
+        var target = FactionType.France;
+
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+            var england = new Faction(initiator, 0, PlayerType.Human);
+            var france = new Faction(target, 0, PlayerType.Ai);
+            var relation = new DiplomacyRelation(initiator, target, 0);
+
+            context.Factions.Add(england);
+            context.Factions.Add(france);
+            context.DiplomacyRelations.Add(relation);
+
+            await context.SaveChangesAsync();
+        }
+
+        var command = new SendTradeOfferCommand(initiator, target);
+        var response = await _client.PostAsJsonAsync("api/diplomacy/offers", command);
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var offerId = await response.Content.ReadFromJsonAsync<Guid>();
+        Assert.NotEqual(Guid.Empty, offerId);
+    }
+
+    #endregion
+
     #region UnitController
 
     [Fact]
