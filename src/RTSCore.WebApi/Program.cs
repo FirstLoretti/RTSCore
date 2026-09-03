@@ -12,6 +12,7 @@ using RTSCore.Domain.ValueObjects.Presets;
 
 using RTSCore.Domain.Services;
 using RTSCore.Application.Campaing.Commands;
+using RTSCore.Application.Campaing.Services.Diplomacy;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -27,11 +28,12 @@ builder.Services.AddScoped<IUnitOfWork, EfUnitOfWork>();
 builder.Services.AddScoped<IBuildingRepository, SqlBuildingRepository>();
 builder.Services.AddScoped<IFactionRepository, SqlFactionRepository>();
 builder.Services.AddScoped<ICityRepository, SqlCityRepository>();
+builder.Services.AddScoped<DiplomacyAi>();
 builder.Services.AddSingleton(Array.Empty<FactionPreset>());
 builder.Services.AddSingleton(GameBalance.Buildings.GetAllTemplates);
 builder.Services.AddSingleton(GameBalance.Units.GetAllTemplates);
 
-builder.Services.AddExceptionHandler<GlobalExeptionHandler>();
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
 
 builder.Services.AddMediatR(cfg =>

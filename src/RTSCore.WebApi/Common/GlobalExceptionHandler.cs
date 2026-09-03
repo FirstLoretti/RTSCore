@@ -7,7 +7,7 @@ using RTSCore.Domain.Exeptions;
 
 namespace RTSCore.WebApi.Common;
 
-public class GlobalExeptionHandler(ILogger<GlobalExeptionHandler> logger)
+public class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger)
     : IExceptionHandler
 {
     public async ValueTask<bool> TryHandleAsync(

@@ -37,5 +37,5 @@ public class DiplomacyOffer
         Status = OfferStatus.Accepted;
     }
 
-    public void Reject() => Status = OfferStatus.Rejeted;
+    public void Reject() => Status = OfferStatus.Rejeсted;
 }

@@ -20,6 +20,7 @@ using RTSCore.Application.Cities.Queries;
 using RTSCore.Application.Cities.Queries.Common;
 using RTSCore.Application.Units.Commands;
 using RTSCore.Application.Campaing.Commands.Diplomacy;
+using RTSCore.Application.Campaing.Services.Diplomacy;
 
 namespace RTSCore.Tests;
 
@@ -436,7 +437,7 @@ public class ApplicationIntegrationTests
             Assert.Equal(expectedStanding, relation.Standing);
 
             Assert.NotNull(offer);
-            Assert.Equal(OfferStatus.Rejeted, offer.Status);
+            Assert.Equal(OfferStatus.Rejeсted, offer.Status);
         }
 
         DeleteDatabase(dbName);
@@ -893,6 +894,74 @@ public class ApplicationIntegrationTests
 
     #endregion
 
+    #region Ai
+
+    [Theory]
+    [InlineData(true, DiplomacyRelation.MaxStanding, 1, 1, OfferStatus.Rejeсted)]
+    [InlineData(false, GameBalance.Diplomacy.MinStandingForTrade - 1, 15, 1, OfferStatus.Rejeсted)]
+    [InlineData(false, GameBalance.Diplomacy.MinStandingForTrade + 1, 15, 1, OfferStatus.Accepted)]
+    public async Task AiDiplomacy_ShouldMakeCorrectDecisions_BasedOnUtilityMath(
+        bool isAlreadyTraded,
+        int initialStandings,
+        int initiatorCityCount,
+        int expectedOffersCount,
+        OfferStatus expectedStatus
+    )
+    {
+        var (dbName, serviceProvider) = SetupTestInvironment();
+
+        var aiFaction = FactionType.England;
+        var initiator = FactionType.France;
+        Guid offerId;
+
+        using (var scope = serviceProvider.CreateScope())
+        {
+            var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+            var englandAi = new Faction(aiFaction, 0, PlayerType.Ai);
+            var france = new Faction(initiator, 0, PlayerType.Human);
+            var relation = new DiplomacyRelation(aiFaction, initiator, initialStandings);
+            var offer = new DiplomacyOffer(initiator, aiFaction, OfferType.TradeAgreement);
+            offerId = offer.Id;
+
+            if (isAlreadyTraded)
+            {
+                relation.OpenTrade();
+            }
+
+            for (int i = 0; i < initiatorCityCount; i++)
+            {
+                context.Cities.Add(new City(new CityPreset($"test_city{i}", "TC", CityType.Village, 1, []), initiator));
+            }
+            context.Factions.Add(englandAi);
+            context.Factions.Add(france);
+            context.DiplomacyRelations.Add(relation);
+            context.DiplomacyOffers.Add(offer);
+            await context.SaveChangesAsync();
+        }
+
+        using (var scope = serviceProvider.CreateScope())
+        {
+            var diplomacyAi = scope.ServiceProvider.GetRequiredService<DiplomacyAi>();
+            await diplomacyAi.ProcessTurnAsync(aiFaction, CancellationToken.None);
+        }
+
+        using (var scope = serviceProvider.CreateScope())
+        {
+            var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+            var dbOffers = await context.DiplomacyOffers.ToListAsync();
+            var incomingOffer = dbOffers.First(o => o.Target == aiFaction);
+
+            Assert.Equal(expectedStatus, incomingOffer.Status);
+            Assert.Equal(expectedOffersCount, dbOffers.Count);
+        }
+
+        DeleteDatabase(dbName);
+    }
+
+    #endregion
+
     #region Common
 
     private static (string, ServiceProvider) SetupTestInvironment(Action<IServiceCollection>? configure = null)
@@ -910,6 +979,7 @@ public class ApplicationIntegrationTests
         services.AddScoped<ICityRepository, SqlCityRepository>();
         services.AddScoped<IFactionRepository, SqlFactionRepository>();
         services.AddScoped<IBuildingRepository, SqlBuildingRepository>();
+        services.AddScoped<DiplomacyAi>();
         services.AddSingleton(GameBalance.Buildings.GetAllTemplates);
 
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(LoggingBehavior<,>));

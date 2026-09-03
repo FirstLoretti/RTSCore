@@ -12,8 +12,8 @@ public class DiplomacyRelation
     public int Standing { get; private set; }
     public bool HasTradeAgreement { get; private set; }
 
-    public const int MinRelationship = -100;
-    public const int MaxRelationship = 100;
+    public const int MinStanding = -100;
+    public const int MaxStanding = 100;
 
     public DiplomacyRelation(FactionType factionA, FactionType factionB, int startingStanding)
     {
@@ -65,6 +65,6 @@ public class DiplomacyRelation
 
     public void ChangeStanding(int amount)
     {
-        Standing = Math.Clamp(Standing + amount, MinRelationship, MaxRelationship);
+        Standing = Math.Clamp(Standing + amount, MinStanding, MaxStanding);
     }
 }

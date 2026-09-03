@@ -21,7 +21,7 @@ public class DiplomacyAi(IUnitOfWork unitOfWork, IMediator mediator)
         await GenerateOutgoingOffers(aiFaction, [.. otherFactions], factionToCitiesCount, cancellationToken);
     }
 
-    public async Task<bool> EvaluateTradeOfferUtilityAsync(
+    private async Task<bool> EvaluateTradeOfferUtilityAsync(
         FactionType aiFaction,
         FactionType targetFaction,
         Dictionary<FactionType, int> factionToCitiesCount,
@@ -34,11 +34,11 @@ public class DiplomacyAi(IUnitOfWork unitOfWork, IMediator mediator)
         if (relation.HasTradeAgreement) return false;
         if (relation.Standing < GameBalance.Diplomacy.MinStandingForTrade) return false;
 
-        var standingScore = (int)((relation.Standing + DiplomacyRelation.MaxRelationship) * 0.5f);
+        var standingScore = (int)((relation.Standing + DiplomacyRelation.MaxStanding) * 0.5f);
 
         var factionCityCount = factionToCitiesCount.GetValueOrDefault(targetFaction);
         var economicScore = Math.Min(
-            factionCityCount * GameBalance.Diplomacy.Ai.ScorePerTargetCity, DiplomacyRelation.MaxRelationship
+            factionCityCount * GameBalance.Diplomacy.Ai.ScorePerTargetCity, DiplomacyRelation.MaxStanding
         );
 
         var totalScore =
@@ -48,7 +48,7 @@ public class DiplomacyAi(IUnitOfWork unitOfWork, IMediator mediator)
         return totalScore >= GameBalance.Diplomacy.Ai.TradeOfferThreshold;
     }
 
-    public async Task GenerateOutgoingOffers(
+    private async Task GenerateOutgoingOffers(
         FactionType aiFaction,
         FactionType[] otherFactions,
         Dictionary<FactionType, int> factionToCitiesCount,
@@ -72,7 +72,7 @@ public class DiplomacyAi(IUnitOfWork unitOfWork, IMediator mediator)
         }
     }
 
-    public async Task RespondToIncomingOffers(
+    private async Task RespondToIncomingOffers(
         FactionType aiFaction,
         Dictionary<FactionType, int> factionToCitiesCount,
         CancellationToken cancellationToken)
