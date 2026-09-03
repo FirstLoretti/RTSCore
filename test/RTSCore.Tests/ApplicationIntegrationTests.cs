@@ -392,6 +392,56 @@ public class ApplicationIntegrationTests
         DeleteDatabase(dbName);
     }
 
+    [Fact]
+    public async Task Mediator_RejectOffer_ShouldSuccessfullyTranslateDomainChangesToDatabase()
+    {
+        var (dbName, serviceProvider) = SetupTestInvironment();
+
+        var initiator = FactionType.England;
+        var target = FactionType.France;
+        Guid offerId;
+
+        using (var scope = serviceProvider.CreateScope())
+        {
+            var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+            var england = new Faction(initiator, 0, PlayerType.Ai);
+            var france = new Faction(target, 0, PlayerType.Human);
+            var relation = new DiplomacyRelation(initiator, target, GameBalance.Diplomacy.StartingStanding);
+            var offer = new DiplomacyOffer(initiator, target, OfferType.TradeAgreement);
+            offerId = offer.Id;
+
+            context.Factions.Add(england);
+            context.Factions.Add(france);
+            context.DiplomacyRelations.Add(relation);
+            context.DiplomacyOffers.Add(offer);
+            await context.SaveChangesAsync();
+        }
+
+        using (var scope = serviceProvider.CreateScope())
+        {
+            var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+            await mediator.Send(new RejectOfferCommand(offerId));
+        }
+
+        using (var scope = serviceProvider.CreateScope())
+        {
+            var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            var relation = await context.DiplomacyRelations.FirstOrDefaultAsync();
+            var offer = await context.DiplomacyOffers.FirstOrDefaultAsync();
+            var expectedStanding = GameBalance.Diplomacy.StartingStanding + GameBalance.Diplomacy.RejectOfferPenalty;
+
+            Assert.NotNull(relation);
+            Assert.False(relation.HasTradeAgreement);
+            Assert.Equal(expectedStanding, relation.Standing);
+
+            Assert.NotNull(offer);
+            Assert.Equal(OfferStatus.Rejeted, offer.Status);
+        }
+
+        DeleteDatabase(dbName);
+    }
+
     #endregion
 
     #endregion
