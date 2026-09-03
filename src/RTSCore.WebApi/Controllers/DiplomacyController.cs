@@ -23,4 +23,11 @@ public class DiplomacyController(IMediator mediator) : ControllerBase
         await mediator.Send(new AcceptOfferCommand(id));
         return NoContent();
     }
+
+    [HttpPost("offers/{id}/reject")]
+    public async Task<IActionResult> RejectOffer(Guid id)
+    {
+        await mediator.Send(new RejectOfferCommand(id));
+        return NoContent();
+    }
 }
