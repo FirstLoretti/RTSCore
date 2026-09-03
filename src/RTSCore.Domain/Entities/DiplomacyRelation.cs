@@ -40,11 +40,11 @@ public class DiplomacyRelation
             throw new GameRuleException("Торговый договор уже заключён.");
         }
 
-        if (Standing < GameBalance.Diplomacy.RequiredStandingForTrade)
+        if (Standing < GameBalance.Diplomacy.MinStandingForTrade)
         {
             throw new GameRuleException(
                 $"Нельзя заключить торговый договор. Уровень отношений: {Standing}. " +
-                $"Требуется минимум: {GameBalance.Diplomacy.RequiredStandingForTrade}"
+                $"Требуется минимум: {GameBalance.Diplomacy.MinStandingForTrade}"
             );
         }
 

@@ -5,7 +5,7 @@ public static partial class GameBalance
     public static class Diplomacy
     {
         public const int StartingStanding = 0;
-        public const int RequiredStandingForTrade = 20;
+        public const int MinStandingForTrade = -80;
         public const int AcceptTradeOfferBonus = 10;
         public const int CancelTradePenalty = -15;
         public const int RejectOfferPenalty = -5;

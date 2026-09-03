@@ -290,7 +290,7 @@ public class ApplicationIntegrationTests
 
             if (!isRelationNull)
             {
-                var relation = new DiplomacyRelation(initiator, target, GameBalance.Diplomacy.RequiredStandingForTrade);
+                var relation = new DiplomacyRelation(initiator, target, GameBalance.Diplomacy.MinStandingForTrade);
 
                 if (isAlreadyTraded)
                 {
@@ -356,7 +356,7 @@ public class ApplicationIntegrationTests
 
             var england = new Faction(initiator, 0, PlayerType.Human);
             var france = new Faction(target, 0, PlayerType.Ai);
-            var relation = new DiplomacyRelation(initiator, target, GameBalance.Diplomacy.RequiredStandingForTrade);
+            var relation = new DiplomacyRelation(initiator, target, GameBalance.Diplomacy.MinStandingForTrade);
             var tradeOffer = new DiplomacyOffer(initiator, target, OfferType.TradeAgreement);
             offerId = tradeOffer.Id;
 
@@ -380,7 +380,7 @@ public class ApplicationIntegrationTests
             var dbRelation = await context.DiplomacyRelations.FirstOrDefaultAsync();
 
             var expectedStanding =
-                GameBalance.Diplomacy.AcceptTradeOfferBonus + GameBalance.Diplomacy.RequiredStandingForTrade;
+                GameBalance.Diplomacy.AcceptTradeOfferBonus + GameBalance.Diplomacy.MinStandingForTrade;
 
             Assert.NotNull(dbOffer);
             Assert.Equal(OfferStatus.Accepted, dbOffer.Status);

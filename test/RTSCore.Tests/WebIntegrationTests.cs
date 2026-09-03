@@ -55,6 +55,35 @@ public class WebIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
         Assert.NotEqual(Guid.Empty, offerId);
     }
 
+    [Fact]
+    public async Task AcceptOffer_WithValidCommand_ShouldReturnNoContent()
+    {
+        var initiator = FactionType.England;
+        var target = FactionType.France;
+        Guid offerId;
+
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            var england = new Faction(initiator, 0, PlayerType.Human);
+            var france = new Faction(target, 0, PlayerType.Ai);
+            var relation = new DiplomacyRelation(initiator, target, GameBalance.Diplomacy.MinStandingForTrade);
+            var offer = new DiplomacyOffer(initiator, target, OfferType.TradeAgreement);
+            offerId = offer.Id;
+
+            context.Factions.Add(england);
+            context.Factions.Add(france);
+            context.DiplomacyRelations.Add(relation);
+            context.DiplomacyOffers.Add(offer);
+            await context.SaveChangesAsync();
+        }
+
+        var command = new AcceptOfferCommand(offerId);
+        var response = await _client.PostAsJsonAsync($"api/diplomacy/offers/{offerId}/accept", command);
+
+        Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+    }
+
     #endregion
 
     #region UnitController

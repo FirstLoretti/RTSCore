@@ -32,7 +32,7 @@ public class DiplomacyAi(IUnitOfWork unitOfWork, IMediator mediator)
         Guard.Against.NullRelation(relation, aiFaction, targetFaction);
 
         if (relation.HasTradeAgreement) return false;
-        if (relation.Standing <= -80) return false;
+        if (relation.Standing < GameBalance.Diplomacy.MinStandingForTrade) return false;
 
         var standingScore = (int)((relation.Standing + DiplomacyRelation.MaxRelationship) * 0.5f);
 
