@@ -25,4 +25,15 @@ public class SqlFactionRepository(AppDbContext context) : IFactionRepository
     {
         return await context.Factions.AnyAsync(cancellationToken);
     }
+
+    public async Task<IReadOnlyCollection<FactionType>> GetAnotherFactionsAsync(
+        FactionType currentFaction,
+        CancellationToken cancellationToken
+    )
+    {
+        return await context.Factions
+            .Where(f => f.Type != currentFaction && !f.IsEliminated)
+            .Select(f => f.Type)
+            .ToListAsync(cancellationToken);
+    }
 }

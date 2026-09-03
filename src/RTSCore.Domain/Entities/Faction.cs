@@ -8,6 +8,7 @@ public class Faction
     public PlayerType PlayerType { get; init; }
     public FactionType Type { get; init; }
     public int Gold { get; private set; }
+    public bool IsEliminated { get; private set; }
 
     public Faction(FactionType type, int gold, PlayerType playerType)
     {

@@ -215,9 +215,9 @@ public class WebIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
         context.Units.Add(unit);
         await context.SaveChangesAsync();
 
-        var responce = await _client.DeleteAsync($"api/city/cancelUnitRecruiting_{unitId}");
+        var response = await _client.DeleteAsync($"api/city/cancelUnitRecruiting_{unitId}");
 
-        Assert.Equal(HttpStatusCode.NoContent, responce.StatusCode);
+        Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
     }
 
     [Fact]

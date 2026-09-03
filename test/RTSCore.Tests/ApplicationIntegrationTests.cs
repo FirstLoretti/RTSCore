@@ -19,6 +19,7 @@ using RTSCore.Domain.Services;
 using RTSCore.Application.Cities.Queries;
 using RTSCore.Application.Cities.Queries.Common;
 using RTSCore.Application.Units.Commands;
+using RTSCore.Application.Campaing.Commands.Diplomacy;
 
 namespace RTSCore.Tests;
 
@@ -97,6 +98,8 @@ public class ApplicationIntegrationTests
     #endregion
 
     #region CampaingCommands
+
+    #region Main
 
     [Theory]
     [InlineData(new[] { FactionType.England }, PlayerType.Human, PlayerType.Ai)]
@@ -258,6 +261,87 @@ public class ApplicationIntegrationTests
 
         Assert.Equal(expectedGold, dbFaction.Gold);
     }
+
+    #endregion
+
+    #region Diplomacy
+
+    [Theory]
+    [InlineData(false, false, false, true)]
+    [InlineData(true, false, false, false)]
+    [InlineData(false, true, false, false)]
+    [InlineData(false, false, true, false)]
+    public async Task Mediator_SendTradeOffer_ShouldHandleRulesCorrectly(
+        bool hasDuplicate,
+        bool isRelationNull,
+        bool isAlreadyTraded,
+        bool shouldSucceed
+    )
+    {
+        FactionType initiator = FactionType.England;
+        FactionType target = FactionType.France;
+        var (dbName, serviceProvider) = SetupTestInvironment();
+
+        using (var scope = serviceProvider.CreateScope())
+        {
+            var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            var engand = new Faction(FactionType.England, 0, PlayerType.Ai);
+            var france = new Faction(FactionType.France, 0, PlayerType.Human);
+
+            if (!isRelationNull)
+            {
+                var relation = new DiplomacyRelation(initiator, target, GameBalance.Diplomacy.RequiredStandingForTrade);
+
+                if (isAlreadyTraded)
+                {
+                    relation.OpenTrade();
+                }
+
+                context.DiplomacyRelations.Add(relation);
+            }
+
+            if (hasDuplicate)
+            {
+                var dublicateOffer = new DiplomacyOffer(initiator, target, OfferType.TradeAgreement);
+                context.DiplomacyOffers.Add(dublicateOffer);
+            }
+
+            await context.SaveChangesAsync();
+        }
+
+        var command = new SendTradeOfferCommand(initiator, target);
+
+        using (var scope = serviceProvider.CreateScope())
+        {
+            var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+
+            if (shouldSucceed)
+            {
+                var resultId = await mediator.Send(command);
+                Assert.NotEqual(Guid.Empty, resultId);
+            }
+            else
+            {
+                await Assert.ThrowsAnyAsync<Exception>(async () => await mediator.Send(command));
+            }
+        }
+
+        using (var scope = serviceProvider.CreateScope())
+        {
+            var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            var offers = await context.DiplomacyOffers.AsNoTracking().ToListAsync();
+
+            if (shouldSucceed)
+            {
+                var createdOffer = Assert.Single(offers);
+                Assert.Equal(OfferStatus.Pending, createdOffer.Status);
+            }
+        }
+
+        DeleteDatabase(dbName);
+    }
+
+    #endregion
 
     #endregion
 

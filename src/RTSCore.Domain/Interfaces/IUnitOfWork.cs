@@ -6,6 +6,8 @@ public interface IUnitOfWork
     IUnitRepository UnitRepository { get; }
     IFactionRepository FactionRepository { get; }
     ICityRepository CityRepository { get; }
+    IDiplomacyRelationRepository DiplomacyRelationRepository { get; }
+    IDiplomacyOfferRepository DiplomacyOfferRepository { get; }
 
     Task SaveChangesAsync(CancellationToken cancellationToken);
 }

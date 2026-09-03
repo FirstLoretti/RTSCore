@@ -34,4 +34,16 @@ public class SqlCityRepository(AppDbContext context) : ICityRepository
     {
         context.Cities.AddRange(cities);
     }
+
+    public async Task<Dictionary<FactionType, int>> GetFactionToCitiesCount(
+        IEnumerable<FactionType> factions,
+        CancellationToken cancellationToken
+    )
+    {
+        return await context.Cities
+            .Where(c => factions.Contains(c.OwnerFaction))
+            .GroupBy(c => c.OwnerFaction)
+            .Select(g => new { Faction = g.Key, Count = g.Count() })
+            .ToDictionaryAsync(x => x.Faction, x => x.Count, cancellationToken);
+    }
 }
