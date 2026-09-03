@@ -49,7 +49,7 @@ public class DiplomacyRelation
         }
 
         HasTradeAgreement = true;
-        ChangeStanding(GameBalance.Diplomacy.TradeAgreementBonus);
+        ChangeStanding(GameBalance.Diplomacy.AcceptTradeOfferBonus);
     }
 
     public void CancelTrade()

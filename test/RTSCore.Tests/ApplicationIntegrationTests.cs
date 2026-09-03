@@ -341,6 +341,57 @@ public class ApplicationIntegrationTests
         DeleteDatabase(dbName);
     }
 
+    [Fact]
+    public async Task Mediator_AcceptOffer_ShouldSuccessfullyTranslateDomainChangesToDatabase()
+    {
+        var (dbName, serviceProvider) = SetupTestInvironment();
+
+        var initiator = FactionType.England;
+        var target = FactionType.France;
+        Guid offerId;
+
+        using (var scope = serviceProvider.CreateScope())
+        {
+            var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+            var england = new Faction(initiator, 0, PlayerType.Human);
+            var france = new Faction(target, 0, PlayerType.Ai);
+            var relation = new DiplomacyRelation(initiator, target, GameBalance.Diplomacy.RequiredStandingForTrade);
+            var tradeOffer = new DiplomacyOffer(initiator, target, OfferType.TradeAgreement);
+            offerId = tradeOffer.Id;
+
+            context.Factions.Add(england);
+            context.Factions.Add(france);
+            context.DiplomacyRelations.Add(relation);
+            context.DiplomacyOffers.Add(tradeOffer);
+            await context.SaveChangesAsync();
+        }
+
+        using (var scope = serviceProvider.CreateScope())
+        {
+            var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+            await mediator.Send(new AcceptOfferCommand(offerId));
+        }
+
+        using (var scope = serviceProvider.CreateScope())
+        {
+            var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            var dbOffer = await context.DiplomacyOffers.FirstOrDefaultAsync();
+            var dbRelation = await context.DiplomacyRelations.FirstOrDefaultAsync();
+
+            var expectedStanding =
+                GameBalance.Diplomacy.AcceptTradeOfferBonus + GameBalance.Diplomacy.RequiredStandingForTrade;
+
+            Assert.NotNull(dbOffer);
+            Assert.Equal(OfferStatus.Accepted, dbOffer.Status);
+            Assert.NotNull(dbRelation);
+            Assert.Equal(expectedStanding, dbRelation.Standing);
+            Assert.True(dbRelation.HasTradeAgreement);
+        }
+
+        DeleteDatabase(dbName);
+    }
+
     #endregion
 
     #endregion
