@@ -11,7 +11,7 @@ public class DiplomacyRelation
     public FactionType FactionB { get; init; }
     public int Standing { get; private set; }
     public bool HasTradeAgreement { get; private set; }
-    public bool IsWar { get; private set; }
+    public bool InWar { get; private set; }
 
     public const int MinStanding = -100;
     public const int MaxStanding = 100;
@@ -36,7 +36,7 @@ public class DiplomacyRelation
 
     public void OpenTrade()
     {
-        if (IsWar)
+        if (InWar)
         {
             throw new GameRuleException("Нельзя заключить торговый договор, фракции в состоянии войны");
         }
@@ -60,14 +60,14 @@ public class DiplomacyRelation
 
     public void DeclareWare()
     {
-        if (IsWar)
+        if (InWar)
         {
             throw new GameRuleException("Нельзя объявить войну. Фракции уже воюют");
         }
 
         HasTradeAgreement = false;
 
-        IsWar = true;
+        InWar = true;
         ChangeStanding(GameBalance.Diplomacy.DeclareWarPenalty);
     }
 
@@ -84,6 +84,6 @@ public class DiplomacyRelation
 
     public void ChangeStanding(int amount)
     {
-        Standing = Math.Clamp(Standing + amount, MinStanding, MaxStanding);
+        Standing = int.Clamp(Standing + amount, MinStanding, MaxStanding);
     }
 }

@@ -13,6 +13,10 @@ public static partial class GameBalance
 
         public static class Ai
         {
+            public const int WarDeclarationThreshold = 50;
+            public const float HostilityWeight = 0.5f;
+            public const float WeaknessWeight = 0.5f;
+
             public const int TradeOfferThreshold = 50;
             public const float StandingWeight = 0.5f;
             public const float EconomicWeight = 0.5f;

@@ -11,5 +11,10 @@ public interface IFactionRepository
 
     Task<Faction?> GetFactionAsync(FactionType faction, CancellationToken cancellationToken);
     Task<bool> HasAnyAsync(CancellationToken cancellationToken);
-    Task<IReadOnlyCollection<FactionType>> GetAnotherFactionsAsync(FactionType currentFaction, CancellationToken cancellationToken);
+    Task<IReadOnlyCollection<FactionType>> GetAnotherFactionsAsync(
+        FactionType currentFaction, CancellationToken cancellationToken
+    );
+    Task<Dictionary<FactionType, int>> GetFactionToMilitaryPower(
+        IEnumerable<FactionType> factions, CancellationToken cancellationToken
+    );
 }

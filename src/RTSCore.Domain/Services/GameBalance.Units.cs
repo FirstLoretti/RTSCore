@@ -9,10 +9,14 @@ public partial class GameBalance
 {
     public static class Units
     {
+
+        public const float HealthWeight = 1.0f;
+        public const float DamageWeight = 2.0f;
+        public const float ArmorWeight = 2.0f;
+
         public static readonly ImmutableArray<int> ExpToNextLevel = [50, 100, 150, 200];
 
         public static IReadOnlyCollection<UnitTemplate> GetAllTemplates => TypeToTemplate.Values;
-
         private static readonly FrozenDictionary<UnitType, UnitTemplate> TypeToTemplate;
 
         static Units()

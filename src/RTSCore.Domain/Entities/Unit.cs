@@ -16,7 +16,7 @@ public class Unit
     public int Level { get; private set; } = 1;
     public int Experience { get; private set; } = 0;
     public int TurnsToRecruit { get; private set; }
-    public bool IsAlive => Health > 0;
+    public bool IsAlive => IsRecruited && Health > 0;
     public bool IsRecruited => TurnsToRecruit <= 0;
 
     public Unit(UnitId id, FactionType ownerFaction, UnitTemplate template, CityId? currentCityId = null)

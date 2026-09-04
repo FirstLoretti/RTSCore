@@ -15,10 +15,16 @@ public class DiplomacyAi(IUnitOfWork unitOfWork, IMediator mediator)
     public async Task ProcessTurnAsync(FactionType aiFaction, CancellationToken cancellationToken)
     {
         var otherFactions = await unitOfWork.FactionRepository.GetAnotherFactionsAsync(aiFaction, cancellationToken);
+        var allFactions = otherFactions.Concat([aiFaction]);
         var factionToCitiesCount = await unitOfWork.CityRepository.GetFactionToCitiesCount(otherFactions, cancellationToken);
+        var factionToMilitaryPower =
+            await unitOfWork.FactionRepository.GetFactionToMilitaryPower(allFactions, cancellationToken
+        );
 
         await RespondToIncomingOffers(aiFaction, factionToCitiesCount, cancellationToken);
-        await GenerateOutgoingOffers(aiFaction, [.. otherFactions], factionToCitiesCount, cancellationToken);
+        await GenerateOutgoingOffers(
+            aiFaction, [.. otherFactions], factionToCitiesCount, factionToMilitaryPower, cancellationToken
+        );
     }
 
     private async Task<bool> EvaluateTradeOfferUtilityAsync(
@@ -41,17 +47,44 @@ public class DiplomacyAi(IUnitOfWork unitOfWork, IMediator mediator)
             factionCityCount * GameBalance.Diplomacy.Ai.ScorePerTargetCity, DiplomacyRelation.MaxStanding
         );
 
-        var totalScore =
+        var finalScore =
             (standingScore * GameBalance.Diplomacy.Ai.StandingWeight) +
             (economicScore * GameBalance.Diplomacy.Ai.EconomicWeight);
 
-        return totalScore >= GameBalance.Diplomacy.Ai.TradeOfferThreshold;
+        return finalScore >= GameBalance.Diplomacy.Ai.TradeOfferThreshold;
+    }
+
+    private async Task<bool> EvaluateDeclareWarUtilityAsync(
+        FactionType aiFaction,
+        FactionType targetFaction,
+        Dictionary<FactionType, int> factionToMilitaryPower,
+        CancellationToken cancellationToken
+    )
+    {
+        var myPower = factionToMilitaryPower.GetValueOrDefault(aiFaction);
+        if (myPower <= 0) return false;
+
+        var relation = await unitOfWork.DiplomacyRelationRepository.GetRelationAsync(aiFaction, targetFaction, cancellationToken);
+        Guard.Against.NotFoundRelation(relation, aiFaction, targetFaction);
+
+        if (relation.InWar) return false;
+
+        var hostilityScore = (DiplomacyRelation.MaxStanding - relation.Standing) * 0.5f;
+        var targetPower = factionToMilitaryPower.GetValueOrDefault(targetFaction);
+        var powerRatio = (float)targetPower / myPower;
+        var weaknessScore = float.Clamp((1.0f - powerRatio) * 100, 0f, 100f);
+
+        var finalScore = (hostilityScore * GameBalance.Diplomacy.Ai.HostilityWeight) +
+                         (weaknessScore * GameBalance.Diplomacy.Ai.WeaknessWeight);
+
+        return finalScore > GameBalance.Diplomacy.Ai.WarDeclarationThreshold;
     }
 
     private async Task GenerateOutgoingOffers(
         FactionType aiFaction,
         FactionType[] otherFactions,
         Dictionary<FactionType, int> factionToCitiesCount,
+        Dictionary<FactionType, int> factionToMilitaryPower,
         CancellationToken cancellationToken)
     {
         var factionsUnderNegotiations =
@@ -61,11 +94,19 @@ public class DiplomacyAi(IUnitOfWork unitOfWork, IMediator mediator)
         {
             if (factionsUnderNegotiations.Contains(targetFaction)) continue;
 
-            var isProfitable = await EvaluateTradeOfferUtilityAsync(
+            var isWarProfitable = await EvaluateDeclareWarUtilityAsync(
+                aiFaction, targetFaction, factionToMilitaryPower, cancellationToken
+            );
+            if (isWarProfitable)
+            {
+                await mediator.Send(new DeclareWarCommand(aiFaction, targetFaction), cancellationToken);
+                continue;
+            }
+
+            var isTradeProfitable = await EvaluateTradeOfferUtilityAsync(
                 aiFaction, targetFaction, factionToCitiesCount, cancellationToken
             );
-
-            if (isProfitable)
+            if (isTradeProfitable)
             {
                 await mediator.Send(new SendTradeOfferCommand(aiFaction, targetFaction), cancellationToken);
             }

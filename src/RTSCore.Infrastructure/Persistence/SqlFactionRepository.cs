@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 
 using RTSCore.Domain.Entities;
 using RTSCore.Domain.Interfaces;
+using RTSCore.Domain.Services;
 using RTSCore.Domain.ValueObjects;
 
 namespace RTSCore.Infrastructure.Persistence;
@@ -35,5 +36,26 @@ public class SqlFactionRepository(AppDbContext context) : IFactionRepository
             .Where(f => f.Type != currentFaction && !f.IsEliminated)
             .Select(f => f.Type)
             .ToListAsync(cancellationToken);
+    }
+
+    public async Task<Dictionary<FactionType, int>> GetFactionToMilitaryPower(
+        IEnumerable<FactionType> factions, CancellationToken cancellationToken
+    )
+    {
+        var militaryPower = await context.Units
+            .AsNoTracking()
+            .Where(u => u.TurnsToRecruit <= 0 && u.Health > 0)
+            .GroupBy(u => u.OwnerFaction)
+            .Select(g => new
+            {
+                Faction = g.Key,
+                Power = (int)g.Sum(u =>
+                            (u.Health * GameBalance.Units.HealthWeight) +
+                            (u.Damage * GameBalance.Units.DamageWeight) +
+                            (u.Armor * GameBalance.Units.ArmorWeight))
+            })
+            .ToListAsync(cancellationToken);
+
+        return militaryPower.ToDictionary(l => l.Faction, l => l.Power);
     }
 }
