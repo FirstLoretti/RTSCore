@@ -42,6 +42,18 @@ public class DiplomacyRelation
         }
     }
 
+    public void ThrowIfCannotProposeTradeOffer()
+    {
+        if (HasTradeAgreement)
+        {
+            throw new GameRuleException("Нельзя начать торговать. Фракции уже торгуют");
+        }
+        if (InWar)
+        {
+            throw new GameRuleException("Нельзя начать торговать. Фракции в состоянии войны");
+        }
+    }
+
     public void OpenTrade()
     {
         if (InWar)

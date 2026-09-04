@@ -41,12 +41,4 @@ public static class ApplicationExtensions
             throw new GameRuleException($"Фракция {target} уже в процессе переговоров");
         }
     }
-
-    public static void AlreadyTraded(this GuardMarker _, DiplomacyRelation relation)
-    {
-        if (relation.HasTradeAgreement)
-        {
-            throw new GameRuleException($"Фракции {relation.FactionA} и {relation.FactionB} уже имеют торговый договор");
-        }
-    }
 }

@@ -15,11 +15,12 @@ public class SendTradeOfferCommandHandler(IUnitOfWork unitOfWork) : IRequestHand
             request.Initiator, request.Target, cancellationToken);
         Guard.Against.NotFoundRelation(relation, request.Initiator, request.Target);
 
+        relation.ThrowIfCannotProposeTradeOffer();
+
         var underNegotiation = await unitOfWork.DiplomacyOfferRepository.GetFactionsUnderNegotiationAsync(
             request.Initiator, cancellationToken
         );
         Guard.Against.DuplicateOffer(underNegotiation, request.Target);
-        Guard.Against.AlreadyTraded(relation);
 
         var offer = new DiplomacyOffer(request.Initiator, request.Target, OfferType.TradeAgreement);
 
