@@ -9,6 +9,7 @@ public static partial class GameBalance
         public const int AcceptTradeOfferBonus = 10;
         public const int CancelTradePenalty = -15;
         public const int RejectOfferPenalty = -5;
+        public const int DeclareWarPenalty = -50;
 
         public static class Ai
         {

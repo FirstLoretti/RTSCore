@@ -11,6 +11,7 @@ public class DiplomacyRelation
     public FactionType FactionB { get; init; }
     public int Standing { get; private set; }
     public bool HasTradeAgreement { get; private set; }
+    public bool IsWar { get; private set; }
 
     public const int MinStanding = -100;
     public const int MaxStanding = 100;
@@ -19,7 +20,7 @@ public class DiplomacyRelation
     {
         if (factionA == factionB)
         {
-            throw new GameRuleException("Фракция не может установить дипломатические отношения сама с собой.");
+            throw new GameRuleException("Фракция не может установить дипломатические отношения сама с собой");
         }
 
         Id = Guid.NewGuid();
@@ -35,9 +36,14 @@ public class DiplomacyRelation
 
     public void OpenTrade()
     {
+        if (IsWar)
+        {
+            throw new GameRuleException("Нельзя заключить торговый договор, фракции в состоянии войны");
+        }
+
         if (HasTradeAgreement)
         {
-            throw new GameRuleException("Торговый договор уже заключён.");
+            throw new GameRuleException("Торговый договор уже заключён");
         }
 
         if (Standing < GameBalance.Diplomacy.MinStandingForTrade)
@@ -50,6 +56,19 @@ public class DiplomacyRelation
 
         HasTradeAgreement = true;
         ChangeStanding(GameBalance.Diplomacy.AcceptTradeOfferBonus);
+    }
+
+    public void DeclareWare()
+    {
+        if (IsWar)
+        {
+            throw new GameRuleException("Нельзя объявить войну. Фракции уже воюют");
+        }
+
+        HasTradeAgreement = false;
+
+        IsWar = true;
+        ChangeStanding(GameBalance.Diplomacy.DeclareWarPenalty);
     }
 
     public void CancelTrade()

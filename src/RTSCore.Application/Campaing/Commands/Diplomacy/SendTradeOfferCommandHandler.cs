@@ -13,7 +13,7 @@ public class SendTradeOfferCommandHandler(IUnitOfWork unitOfWork) : IRequestHand
     {
         var relation = await unitOfWork.DiplomacyRelationRepository.GetRelationAsync(
             request.Initiator, request.Target, cancellationToken);
-        Guard.Against.NullRelation(relation, request.Initiator, request.Target);
+        Guard.Against.NotFoundRelation(relation, request.Initiator, request.Target);
 
         var underNegotiation = await unitOfWork.DiplomacyOfferRepository.GetFactionsUnderNegotiationAsync(
             request.Initiator, cancellationToken

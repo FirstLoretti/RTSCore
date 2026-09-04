@@ -268,6 +268,68 @@ public class ApplicationIntegrationTests
     #region Diplomacy
 
     [Theory]
+    [InlineData(true, typeof(NotFoundException))]
+    [InlineData(false, null)]
+    public async Task Mediator_SendWarOffer_ShouldHandleRulesCorrectly(
+        bool isRelationNull,
+        Type? expectedExceptionType
+    )
+    {
+        var (dbName, serviceProvider) = SetupTestInvironment();
+        var initiator = FactionType.England;
+        var target = FactionType.France;
+
+        using (var scope = serviceProvider.CreateScope())
+        {
+            var england = new Faction(initiator, 0, PlayerType.Human);
+            var france = new Faction(target, 0, PlayerType.Ai);
+            var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+            if (!isRelationNull)
+            {
+                var relation = new DiplomacyRelation(initiator, target, 0);
+                context.DiplomacyRelations.Add(relation);
+            }
+            context.Factions.Add(england);
+            context.Factions.Add(france);
+
+            await context.SaveChangesAsync();
+        }
+
+        using (var scope = serviceProvider.CreateScope())
+        {
+            var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+            var command = new DeclareWarCommand(initiator, target);
+
+            if (!isRelationNull)
+            {
+                await mediator.Send(command);
+            }
+            else
+            {
+                await Assert.ThrowsAsync(expectedExceptionType!, async () => await mediator.Send(command));
+            }
+        }
+
+        using (var scope = serviceProvider.CreateScope())
+        {
+            var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            var relation = context.DiplomacyRelations.FirstOrDefault();
+
+            if (isRelationNull)
+            {
+                Assert.Null(relation);
+            }
+            else
+            {
+                Assert.NotNull(relation);
+                Assert.True(relation.IsWar);
+                Assert.Equal(0 + GameBalance.Diplomacy.DeclareWarPenalty, relation.Standing);
+            }
+        }
+    }
+
+    [Theory]
     [InlineData(false, false, false, true)]
     [InlineData(true, false, false, false)]
     [InlineData(false, true, false, false)]

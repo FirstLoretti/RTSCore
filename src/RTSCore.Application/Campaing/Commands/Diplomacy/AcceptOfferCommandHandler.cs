@@ -17,7 +17,7 @@ public class AcceptOfferCommandHandler(IUnitOfWork unitOfWork) : IRequestHandler
         var relation = await unitOfWork.DiplomacyRelationRepository.GetRelationAsync(
             offer.Initiator, offer.Target, cancellationToken
         );
-        Guard.Against.NullRelation(relation, offer.Initiator, offer.Target);
+        Guard.Against.NotFoundRelation(relation, offer.Initiator, offer.Target);
 
         if (offer.Type == OfferType.TradeAgreement)
         {

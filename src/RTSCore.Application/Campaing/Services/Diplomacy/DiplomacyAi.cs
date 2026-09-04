@@ -29,7 +29,7 @@ public class DiplomacyAi(IUnitOfWork unitOfWork, IMediator mediator)
     )
     {
         var relation = await unitOfWork.DiplomacyRelationRepository.GetRelationAsync(aiFaction, targetFaction, cancellationToken);
-        Guard.Against.NullRelation(relation, aiFaction, targetFaction);
+        Guard.Against.NotFoundRelation(relation, aiFaction, targetFaction);
 
         if (relation.HasTradeAgreement) return false;
         if (relation.Standing < GameBalance.Diplomacy.MinStandingForTrade) return false;

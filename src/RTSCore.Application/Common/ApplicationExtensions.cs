@@ -21,7 +21,7 @@ public static class ApplicationExtensions
         }
     }
 
-    public static void NullRelation(
+    public static void NotFoundRelation(
         this GuardMarker _,
         [NotNull] DiplomacyRelation? relation,
         FactionType a,
