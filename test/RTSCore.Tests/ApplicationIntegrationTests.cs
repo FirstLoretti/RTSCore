@@ -296,7 +296,7 @@ public class ApplicationIntegrationTests
 
                 if (startInWar)
                 {
-                    relation.DeclareWare();
+                    relation.DeclareWar();
                 }
             }
             context.Factions.Add(england);

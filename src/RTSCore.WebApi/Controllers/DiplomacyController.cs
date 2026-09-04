@@ -17,6 +17,12 @@ public class DiplomacyController(IMediator mediator) : ControllerBase
         return Ok(offerId);
     }
 
+    [HttpPost("offers/peace")]
+    public async Task<IActionResult> SendPeaceOffer(SendPeaceOfferCommand command)
+    {
+        var offerId = await mediator.Send(command);
+        return Ok(offerId);
+    }
 
     [HttpPost("offers/war")]
     public async Task<IActionResult> DeclareWar(DeclareWarCommand command)

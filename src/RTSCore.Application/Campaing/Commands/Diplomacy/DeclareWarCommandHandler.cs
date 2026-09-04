@@ -15,7 +15,7 @@ public class DeclareWarCommandHandler(IUnitOfWork unitOfWork) : IRequestHandler<
         );
         Guard.Against.NotFoundRelation(relation, request.Initiator, request.Target);
 
-        relation.DeclareWare();
+        relation.DeclareWar();
         await unitOfWork.SaveChangesAsync(cancellationToken);
     }
 }

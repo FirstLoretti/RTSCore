@@ -66,7 +66,7 @@ public class DiplomacyRelation
         ChangeStanding(GameBalance.Diplomacy.AcceptTradeOfferBonus);
     }
 
-    public void DeclareWare()
+    public void DeclareWar()
     {
         if (InWar)
         {
