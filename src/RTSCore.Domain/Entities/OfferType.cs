@@ -5,5 +5,5 @@ public enum OfferType
     None = 0,
     TradeAgreement,
     DeclareWar,
-    MakePease
+    PeaceTreaty
 }

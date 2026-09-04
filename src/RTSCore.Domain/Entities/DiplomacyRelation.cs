@@ -34,6 +34,14 @@ public class DiplomacyRelation
 
     private DiplomacyRelation() { }
 
+    public void ThrowIfCannotProposePeaceOffer()
+    {
+        if (!InWar)
+        {
+            throw new GameRuleException("Нельзя заключить мир. Фракции уже в состоянии мира");
+        }
+    }
+
     public void OpenTrade()
     {
         if (InWar)
@@ -69,6 +77,17 @@ public class DiplomacyRelation
 
         InWar = true;
         ChangeStanding(GameBalance.Diplomacy.DeclareWarPenalty);
+    }
+
+    public void MakePeace()
+    {
+        if (!InWar)
+        {
+            throw new GameRuleException("Нельзя заключить мир. Фракции уже в состоянии мира");
+        }
+
+        InWar = false;
+        ChangeStanding(GameBalance.Diplomacy.MakePeaceBonus);
     }
 
     public void CancelTrade()

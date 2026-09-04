@@ -19,17 +19,17 @@ public class SqlDiplomacyOfferRepository(AppDbContext context) : IDiplomacyOffer
     }
 
     public async Task<HashSet<FactionType>> GetFactionsUnderNegotiationAsync(
-        FactionType aiFaction,
+        FactionType initiator,
         CancellationToken cancellationToken
     )
     {
         var pendingOffers = await context.DiplomacyOffers
             .AsNoTracking()
-            .Where(o => o.Status == OfferStatus.Pending && (o.Initiator == aiFaction || o.Target == aiFaction))
+            .Where(o => o.Status == OfferStatus.Pending && (o.Initiator == initiator || o.Target == initiator))
             .Select(o => new { o.Initiator, o.Target })
             .ToListAsync(cancellationToken);
 
-        return [.. pendingOffers.Select(o => o.Initiator == aiFaction ? o.Target : o.Initiator)];
+        return [.. pendingOffers.Select(o => o.Initiator == initiator ? o.Target : o.Initiator)];
     }
 
     public async Task<IReadOnlyCollection<DiplomacyOffer>> GetFactionOffersAsync(

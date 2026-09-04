@@ -268,9 +268,73 @@ public class ApplicationIntegrationTests
     #region Diplomacy
 
     [Theory]
+    [InlineData(true, false, false, typeof(NotFoundException))]
+    [InlineData(false, false, false, typeof(GameRuleException))]
+    [InlineData(false, true, true, null)]
+    public async Task Mediator_SendPeaceOffer_ShouldHandleRulesCorrectly(
+        bool isRelationNull,
+        bool startInWar,
+        bool shouldSucceed,
+        Type? expectedExceptionType
+    )
+    {
+        var (dbName, serviceProvider) = SetupTestInvironment();
+
+        var initiator = FactionType.England;
+        var target = FactionType.France;
+
+        using (var scope = serviceProvider.CreateScope())
+        {
+            var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            var england = new Faction(FactionType.England, 0, PlayerType.Human);
+            var france = new Faction(FactionType.France, 0, PlayerType.Ai);
+
+            if (!isRelationNull)
+            {
+                var relation = new DiplomacyRelation(initiator, target, 0);
+                context.DiplomacyRelations.Add(relation);
+
+                if (startInWar)
+                {
+                    relation.DeclareWare();
+                }
+            }
+            context.Factions.Add(england);
+            context.Factions.Add(france);
+
+            await context.SaveChangesAsync();
+        }
+
+        using (var scope = serviceProvider.CreateScope())
+        {
+            var command = new SendPeaceOfferCommand(initiator, target);
+            var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+            var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+            if (shouldSucceed)
+            {
+                var offerId = await mediator.Send(command);
+
+                Assert.NotEqual(Guid.Empty, offerId);
+
+                var offer = context.DiplomacyOffers.Single();
+
+                Assert.Equal(OfferStatus.Pending, offer.Status);
+                Assert.Equal(OfferType.PeaceTreaty, offer.Type);
+            }
+            else
+            {
+                await Assert.ThrowsAsync(expectedExceptionType!, async () => await mediator.Send(command));
+            }
+        }
+
+        DeleteDatabase(dbName);
+    }
+
+    [Theory]
     [InlineData(true, typeof(NotFoundException))]
     [InlineData(false, null)]
-    public async Task Mediator_SendWarOffer_ShouldHandleRulesCorrectly(
+    public async Task Mediator_DeclareWar_ShouldHandleRulesCorrectly(
         bool isRelationNull,
         Type? expectedExceptionType
     )
