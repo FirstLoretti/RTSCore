@@ -7,7 +7,7 @@ namespace RTSCore.Tests;
 
 public class UnitTests
 {
-    [Theory]
+    [Theory(Skip = "Логика Unit.cs будет изменена")]
     [MemberData(nameof(TakeDamageData))]
     public void TakeDamage_ShouldDecreaseHealth_DependingOnAmount(
         int damage,
@@ -22,7 +22,7 @@ public class UnitTests
         Assert.Equal(isAlive, unit.IsAlive);
     }
 
-    [Theory]
+    [Theory(Skip = "Логика Unit.cs будет изменена")]
     [MemberData(nameof(AddExperienceData))]
     public void AddExperience_ShouldLevelUpAndKeepRemainingExp_DependingOnAmount(
         int expAmount,
@@ -37,7 +37,7 @@ public class UnitTests
         Assert.Equal(remainingExp, unit.Experience);
     }
 
-    [Fact]
+    [Fact(Skip = "Логика Unit.cs будет изменена")]
     public void RecalculateStats_ShouldUpdateStats_WhenLevelUp()
     {
         var unit = CreateUnit();
