@@ -25,6 +25,32 @@ public class WebIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
     #region DiplomacyController
 
     [Fact]
+    public async Task DeclareWar_WithValidCommand_ShouldReturnNoContent()
+    {
+        var initiator = FactionType.England;
+        var target = FactionType.France;
+
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var england = new Faction(initiator, 0, PlayerType.Human);
+            var france = new Faction(target, 0, PlayerType.Ai);
+            var relation = new DiplomacyRelation(initiator, target, 0);
+            var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+            context.Factions.Add(england);
+            context.Factions.Add(france);
+            context.DiplomacyRelations.Add(relation);
+
+            await context.SaveChangesAsync();
+        }
+
+        var command = new DeclareWarCommand(initiator, target);
+        var response = await _client.PostAsJsonAsync("api/diplomacy/offers/war", command);
+
+        Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+    }
+
+    [Fact]
     public async Task SendTradeOffer_WithValidCommand_ShouldReturnOkWithGuid()
     {
 
@@ -47,7 +73,7 @@ public class WebIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
         }
 
         var command = new SendTradeOfferCommand(initiator, target);
-        var response = await _client.PostAsJsonAsync("api/diplomacy/offers", command);
+        var response = await _client.PostAsJsonAsync("api/diplomacy/offers/trade", command);
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 

@@ -10,11 +10,19 @@ namespace RTSCore.WebApi.Controllers;
 [Route("api/[controller]")]
 public class DiplomacyController(IMediator mediator) : ControllerBase
 {
-    [HttpPost("offers")]
+    [HttpPost("offers/trade")]
     public async Task<IActionResult> SendTradeOffer(SendTradeOfferCommand command)
     {
         var offerId = await mediator.Send(command);
         return Ok(offerId);
+    }
+
+
+    [HttpPost("offers/war")]
+    public async Task<IActionResult> DeclareWar(DeclareWarCommand command)
+    {
+        await mediator.Send(command);
+        return NoContent();
     }
 
     [HttpPost("offers/{id}/accept")]
