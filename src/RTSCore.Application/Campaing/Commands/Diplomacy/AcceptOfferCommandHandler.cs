@@ -23,6 +23,10 @@ public class AcceptOfferCommandHandler(IUnitOfWork unitOfWork) : IRequestHandler
         {
             relation.OpenTrade();
         }
+        else if (offer.Type == OfferType.PeaceTreaty)
+        {
+            relation.MakePeace();
+        }
         else
         {
             throw new NotImplementedException($"Логика для типа соглашений {offer.Type} не реализована");

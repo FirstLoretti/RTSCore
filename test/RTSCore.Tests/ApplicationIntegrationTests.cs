@@ -332,10 +332,11 @@ public class ApplicationIntegrationTests
     }
 
     [Theory]
-    [InlineData(true, typeof(NotFoundException))]
-    [InlineData(false, null)]
+    [InlineData(true, GameBalance.Diplomacy.InitialStanding, typeof(NotFoundException))]
+    [InlineData(false, GameBalance.Diplomacy.InitialStanding, null)]
     public async Task Mediator_DeclareWar_ShouldHandleRulesCorrectly(
         bool isRelationNull,
+        int initialStanding,
         Type? expectedExceptionType
     )
     {
@@ -351,7 +352,7 @@ public class ApplicationIntegrationTests
 
             if (!isRelationNull)
             {
-                var relation = new DiplomacyRelation(initiator, target, 0);
+                var relation = new DiplomacyRelation(initiator, target, initialStanding);
                 context.DiplomacyRelations.Add(relation);
             }
             context.Factions.Add(england);
@@ -388,7 +389,7 @@ public class ApplicationIntegrationTests
             {
                 Assert.NotNull(relation);
                 Assert.True(relation.InWar);
-                Assert.Equal(0 + GameBalance.Diplomacy.DeclareWarPenalty, relation.Standing);
+                Assert.Equal(initialStanding + GameBalance.Diplomacy.DeclareWarPenalty, relation.Standing);
             }
         }
     }
@@ -468,8 +469,16 @@ public class ApplicationIntegrationTests
         DeleteDatabase(dbName);
     }
 
-    [Fact]
-    public async Task Mediator_AcceptOffer_ShouldSuccessfullyTranslateDomainChangesToDatabase()
+    [Theory]
+    [InlineData(OfferType.PeaceTreaty, GameBalance.Diplomacy.InitialStanding, true, true, false)]
+    [InlineData(OfferType.TradeAgreement, GameBalance.Diplomacy.InitialStanding, false, true, true)]
+    public async Task Mediator_AcceptOffer_ShouldSuccessfullyTranslateDomainChangesToDatabase(
+        OfferType offerType,
+        int initialStanding,
+        bool inWar,
+        bool expectedPeace,
+        bool expectedTrade
+    )
     {
         var (dbName, serviceProvider) = SetupTestInvironment();
 
@@ -483,14 +492,20 @@ public class ApplicationIntegrationTests
 
             var england = new Faction(initiator, 0, PlayerType.Human);
             var france = new Faction(target, 0, PlayerType.Ai);
-            var relation = new DiplomacyRelation(initiator, target, GameBalance.Diplomacy.MinStandingForTrade);
-            var tradeOffer = new DiplomacyOffer(initiator, target, OfferType.TradeAgreement);
-            offerId = tradeOffer.Id;
+            var relation = new DiplomacyRelation(initiator, target, initialStanding);
+            var offer = new DiplomacyOffer(initiator, target, offerType);
+            offerId = offer.Id;
+
+            if (inWar)
+            {
+                relation.DeclareWar();
+            }
 
             context.Factions.Add(england);
             context.Factions.Add(france);
             context.DiplomacyRelations.Add(relation);
-            context.DiplomacyOffers.Add(tradeOffer);
+            context.DiplomacyOffers.Add(offer);
+
             await context.SaveChangesAsync();
         }
 
@@ -506,21 +521,33 @@ public class ApplicationIntegrationTests
             var dbOffer = await context.DiplomacyOffers.FirstOrDefaultAsync();
             var dbRelation = await context.DiplomacyRelations.FirstOrDefaultAsync();
 
-            var expectedStanding =
-                GameBalance.Diplomacy.AcceptTradeOfferBonus + GameBalance.Diplomacy.MinStandingForTrade;
+            var expectedStanding = CalculateExpectedStanding(
+                initialStanding, false, offerType, OfferStatus.Accepted, inWar
+            );
+
 
             Assert.NotNull(dbOffer);
             Assert.Equal(OfferStatus.Accepted, dbOffer.Status);
+
             Assert.NotNull(dbRelation);
             Assert.Equal(expectedStanding, dbRelation.Standing);
-            Assert.True(dbRelation.HasTradeAgreement);
+            Assert.Equal(expectedPeace, !dbRelation.InWar);
+            Assert.Equal(expectedTrade, dbRelation.HasTradeAgreement);
         }
 
         DeleteDatabase(dbName);
     }
 
-    [Fact]
-    public async Task Mediator_RejectOffer_ShouldSuccessfullyTranslateDomainChangesToDatabase()
+    [Theory]
+    [InlineData(OfferType.PeaceTreaty, GameBalance.Diplomacy.InitialStanding, true, false, false)]
+    [InlineData(OfferType.TradeAgreement, GameBalance.Diplomacy.InitialStanding, false, true, false)]
+    public async Task Mediator_RejectOffer_ShouldSuccessfullyTranslateDomainChangesToDatabase(
+        OfferType offerType,
+        int initialStanding,
+        bool inWar,
+        bool expectedPeace,
+        bool expectedTrade
+    )
     {
         var (dbName, serviceProvider) = SetupTestInvironment();
 
@@ -532,16 +559,22 @@ public class ApplicationIntegrationTests
         {
             var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-            var england = new Faction(initiator, 0, PlayerType.Ai);
-            var france = new Faction(target, 0, PlayerType.Human);
-            var relation = new DiplomacyRelation(initiator, target, GameBalance.Diplomacy.StartingStanding);
-            var offer = new DiplomacyOffer(initiator, target, OfferType.TradeAgreement);
+            var england = new Faction(initiator, gold: 0, PlayerType.Ai);
+            var france = new Faction(target, gold: 0, PlayerType.Human);
+            var relation = new DiplomacyRelation(initiator, target, initialStanding);
+            var offer = new DiplomacyOffer(initiator, target, offerType);
             offerId = offer.Id;
+
+            if (inWar)
+            {
+                relation.DeclareWar();
+            }
 
             context.Factions.Add(england);
             context.Factions.Add(france);
             context.DiplomacyRelations.Add(relation);
             context.DiplomacyOffers.Add(offer);
+
             await context.SaveChangesAsync();
         }
 
@@ -556,10 +589,13 @@ public class ApplicationIntegrationTests
             var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
             var relation = await context.DiplomacyRelations.FirstOrDefaultAsync();
             var offer = await context.DiplomacyOffers.FirstOrDefaultAsync();
-            var expectedStanding = GameBalance.Diplomacy.StartingStanding + GameBalance.Diplomacy.RejectOfferPenalty;
+            var expectedStanding = CalculateExpectedStanding(
+                initialStanding, alreadyTraded: false, offerType, OfferStatus.Rejeсted, declareWar: inWar
+            );
 
             Assert.NotNull(relation);
-            Assert.False(relation.HasTradeAgreement);
+            Assert.Equal(expectedTrade, relation.HasTradeAgreement);
+            Assert.Equal(expectedPeace, !relation.InWar);
             Assert.Equal(expectedStanding, relation.Standing);
 
             Assert.NotNull(offer);
@@ -1047,7 +1083,10 @@ public class ApplicationIntegrationTests
         var aiFaction = FactionType.England;
         var initiator = FactionType.France;
         Guid offerId;
-        UnitTemplate[] unitTemplates = [new(UnitType.EnglandPeasant, "TU", 0, 100, 10, 10, 10, 0, 0, 0, 0)];
+        UnitTemplate[] unitTemplates =
+        [
+            new(UnitType.EnglandPeasant, "TU", 0, MaxHealth: 100, Damage: 10, Armor: 10, 0, 0, 0, 0, 0)
+        ];
 
         var (dbName, serviceProvider) = SetupTestInvironment(services =>
            services.AddSingleton<IReadOnlyCollection<UnitTemplate>>(unitTemplates));
@@ -1056,8 +1095,8 @@ public class ApplicationIntegrationTests
         {
             var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-            var englandAi = new Faction(aiFaction, 0, PlayerType.Ai);
-            var france = new Faction(initiator, 0, PlayerType.Human);
+            var englandAi = new Faction(aiFaction, gold: 0, PlayerType.Ai);
+            var france = new Faction(initiator, gold: 0, PlayerType.Human);
             var relation = new DiplomacyRelation(aiFaction, initiator, initialStandings);
             var offer = new DiplomacyOffer(initiator, aiFaction, OfferType.TradeAgreement);
             offerId = offer.Id;
@@ -1069,16 +1108,18 @@ public class ApplicationIntegrationTests
 
             for (int i = 0; i < initiatorCityCount; i++)
             {
-                context.Cities.Add(new City(new CityPreset($"test_city{i}", "TC", CityType.Village, 1, []), initiator));
+                context.Cities.Add(
+                    new City(new CityPreset($"t_c{i}", "TC", CityType.Village, CurrentPopulation: 0, []), initiator)
+                );
             }
 
             for (int i = 0; i < initiatorUnitsCount; i++)
             {
-                context.Units.Add(new Unit($"initiator_unit_{i}", initiator, unitTemplates[0]));
+                context.Units.Add(new Unit($"i_u_{i}", initiator, unitTemplates[0]));
             }
             for (int i = 0; i < aiUnitsCount; i++)
             {
-                context.Units.Add(new Unit($"ai_unit_{i}", aiFaction, unitTemplates[0]));
+                context.Units.Add(new Unit($"ai_u_{i}", aiFaction, unitTemplates[0]));
             }
 
             context.Factions.Add(englandAi);
@@ -1104,14 +1145,8 @@ public class ApplicationIntegrationTests
             var relation = await context.DiplomacyRelations.FirstOrDefaultAsync();
 
             Assert.NotNull(relation);
-
-            var expectedStanding = CalculateExpectedStanding(
-                initialStandings, alreadyTraded, OfferType.TradeAgreement, expectedOfferStatus, shouldDeclareWar
-            );
-
             Assert.Equal(expectedOfferStatus, incomingOffer.Status);
             Assert.Equal(expectedOffersCount, dbOffers.Count);
-            Assert.Equal(expectedStanding, relation.Standing);
             Assert.Equal(shouldDeclareWar, relation.InWar);
 
             if (shouldDeclareWar)
@@ -1251,6 +1286,12 @@ public class ApplicationIntegrationTests
         {
             current += (offerStatus == OfferStatus.Accepted)
                 ? GameBalance.Diplomacy.AcceptTradeOfferBonus
+                : GameBalance.Diplomacy.RejectOfferPenalty;
+        }
+        else if (offerType == OfferType.PeaceTreaty)
+        {
+            current += (offerStatus == OfferStatus.Accepted)
+                ? GameBalance.Diplomacy.AcceptPeaceOfferBonus
                 : GameBalance.Diplomacy.RejectOfferPenalty;
         }
 

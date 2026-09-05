@@ -153,7 +153,7 @@ public class WebIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
 
             var england = new Faction(initiator, 0, PlayerType.Ai);
             var france = new Faction(target, 0, PlayerType.Human);
-            var relation = new DiplomacyRelation(initiator, target, GameBalance.Diplomacy.StartingStanding);
+            var relation = new DiplomacyRelation(initiator, target, GameBalance.Diplomacy.InitialStanding);
             var offer = new DiplomacyOffer(initiator, target, OfferType.TradeAgreement);
             offerId = offer.Id;
 

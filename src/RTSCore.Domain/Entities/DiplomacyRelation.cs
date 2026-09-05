@@ -99,7 +99,7 @@ public class DiplomacyRelation
         }
 
         InWar = false;
-        ChangeStanding(GameBalance.Diplomacy.MakePeaceBonus);
+        ChangeStanding(GameBalance.Diplomacy.AcceptPeaceOfferBonus);
     }
 
     public void CancelTrade()
