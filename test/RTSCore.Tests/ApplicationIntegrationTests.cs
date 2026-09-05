@@ -13,14 +13,14 @@ using RTSCore.Domain.Interfaces;
 using RTSCore.Domain.ValueObjects;
 using RTSCore.Domain.ValueObjects.Presets;
 using RTSCore.Infrastructure.Persistence;
-
-using Unit = RTSCore.Domain.Entities.Unit;
 using RTSCore.Domain.Services;
 using RTSCore.Application.Cities.Queries;
 using RTSCore.Application.Cities.Queries.Common;
 using RTSCore.Application.Units.Commands;
 using RTSCore.Application.Campaing.Commands.Diplomacy;
 using RTSCore.Application.Campaing.Services.Diplomacy;
+
+using Unit = RTSCore.Domain.Entities.Unit;
 
 namespace RTSCore.Tests;
 
@@ -1060,17 +1060,24 @@ public class ApplicationIntegrationTests
 
     [Theory]
     // Хорошие отношения, силы равны. Предложение торговли отклоняется. Не объявляет войну
-    [InlineData(true, DiplomacyRelation.MaxStanding, 1, 1, 1, 1, OfferStatus.Rejeсted, false)]
+    [InlineData(true, false, OfferType.TradeAgreement, DiplomacyRelation.MaxStanding, 1, 1, 1, 1, OfferStatus.Rejeсted, false)]
     // Плохие отношения, ии сильнее. Предложение торговли отклоняется. Объявляет войну, торговля разрывается
-    [InlineData(true, -50, 1, 1, 2, 1, OfferStatus.Rejeсted, true)]
+    [InlineData(true, false, OfferType.TradeAgreement, -50, 1, 1, 2, 1, OfferStatus.Rejeсted, true)]
     // Плохие отношения, войск нету. Предложение торговли отклоняется. Не объявляет войну
-    [InlineData(false, GameBalance.Diplomacy.MinStandingForTrade - 1, 15, 0, 0, 1, OfferStatus.Rejeсted, false)]
+    [InlineData(false, false, OfferType.TradeAgreement, GameBalance.Diplomacy.MinStandingForTrade - 1, 15, 0, 0, 1, OfferStatus.Rejeсted, false)]
     // Плохие отношения, силы равны. Предложение торговли принимается. Не объявляет войну
-    [InlineData(false, GameBalance.Diplomacy.MinStandingForTrade + 1, 15, 1, 1, 1, OfferStatus.Accepted, false)]
+    [InlineData(false, false, OfferType.TradeAgreement, GameBalance.Diplomacy.MinStandingForTrade + 1, 15, 1, 1, 1, OfferStatus.Accepted, false)]
     // Плохие отношения, ии сильнее. Предложение торговли отклоняется. Объявляет войну
-    [InlineData(false, GameBalance.Diplomacy.MinStandingForTrade - 1, 1, 1, 2, 1, OfferStatus.Rejeсted, true)]
+    [InlineData(false, false, OfferType.TradeAgreement, GameBalance.Diplomacy.MinStandingForTrade - 1, 1, 1, 2, 1, OfferStatus.Rejeсted, true)]
+    // Война. Плохие отношения, оппонент сильнее. Предложение мира принимается. Война заканчивается
+    [InlineData(false, true, OfferType.PeaceTreaty, -50, 1, 9, 3, 1, OfferStatus.Accepted, false)]
+    // Война. Плохие отношения, силы равны. Предложение мира отклоняется. Война продолжается
+    [InlineData(false, true, OfferType.PeaceTreaty, -50, 1, 9, 9, 1, OfferStatus.Rejeсted, true)]
+
     public async Task AiDiplomacy_ShouldMakeCorrectDecisions_BasedOnUtilityMath(
         bool alreadyTraded,
+        bool startInWar,
+        OfferType incomingOfferType,
         int initialStandings,
         int initiatorCityCount,
         int initiatorUnitsCount,
@@ -1098,12 +1105,16 @@ public class ApplicationIntegrationTests
             var englandAi = new Faction(aiFaction, gold: 0, PlayerType.Ai);
             var france = new Faction(initiator, gold: 0, PlayerType.Human);
             var relation = new DiplomacyRelation(aiFaction, initiator, initialStandings);
-            var offer = new DiplomacyOffer(initiator, aiFaction, OfferType.TradeAgreement);
+            var offer = new DiplomacyOffer(initiator, aiFaction, incomingOfferType);
             offerId = offer.Id;
 
             if (alreadyTraded)
             {
                 relation.OpenTrade();
+            }
+            if (startInWar)
+            {
+                relation.DeclareWar();
             }
 
             for (int i = 0; i < initiatorCityCount; i++)
@@ -1157,8 +1168,6 @@ public class ApplicationIntegrationTests
 
         DeleteDatabase(dbName);
     }
-
-
 
     #endregion
 
