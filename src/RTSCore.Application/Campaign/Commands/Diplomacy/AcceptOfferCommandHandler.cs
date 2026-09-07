@@ -5,7 +5,7 @@ using RTSCore.Domain.Common;
 using RTSCore.Domain.Entities;
 using RTSCore.Domain.Interfaces;
 
-namespace RTSCore.Application.Campaing.Commands.Diplomacy;
+namespace RTSCore.Application.Campaign.Commands.Diplomacy;
 
 public class AcceptOfferCommandHandler(IUnitOfWork unitOfWork) : IRequestHandler<AcceptOfferCommand>
 {
@@ -14,7 +14,7 @@ public class AcceptOfferCommandHandler(IUnitOfWork unitOfWork) : IRequestHandler
         var offer = await unitOfWork.DiplomacyOfferRepository.GetOfferAsync(request.OfferId, cancellationToken);
         Guard.Against.NotFound(offer, request.OfferId);
 
-        var relation = await unitOfWork.DiplomacyRelationRepository.GetRelationAsync(
+        var relation = await unitOfWork.DiplomacyRelationRepository.GetAsync(
             offer.Initiator, offer.Target, cancellationToken
         );
         Guard.Against.NotFoundRelation(relation, offer.Initiator, offer.Target);

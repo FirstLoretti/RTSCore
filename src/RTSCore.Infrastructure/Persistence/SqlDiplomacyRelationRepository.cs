@@ -13,7 +13,7 @@ public class SqlDiplomacyRelationRepository(AppDbContext context) : IDiplomacyRe
         context.DiplomacyRelations.Add(relation);
     }
 
-    public async Task<DiplomacyRelation?> GetRelationAsync(
+    public async Task<DiplomacyRelation?> GetAsync(
         FactionType factionA,
         FactionType factionB,
         CancellationToken cancellationToken
@@ -29,8 +29,15 @@ public class SqlDiplomacyRelationRepository(AppDbContext context) : IDiplomacyRe
             .FirstOrDefaultAsync(r => r.FactionA == first && r.FactionB == second, cancellationToken);
     }
 
-    public async Task<DiplomacyOffer?> GetDiplomacyOfferAsync(Guid id, CancellationToken cancellationToken)
+    public async Task<IReadOnlyList<DiplomacyRelation>> GetActiveTradeAgreementsForFaction(
+        FactionType faction,
+        CancellationToken cancellationToken
+    )
     {
-        return await context.DiplomacyOffers.FindAsync([id], cancellationToken);
+        return await context.DiplomacyRelations
+            .AsNoTracking()
+            .Where(r => r.HasTradeAgreement && !r.InWar)
+            .Where(r => r.FactionA == faction || r.FactionB == faction)
+            .ToArrayAsync(cancellationToken);
     }
 }

@@ -5,7 +5,7 @@ using RTSCore.Domain.Common;
 using RTSCore.Domain.Interfaces;
 using RTSCore.Domain.Services;
 
-namespace RTSCore.Application.Campaing.Commands.Diplomacy;
+namespace RTSCore.Application.Campaign.Commands.Diplomacy;
 
 public class RejectOfferCommandHandler(IUnitOfWork unitOfWork) : IRequestHandler<RejectOfferCommand>
 {
@@ -16,7 +16,7 @@ public class RejectOfferCommandHandler(IUnitOfWork unitOfWork) : IRequestHandler
 
         offer.Reject();
 
-        var relation = await unitOfWork.DiplomacyRelationRepository.GetRelationAsync(
+        var relation = await unitOfWork.DiplomacyRelationRepository.GetAsync(
             offer.Initiator, offer.Target, cancellationToken);
         Guard.Against.NotFoundRelation(relation, offer.Initiator, offer.Target);
 

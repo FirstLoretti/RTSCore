@@ -11,8 +11,8 @@ using RTSCore.WebApi.Common;
 using RTSCore.Domain.ValueObjects.Presets;
 
 using RTSCore.Domain.Services;
-using RTSCore.Application.Campaing.Commands;
-using RTSCore.Application.Campaing.Services.Diplomacy;
+using RTSCore.Application.Campaign.Commands;
+using RTSCore.Application.Campaign.Services.Diplomacy;
 
 
 var builder = WebApplication.CreateBuilder(args);

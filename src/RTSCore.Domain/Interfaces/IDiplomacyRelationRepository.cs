@@ -7,9 +7,14 @@ public interface IDiplomacyRelationRepository
 {
     void Add(DiplomacyRelation relation);
 
-    Task<DiplomacyRelation?> GetRelationAsync(
+    Task<DiplomacyRelation?> GetAsync(
         FactionType factionA,
         FactionType factionB,
+        CancellationToken cancellationToken
+    );
+
+    Task<IReadOnlyList<DiplomacyRelation>> GetActiveTradeAgreementsForFaction(
+        FactionType faction,
         CancellationToken cancellationToken
     );
 }

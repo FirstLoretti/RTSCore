@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 using RTSCore.Application.Cities.Commands;
-using RTSCore.Application.Campaing.Commands;
+using RTSCore.Application.Campaign.Commands;
 using RTSCore.Application.Common.Behaviors;
 using RTSCore.Domain.Entities;
 using RTSCore.Domain.Exeptions;
@@ -17,8 +17,8 @@ using RTSCore.Domain.Services;
 using RTSCore.Application.Cities.Queries;
 using RTSCore.Application.Cities.Queries.Common;
 using RTSCore.Application.Units.Commands;
-using RTSCore.Application.Campaing.Commands.Diplomacy;
-using RTSCore.Application.Campaing.Services.Diplomacy;
+using RTSCore.Application.Campaign.Commands.Diplomacy;
+using RTSCore.Application.Campaign.Services.Diplomacy;
 
 using Unit = RTSCore.Domain.Entities.Unit;
 
@@ -168,7 +168,7 @@ public class ApplicationIntegrationTests
     }
 
     [Fact]
-    public async Task Mediator_EndTurn_ShouldAdvanceConstruction_CollectTaxes_IncreasePopulation_CollectBuildingIncome()
+    public async Task Mediator_EndTurn_ShouldAdvanceConstruction_CollectTrade_Tax_AndBuildingsIncome_IncreasePopulation()
     {
         var (dbName, serviceProvider) = SetupTestInvironment();
 
@@ -177,38 +177,62 @@ public class ApplicationIntegrationTests
         var startingPopulation = 1000;
         var startingGold = 1000;
         var factionType = FactionType.England;
+        var partnerFactionType = FactionType.France;
+        var partnerCityCount = 2;
+
+        var marketTemplate = new BuildingTemplate(
+           BuildingType.Market, "MT", Cost: 0, TurnsToConstruct: 0, [CityType.Village], null,
+           [new(BuildingEffectType.GoldIncome, 150f)]
+        );
+        var fieldTemplate = new BuildingTemplate(
+            BuildingType.CultivatedField, "FT", Cost: 0, TurnsToConstruct: 0, [CityType.Village], null,
+            [new(BuildingEffectType.PopulationGrowth, 0.05f), new(BuildingEffectType.GoldIncome, 25f)]
+        );
 
         using (var scope = serviceProvider.CreateScope())
         {
+            var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
             var faction = new Faction(factionType, startingGold, PlayerType.Human);
+            var partnerFaction = new Faction(partnerFactionType, gold: 0, PlayerType.Ai);
+            var relation = new DiplomacyRelation(factionType, partnerFactionType, startingStanding: 0);
             var cityPreset = new CityPreset(cityId, "Test_London", CityType.Settlement, startingPopulation, []);
             var city = new City(cityPreset, factionType);
+
+            for (int i = 0; i < partnerCityCount; i++)
+            {
+                var partnerCity = new City(
+                    new CityPreset($"p_c_{i}", $"$pc{i}", CityType.Village, CurrentPopulation: 0, []),
+                    partnerFactionType
+                );
+                context.Cities.Add(partnerCity);
+            }
 
             var barrack = Building.CreateWithCustomStatus(
                 barrackId, BuildingType.ReqruitBarrack, factionType, city.Id,
                 isConstructed: false,
                 turnsToConstruct: 1
             );
-
-            var field = Building.CreateWithCustomStatus(
-                "test_field", BuildingType.CultivatedField, factionType, city.Id,
+            var market = Building.CreateWithCustomStatus(
+                "test_market", BuildingType.Market, factionType, city.Id,
                 isConstructed: true,
                 turnsToConstruct: 0
             );
-
-            var market = Building.CreateWithCustomStatus(
-                "test_market", BuildingType.Market, factionType, cityId,
+            var field = Building.CreateWithCustomStatus(
+                "test_filed", BuildingType.CultivatedField, factionType, cityId,
                 isConstructed: true,
                 turnsToConstruct: 0
             );
 
             city.RegisterBuilding(barrack);
-            city.RegisterBuilding(field);
             city.RegisterBuilding(market);
+            city.RegisterBuilding(field);
 
-            var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            relation.OpenTrade();
+
             context.Cities.Add(city);
             context.Factions.Add(faction);
+            context.Factions.Add(partnerFaction);
+            context.DiplomacyRelations.Add(relation);
 
             await context.SaveChangesAsync();
         }
@@ -217,12 +241,13 @@ public class ApplicationIntegrationTests
         {
             var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
 
-            await mediator.Send(new EndTurnCommand());
+            await mediator.Send(new EndTurnCommand(factionType));
         }
 
         Building dbBarrack;
         City dbCity;
         Faction dbFaction;
+        DiplomacyRelation dbRelation;
 
         using (var scope = serviceProvider.CreateScope())
         {
@@ -231,6 +256,7 @@ public class ApplicationIntegrationTests
             dbBarrack = await context.Buildings.FirstAsync(b => b.Id == barrackId);
             dbCity = await context.Cities.FirstAsync(c => c.Id == cityId);
             dbFaction = await context.Factions.FirstAsync(f => f.Type == factionType);
+            dbRelation = await context.DiplomacyRelations.SingleAsync();
         }
 
         DeleteDatabase(dbName);
@@ -240,25 +266,29 @@ public class ApplicationIntegrationTests
         Assert.Equal(0, dbBarrack.TurnsToConstruct);
 
         // Assert: увеличение населения
-        var template = GameBalance.Buildings.GetTemplate(BuildingType.CultivatedField);
-        var fieldGrowthBonus = template.Effects
-            .Where(e => e.Type == BuildingEffectType.PopulationGrowth)
-            .Sum(e => e.Value);
+        var fieldGrowthBonus = fieldTemplate.Effects
+            .Single(e => e.Type == BuildingEffectType.PopulationGrowth)
+            .Value;
 
         var populationGrowth = (int)(startingPopulation * (GameBalance.Population.BaseGrowthRate + fieldGrowthBonus));
         var expectedPopulation = startingPopulation + populationGrowth;
 
         Assert.Equal(expectedPopulation, dbCity.Population);
 
-        // Assert: начисление дохода от налогов и здания
-        BuildingType[] testBuildingsType = [BuildingType.CultivatedField, BuildingType.ReqruitBarrack, BuildingType.Market];
+        // Assert: начисление дохода от налогов / здания / торгового договора
         var expectedTaxIncome = startingPopulation * GameBalance.Economy.TaxRatePerCitizen;
-        var expectedBuildingsIncome = (int)testBuildingsType
-            .Select(t => GameBalance.Buildings.GetTemplate(t))
-            .SelectMany(t => t.Effects)
-            .Where(e => e.Type == BuildingEffectType.GoldIncome)
-            .Sum(e => e.Value);
-        var expectedGold = startingGold + expectedTaxIncome + expectedBuildingsIncome;
+
+        var marketGold = marketTemplate.Effects
+            .FirstOrDefault(e => e.Type == BuildingEffectType.GoldIncome)
+            .Value;
+        var fieldGold = fieldTemplate.Effects
+            .FirstOrDefault(e => e.Type == BuildingEffectType.GoldIncome)
+            .Value;
+        var expectedBuildingsIncome = marketGold + fieldGold;
+
+        var expectedTradeIncome = partnerCityCount * GameBalance.Diplomacy.TradeIncomePerPartnerCity;
+
+        var expectedGold = startingGold + expectedTaxIncome + expectedBuildingsIncome + expectedTradeIncome;
 
         Assert.Equal(expectedGold, dbFaction.Gold);
     }

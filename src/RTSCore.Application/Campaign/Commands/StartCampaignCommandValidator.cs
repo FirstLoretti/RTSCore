@@ -2,7 +2,7 @@ using FluentValidation;
 
 using RTSCore.Domain.ValueObjects;
 
-namespace RTSCore.Application.Campaing.Commands;
+namespace RTSCore.Application.Campaign.Commands;
 
 public class StartCampaignCommandValidator : AbstractValidator<StartCampaignCommand>
 {

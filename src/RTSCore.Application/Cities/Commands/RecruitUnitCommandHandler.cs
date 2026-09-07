@@ -21,7 +21,7 @@ public class RecruitUnitCommandHandler(
                 $"Шаблон для юнита типа {request.Type} не содержится в {nameof(GameBalance.Units)}"
             );
 
-        var city = await unitOfWork.CityRepository.GetCityWithBuildingsAsync(request.CityId, cancellationToken)
+        var city = await unitOfWork.CityRepository.GetWithBuildingsAsync(request.CityId, cancellationToken)
             ?? throw new NotFoundException(
                 $"[{nameof(RecruitUnitCommandHandler)}] " +
                 $"Поселения {request.CityId} нет на карте кампании"

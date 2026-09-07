@@ -16,7 +16,7 @@ public class ConstructBuildingCommandHandler(
 {
     public async Task Handle(ConstructBuildingCommand request, CancellationToken cancellationToken)
     {
-        var city = await unitOfWork.CityRepository.GetCityWithBuildingsAsync(request.CityId, cancellationToken)
+        var city = await unitOfWork.CityRepository.GetWithBuildingsAsync(request.CityId, cancellationToken)
             ?? throw new NotFoundException(
                 $"[{nameof(ConstructBuildingCommandHandler)}] " +
                 $"Поселения {request.CityId} нет на карте кампании"

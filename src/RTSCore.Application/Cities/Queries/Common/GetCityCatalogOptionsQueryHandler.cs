@@ -20,7 +20,7 @@ public abstract class GetCityCatalogOptionsQueryHandler<Query, T, Template>(
     public async Task<IReadOnlyCollection<CityCatalogOptionDto<T>>> Handle(Query request, CancellationToken cancellationToken)
     {
         var cityId = request.CityId;
-        var city = await unitOfWork.CityRepository.GetCityWithBuildingsAsync(cityId, cancellationToken)
+        var city = await unitOfWork.CityRepository.GetWithBuildingsAsync(cityId, cancellationToken)
             ?? throw new NotFoundException($"[{nameof(GetCityCatalogOptionsQueryHandler<,,>)}] Поселения {cityId} нет на карте");
 
         var faction = await unitOfWork.FactionRepository.GetFactionAsync(city.OwnerFaction, cancellationToken)

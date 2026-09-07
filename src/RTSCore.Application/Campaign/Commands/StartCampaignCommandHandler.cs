@@ -5,7 +5,7 @@ using RTSCore.Domain.Interfaces;
 using RTSCore.Domain.ValueObjects;
 using RTSCore.Domain.ValueObjects.Presets;
 
-namespace RTSCore.Application.Campaing.Commands;
+namespace RTSCore.Application.Campaign.Commands;
 
 public class StartCampaignCommanHandler(
     IUnitOfWork unitOfWork,

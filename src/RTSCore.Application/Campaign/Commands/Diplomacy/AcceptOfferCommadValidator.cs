@@ -1,6 +1,6 @@
 using FluentValidation;
 
-namespace RTSCore.Application.Campaing.Commands.Diplomacy;
+namespace RTSCore.Application.Campaign.Commands.Diplomacy;
 
 public class AcceptOfferCommandValidator : AbstractValidator<AcceptOfferCommand>
 {

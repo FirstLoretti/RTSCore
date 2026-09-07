@@ -16,18 +16,26 @@ public class SqlCityRepository(AppDbContext context) : ICityRepository
         return await context.Cities.FindAsync([id], cancellationToken);
     }
 
-    public async Task<City?> GetCityWithBuildingsAsync(CityId id, CancellationToken cancellationToken)
+    public async Task<City?> GetWithBuildingsAsync(CityId id, CancellationToken cancellationToken)
     {
         return await context.Cities
             .Include(c => c.Buildings)
             .FirstOrDefaultAsync(c => c.Id == id, cancellationToken);
     }
 
-    public async Task<IReadOnlyCollection<City>> GetCitiesWithBuildingsAsync(CancellationToken cancellationToken)
+    public async Task<IReadOnlyList<City>> GetWithBuildingsAsync(CancellationToken cancellationToken)
     {
         return await context.Cities
             .Include(c => c.Buildings)
             .ToArrayAsync(cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<City>> GetWithBuildingsAsync(FactionType faction, CancellationToken cancellationToken)
+    {
+        return await context.Cities
+            .Where(c => c.OwnerFaction == faction)
+            .Include(c => c.Buildings)
+            .ToListAsync(cancellationToken);
     }
 
     public void AddRange(IEnumerable<City> cities)
@@ -35,7 +43,7 @@ public class SqlCityRepository(AppDbContext context) : ICityRepository
         context.Cities.AddRange(cities);
     }
 
-    public async Task<Dictionary<FactionType, int>> GetFactionToCitiesCount(
+    public async Task<Dictionary<FactionType, int>> GetFactionToCityCount(
         IEnumerable<FactionType> factions,
         CancellationToken cancellationToken
     )

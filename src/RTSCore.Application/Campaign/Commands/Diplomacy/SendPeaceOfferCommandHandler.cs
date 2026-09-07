@@ -5,13 +5,13 @@ using RTSCore.Domain.Common;
 using RTSCore.Domain.Entities;
 using RTSCore.Domain.Interfaces;
 
-namespace RTSCore.Application.Campaing.Commands.Diplomacy;
+namespace RTSCore.Application.Campaign.Commands.Diplomacy;
 
 public class SendPeaceOfferCommanHandler(IUnitOfWork unitOfWork) : IRequestHandler<SendPeaceOfferCommand, Guid>
 {
     public async Task<Guid> Handle(SendPeaceOfferCommand request, CancellationToken cancellationToken)
     {
-        var relation = await unitOfWork.DiplomacyRelationRepository.GetRelationAsync(
+        var relation = await unitOfWork.DiplomacyRelationRepository.GetAsync(
             request.Initiator, request.Target, cancellationToken
         );
         Guard.Against.NotFoundRelation(relation, request.Initiator, request.Target);

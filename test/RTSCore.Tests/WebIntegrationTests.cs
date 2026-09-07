@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 using RTSCore.Application.Cities.Commands;
-using RTSCore.Application.Campaing.Commands;
+using RTSCore.Application.Campaign.Commands;
 using RTSCore.Domain.Entities;
 using RTSCore.Domain.ValueObjects;
 using RTSCore.Domain.ValueObjects.Presets;
@@ -17,7 +17,8 @@ using RTSCore.Infrastructure.Persistence;
 using RTSCore.Domain.Services;
 using RTSCore.Application.Cities.Queries.Common;
 using RTSCore.Application.Units.Commands;
-using RTSCore.Application.Campaing.Commands.Diplomacy;
+using RTSCore.Application.Campaign.Commands.Diplomacy;
+using System.Collections;
 namespace RTSCore.Tests;
 
 public class WebIntegrationTests : IClassFixture<WebApplicationFactory<Program>>, IDisposable
@@ -255,9 +256,20 @@ public class WebIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
     [Fact]
     public async Task EndTurn_ShouldReturnNoContent()
     {
-        var responce = await _client.PostAsJsonAsync("api/campaign/endTurn", new EndTurnCommand());
+        var factionType = FactionType.England;
 
-        Assert.Equal(HttpStatusCode.NoContent, responce.StatusCode);
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            var faction = new Faction(factionType, gold: 0, PlayerType.Ai);
+
+            context.Factions.Add(faction);
+            await context.SaveChangesAsync();
+        }
+
+        var response = await _client.PostAsync($"api/faction/{factionType}/turn/end", _emptyContent);
+
+        Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
     }
 
     #endregion
@@ -429,6 +441,7 @@ public class WebIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
     private readonly HttpClient _client;
     private readonly SqliteConnection _sqliteConnection;
     private readonly WebApplicationFactory<Program> _factory;
+    private readonly HttpContent _emptyContent = new ByteArrayContent([]);
 
     public WebIntegrationTests(WebApplicationFactory<Program> factory)
     {

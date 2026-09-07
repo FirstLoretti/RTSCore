@@ -2,7 +2,7 @@ using MediatR;
 
 using Microsoft.AspNetCore.Mvc;
 
-using RTSCore.Application.Campaing.Commands.Diplomacy;
+using RTSCore.Application.Campaign.Commands.Diplomacy;
 
 namespace RTSCore.WebApi.Controllers;
 

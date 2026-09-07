@@ -71,7 +71,7 @@ public partial class GameBalance
                         Cost: 1500,
                         TurnsToConstruct: 4,
                         AllowedCityTypes: [CityType.Settlement],
-                        Effects: [new(BuildingEffectType.PopulationGrowth, 0.1f)]
+                        Effects: [new(BuildingEffectType.PopulationGrowth, 0.1f), new(BuildingEffectType.GoldIncome, 100f)]
                     )
                 }
             };

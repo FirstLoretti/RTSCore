@@ -2,11 +2,11 @@ using FluentValidation;
 
 using RTSCore.Domain.ValueObjects;
 
-namespace RTSCore.Application.Campaing.Commands.Diplomacy;
+namespace RTSCore.Application.Campaign.Commands.Diplomacy;
 
-public class SendTraidOfferCommandValidator : AbstractValidator<SendTradeOfferCommand>
+public class DeclareWarCommandValidator : AbstractValidator<DeclareWarCommand>
 {
-    public SendTraidOfferCommandValidator()
+    public DeclareWarCommandValidator()
     {
         RuleFor(c => c.Initiator).IsInEnum().NotEqual(FactionType.None);
         RuleFor(c => c.Target).IsInEnum().NotEqual(FactionType.None);

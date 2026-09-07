@@ -10,5 +10,6 @@ public interface IBuildingRepository
     void AddRange(IEnumerable<Building> buildings);
 
     Task<Building?> GetBuildingAsync(BuildingId id, CancellationToken cancellationToken);
-    Task<IEnumerable<Building>> GetUnderConstructionAsync(CancellationToken cancellationToken);
+    Task<IReadOnlyList<Building>> GetUnderConstructionAsync(CancellationToken cancellationToken);
+    Task<IReadOnlyList<Building>> GetUnderConstructionAsync(FactionType faction, CancellationToken cancellationToken);
 }

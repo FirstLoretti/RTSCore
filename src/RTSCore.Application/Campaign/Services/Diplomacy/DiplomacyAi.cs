@@ -1,6 +1,6 @@
 using MediatR;
 
-using RTSCore.Application.Campaing.Commands.Diplomacy;
+using RTSCore.Application.Campaign.Commands.Diplomacy;
 using RTSCore.Application.Common;
 using RTSCore.Domain.Common;
 using RTSCore.Domain.Entities;
@@ -10,7 +10,7 @@ using RTSCore.Domain.ValueObjects;
 
 using Ai = RTSCore.Domain.Services.GameBalance.Diplomacy.Ai;
 
-namespace RTSCore.Application.Campaing.Services.Diplomacy;
+namespace RTSCore.Application.Campaign.Services.Diplomacy;
 
 public class DiplomacyAi(IUnitOfWork unitOfWork, IMediator mediator)
 {
@@ -19,7 +19,7 @@ public class DiplomacyAi(IUnitOfWork unitOfWork, IMediator mediator)
         var otherFactions = await unitOfWork.FactionRepository.GetAnotherFactionsAsync(aiFaction, cancellationToken);
         var allFactions = otherFactions.Concat([aiFaction]);
 
-        var factionToCitiesCount = await unitOfWork.CityRepository.GetFactionToCitiesCount(otherFactions, cancellationToken);
+        var factionToCitiesCount = await unitOfWork.CityRepository.GetFactionToCityCount(otherFactions, cancellationToken);
         var factionToMilitaryPower =
             await unitOfWork.FactionRepository.GetFactionToMilitaryPower(allFactions, cancellationToken
         );
@@ -44,7 +44,7 @@ public class DiplomacyAi(IUnitOfWork unitOfWork, IMediator mediator)
         {
             if (factionsUnderNegotiations.Contains(targetFaction)) continue;
 
-            var relation = await unitOfWork.DiplomacyRelationRepository.GetRelationAsync(
+            var relation = await unitOfWork.DiplomacyRelationRepository.GetAsync(
                 aiFaction, targetFaction, cancellationToken
             );
             Guard.Against.NotFoundRelation(relation, aiFaction, targetFaction);
@@ -135,7 +135,7 @@ public class DiplomacyAi(IUnitOfWork unitOfWork, IMediator mediator)
         CancellationToken cancellationToken
     )
     {
-        var relation = await unitOfWork.DiplomacyRelationRepository.GetRelationAsync(aiFaction, targetFaction, cancellationToken);
+        var relation = await unitOfWork.DiplomacyRelationRepository.GetAsync(aiFaction, targetFaction, cancellationToken);
         Guard.Against.NotFoundRelation(relation, aiFaction, targetFaction);
 
         if (relation.HasTradeAgreement) return false;
@@ -160,7 +160,7 @@ public class DiplomacyAi(IUnitOfWork unitOfWork, IMediator mediator)
         CancellationToken cancellationToken
     )
     {
-        var relation = await unitOfWork.DiplomacyRelationRepository.GetRelationAsync(
+        var relation = await unitOfWork.DiplomacyRelationRepository.GetAsync(
             aiFaction, targetFaction, cancellationToken
         );
         Guard.Against.NotFoundRelation(relation, aiFaction, targetFaction);
@@ -194,7 +194,7 @@ public class DiplomacyAi(IUnitOfWork unitOfWork, IMediator mediator)
         var myPower = factionToMilitaryPower.GetValueOrDefault(aiFaction);
         if (myPower <= 0) return false;
 
-        var relation = await unitOfWork.DiplomacyRelationRepository.GetRelationAsync(aiFaction, targetFaction, cancellationToken);
+        var relation = await unitOfWork.DiplomacyRelationRepository.GetAsync(aiFaction, targetFaction, cancellationToken);
         Guard.Against.NotFoundRelation(relation, aiFaction, targetFaction);
 
         if (relation.InWar) return false;

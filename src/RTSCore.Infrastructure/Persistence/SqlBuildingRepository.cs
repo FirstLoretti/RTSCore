@@ -21,8 +21,17 @@ public class SqlBuildingRepository(AppDbContext context) : IBuildingRepository
         context.Buildings.AddRange(buildings);
     }
 
-    public async Task<IEnumerable<Building>> GetUnderConstructionAsync(CancellationToken cancellationToken)
+    public async Task<IReadOnlyList<Building>> GetUnderConstructionAsync(CancellationToken cancellationToken)
     {
-        return await context.Buildings.Where(b => !b.IsConstructed).ToListAsync(cancellationToken);
+        return await context.Buildings
+            .Where(b => !b.IsConstructed)
+            .ToArrayAsync(cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<Building>> GetUnderConstructionAsync(FactionType faction, CancellationToken cancellationToken)
+    {
+        return await context.Buildings
+            .Where(b => b.OwnerFaction == faction && !b.IsConstructed)
+            .ToArrayAsync(cancellationToken);
     }
 }
