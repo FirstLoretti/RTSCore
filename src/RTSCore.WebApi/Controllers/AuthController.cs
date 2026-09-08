@@ -17,4 +17,12 @@ public class AuthController(IMediator mediator) : ControllerBase
         string token = await mediator.Send(command, cancellationToken);
         return Ok(token);
     }
+
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [HttpPost("login")]
+    public async Task<ActionResult<string>> Login(LoginUserCommand command, CancellationToken cancellationToken)
+    {
+        string token = await mediator.Send(command, cancellationToken);
+        return Ok(token);
+    }
 }

@@ -8,7 +8,7 @@ public class RegisterUserCommandValidator : AbstractValidator<RegisterUserComman
 {
     public RegisterUserCommandValidator()
     {
-        RuleFor(c => c.Name).NotEmpty().Length(1, 25);
+        RuleFor(c => c.Name).NotEmpty().MaximumLength(25);
         RuleFor(c => c.Password).NotEmpty().Length(8, 25);
         RuleFor(c => c.Faction).IsInEnum().NotEqual(FactionType.None);
     }
