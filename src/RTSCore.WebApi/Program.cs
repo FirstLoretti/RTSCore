@@ -13,6 +13,9 @@ using RTSCore.Domain.ValueObjects.Presets;
 using RTSCore.Domain.Services;
 using RTSCore.Application.Campaign.Commands;
 using RTSCore.Application.Campaign.Services.Diplomacy;
+using RTSCore.Application.Common.Settings;
+using RTSCore.Domain.Interfaces.Authentication;
+using RTSCore.Infrastructure.Authentication;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -28,10 +31,15 @@ builder.Services.AddScoped<IUnitOfWork, EfUnitOfWork>();
 builder.Services.AddScoped<IBuildingRepository, SqlBuildingRepository>();
 builder.Services.AddScoped<IFactionRepository, SqlFactionRepository>();
 builder.Services.AddScoped<ICityRepository, SqlCityRepository>();
+builder.Services.AddScoped<IUserRepository, SqlUserRepository>();
 builder.Services.AddScoped<DiplomacyAi>();
 builder.Services.AddSingleton(Array.Empty<FactionPreset>());
 builder.Services.AddSingleton(GameBalance.Buildings.GetAllTemplates);
 builder.Services.AddSingleton(GameBalance.Units.GetAllTemplates);
+
+builder.Services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
+builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection(JwtSettings.SectionName));
+
 
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();

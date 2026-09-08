@@ -10,6 +10,7 @@ public class EfUnitOfWork(AppDbContext context) : IUnitOfWork
     public IFactionRepository FactionRepository { get; } = new SqlFactionRepository(context);
     public IDiplomacyRelationRepository DiplomacyRelationRepository { get; } = new SqlDiplomacyRelationRepository(context);
     public IDiplomacyOfferRepository DiplomacyOfferRepository { get; } = new SqlDiplomacyOfferRepository(context);
+    public IUserRepository UserRepository { get; } = new SqlUserRepository(context);
 
     public async Task SaveChangesAsync(CancellationToken cancellationToken)
     {

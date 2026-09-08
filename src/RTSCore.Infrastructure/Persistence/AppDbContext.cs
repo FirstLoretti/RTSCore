@@ -12,6 +12,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<Faction> Factions { get; set; }
     public DbSet<DiplomacyRelation> DiplomacyRelations { get; set; }
     public DbSet<DiplomacyOffer> DiplomacyOffers { get; set; }
+    public DbSet<User> Users { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

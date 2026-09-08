@@ -8,6 +8,7 @@ public interface IUnitOfWork
     ICityRepository CityRepository { get; }
     IDiplomacyRelationRepository DiplomacyRelationRepository { get; }
     IDiplomacyOfferRepository DiplomacyOfferRepository { get; }
+    IUserRepository UserRepository { get; }
 
     Task SaveChangesAsync(CancellationToken cancellationToken);
 }

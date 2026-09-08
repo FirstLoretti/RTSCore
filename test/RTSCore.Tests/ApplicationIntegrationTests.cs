@@ -1,15 +1,12 @@
 using MediatR;
 
-using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 using RTSCore.Application.Cities.Commands;
 using RTSCore.Application.Campaign.Commands;
-using RTSCore.Application.Common.Behaviors;
 using RTSCore.Domain.Entities;
 using RTSCore.Domain.Exeptions;
-using RTSCore.Domain.Interfaces;
 using RTSCore.Domain.ValueObjects;
 using RTSCore.Domain.ValueObjects.Presets;
 using RTSCore.Infrastructure.Persistence;
@@ -21,10 +18,11 @@ using RTSCore.Application.Campaign.Commands.Diplomacy;
 using RTSCore.Application.Campaign.Services.Diplomacy;
 
 using Unit = RTSCore.Domain.Entities.Unit;
+using RTSCore.Tests.Base;
 
 namespace RTSCore.Tests;
 
-public class ApplicationIntegrationTests
+public class ApplicationIntegrationTests : TestBase
 {
     #region UnitCommands
 
@@ -46,7 +44,7 @@ public class ApplicationIntegrationTests
             new (UnitType.Invulnerable, "Test Invulnerable", 1, 1, 1, 1, 1, 1, 1, 1, 1)
         };
 
-        var (dbName, serviceProvider) = SetupTestInvironment(service =>
+        var serviceProvider = SetupTestInvironment(service =>
             service.AddSingleton<IReadOnlyCollection<UnitTemplate>>(templates));
 
         using (var scope = serviceProvider.CreateScope())
@@ -76,23 +74,19 @@ public class ApplicationIntegrationTests
             }
         }
 
-        Unit? dbUnit;
-
         using (var scope = serviceProvider.CreateScope())
         {
             var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-            dbUnit = await context.Units.FirstOrDefaultAsync();
-        }
+            var dbUnit = await context.Units.FirstOrDefaultAsync();
 
-        DeleteDatabase(dbName);
-
-        if (shouldSucceed)
-        {
-            Assert.Null(dbUnit);
-        }
-        else
-        {
-            Assert.NotNull(dbUnit);
+            if (shouldSucceed)
+            {
+                Assert.Null(dbUnit);
+            }
+            else
+            {
+                Assert.NotNull(dbUnit);
+            }
         }
     }
 
@@ -111,7 +105,7 @@ public class ApplicationIntegrationTests
         PlayerType francePlayerType
     )
     {
-        var (dbName, serviceProvider) = SetupTestInvironment(services =>
+        var serviceProvider = SetupTestInvironment(services =>
         {
             var factionPresets = new FactionPreset[]
             {
@@ -156,8 +150,6 @@ public class ApplicationIntegrationTests
             cities = await context.Cities.ToListAsync();
         }
 
-        DeleteDatabase(dbName);
-
         Assert.Equal(2, players.Count);
         Assert.Equal(englandPlayerType, players.First(p => p.Type == FactionType.England).PlayerType);
         Assert.Equal(francePlayerType, players.First(p => p.Type == FactionType.France).PlayerType);
@@ -170,7 +162,7 @@ public class ApplicationIntegrationTests
     [Fact]
     public async Task Mediator_EndTurn_ShouldAdvanceConstruction_CollectTrade_Tax_AndBuildingsIncome_IncreasePopulation()
     {
-        var (dbName, serviceProvider) = SetupTestInvironment();
+        var serviceProvider = SetupTestInvironment();
 
         var barrackId = new BuildingId("test_barrack");
         var cityId = new CityId("test_london");
@@ -259,7 +251,7 @@ public class ApplicationIntegrationTests
             dbRelation = await context.DiplomacyRelations.SingleAsync();
         }
 
-        DeleteDatabase(dbName);
+
 
         // Assert: продвижение строительства
         Assert.True(dbBarrack.IsConstructed);
@@ -308,7 +300,7 @@ public class ApplicationIntegrationTests
         Type? expectedExceptionType
     )
     {
-        var (dbName, serviceProvider) = SetupTestInvironment();
+        var serviceProvider = SetupTestInvironment();
 
         var initiator = FactionType.England;
         var target = FactionType.France;
@@ -357,8 +349,6 @@ public class ApplicationIntegrationTests
                 await Assert.ThrowsAsync(expectedExceptionType!, async () => await mediator.Send(command));
             }
         }
-
-        DeleteDatabase(dbName);
     }
 
     [Theory]
@@ -370,7 +360,7 @@ public class ApplicationIntegrationTests
         Type? expectedExceptionType
     )
     {
-        var (dbName, serviceProvider) = SetupTestInvironment();
+        var serviceProvider = SetupTestInvironment();
         var initiator = FactionType.England;
         var target = FactionType.France;
 
@@ -438,7 +428,7 @@ public class ApplicationIntegrationTests
     {
         FactionType initiator = FactionType.England;
         FactionType target = FactionType.France;
-        var (dbName, serviceProvider) = SetupTestInvironment();
+        var serviceProvider = SetupTestInvironment();
 
         using (var scope = serviceProvider.CreateScope())
         {
@@ -496,7 +486,7 @@ public class ApplicationIntegrationTests
             }
         }
 
-        DeleteDatabase(dbName);
+
     }
 
     [Theory]
@@ -510,7 +500,7 @@ public class ApplicationIntegrationTests
         bool expectedTrade
     )
     {
-        var (dbName, serviceProvider) = SetupTestInvironment();
+        var serviceProvider = SetupTestInvironment();
 
         var initiator = FactionType.England;
         var target = FactionType.France;
@@ -564,8 +554,6 @@ public class ApplicationIntegrationTests
             Assert.Equal(expectedPeace, !dbRelation.InWar);
             Assert.Equal(expectedTrade, dbRelation.HasTradeAgreement);
         }
-
-        DeleteDatabase(dbName);
     }
 
     [Theory]
@@ -579,7 +567,7 @@ public class ApplicationIntegrationTests
         bool expectedTrade
     )
     {
-        var (dbName, serviceProvider) = SetupTestInvironment();
+        var serviceProvider = SetupTestInvironment();
 
         var initiator = FactionType.England;
         var target = FactionType.France;
@@ -632,7 +620,7 @@ public class ApplicationIntegrationTests
             Assert.Equal(OfferStatus.Rejeсted, offer.Status);
         }
 
-        DeleteDatabase(dbName);
+
     }
 
     #endregion
@@ -656,7 +644,7 @@ public class ApplicationIntegrationTests
     {
         var mockTemplates = CreateMockTemplates();
 
-        var (dbName, serviceProvider) = SetupTestInvironment(services =>
+        var serviceProvider = SetupTestInvironment(services =>
             services.AddSingleton<IReadOnlyCollection<BuildingTemplate>>(mockTemplates));
 
         var targetTemplate = mockTemplates.First(t => t.Type == buildingToConstruct);
@@ -692,7 +680,7 @@ public class ApplicationIntegrationTests
             dbBuildings = await context.Buildings.Where(b => b.Type == buildingToConstruct).ToListAsync();
         }
 
-        DeleteDatabase(dbName);
+
 
         if (shouldSucceed)
         {
@@ -727,7 +715,7 @@ public class ApplicationIntegrationTests
             )
         };
 
-        var (dbName, serviceProvider) = SetupTestInvironment(service =>
+        var serviceProvider = SetupTestInvironment(service =>
             service.AddSingleton<IReadOnlyCollection<UnitTemplate>>(unitTemplates)
         );
 
@@ -776,7 +764,7 @@ public class ApplicationIntegrationTests
             dbUnit = await context.Units.FirstOrDefaultAsync();
         }
 
-        DeleteDatabase(dbName);
+
 
         Assert.NotNull(dbFaction);
         if (shouldSucceed)
@@ -813,7 +801,7 @@ public class ApplicationIntegrationTests
             turnsToConstruct: isConstructed ? 0 : 1
         );
 
-        var (dbName, serviceProvider) = SetupTestInvironment(services =>
+        var serviceProvider = SetupTestInvironment(services =>
             services.AddSingleton<IReadOnlyCollection<BuildingTemplate>>(mockTemplates));
 
         var dbGold = factionGold - buildingTemplate.Cost;
@@ -849,7 +837,7 @@ public class ApplicationIntegrationTests
             dbBuildings = await context.Buildings.ToListAsync();
         }
 
-        DeleteDatabase(dbName);
+
 
         if (shouldSucceed)
         {
@@ -884,7 +872,7 @@ public class ApplicationIntegrationTests
     )
     {
         var mockTemplates = CreateMockTemplates();
-        var (dbName, serviceProvider) = SetupTestInvironment(services =>
+        var serviceProvider = SetupTestInvironment(services =>
             services.AddSingleton<IReadOnlyCollection<BuildingTemplate>>(mockTemplates)
         );
 
@@ -902,7 +890,7 @@ public class ApplicationIntegrationTests
             catalog = await mediator.Send(new GetCityConstructionOptionsQuery(cityId));
         }
 
-        DeleteDatabase(dbName);
+
 
         var catalogBuilding = catalog.FirstOrDefault(b => b.Type == buildingTypeToConstruct);
 
@@ -956,7 +944,7 @@ public class ApplicationIntegrationTests
             turnsToConstruct: isBarrackConstructed ? 0 : 1
         );
 
-        var (dbName, serviceProvider) = SetupTestInvironment(services =>
+        var serviceProvider = SetupTestInvironment(services =>
             services.AddSingleton<IReadOnlyCollection<UnitTemplate>>(unitTemplates)
         );
 
@@ -972,7 +960,7 @@ public class ApplicationIntegrationTests
             catalog = await mediator.Send(new GetCityRecruitOptionsQuery(cityId));
         }
 
-        DeleteDatabase(dbName);
+
 
         var unitOption = catalog.FirstOrDefault(u => u.Type == UnitType.EnglandPeasant);
 
@@ -1015,7 +1003,7 @@ public class ApplicationIntegrationTests
             )
         };
 
-        var (dbName, serviceProvider) = SetupTestInvironment(services =>
+        var serviceProvider = SetupTestInvironment(services =>
         {
             services.AddSingleton<IReadOnlyCollection<UnitTemplate>>(unitTemplates);
             services.AddSingleton<IReadOnlyCollection<BuildingTemplate>>(buildingTemplates);
@@ -1069,7 +1057,7 @@ public class ApplicationIntegrationTests
             dbUnit = await context.Units.FirstOrDefaultAsync(u => u.Type == unitType);
         }
 
-        DeleteDatabase(dbName);
+
 
         if (shouldSucceed)
         {
@@ -1125,7 +1113,7 @@ public class ApplicationIntegrationTests
             new(UnitType.EnglandPeasant, "TU", 0, MaxHealth: 100, Damage: 10, Armor: 10, 0, 0, 0, 0, 0)
         ];
 
-        var (dbName, serviceProvider) = SetupTestInvironment(services =>
+        var serviceProvider = SetupTestInvironment(services =>
            services.AddSingleton<IReadOnlyCollection<UnitTemplate>>(unitTemplates));
 
         using (var scope = serviceProvider.CreateScope())
@@ -1196,46 +1184,12 @@ public class ApplicationIntegrationTests
             }
         }
 
-        DeleteDatabase(dbName);
+
     }
 
     #endregion
 
     #region Common
-
-    private static (string, ServiceProvider) SetupTestInvironment(Action<IServiceCollection>? configure = null)
-    {
-        string dbName = $"app_test_{Guid.NewGuid():N}.db";
-
-        var services = new ServiceCollection();
-
-        services.AddLogging();
-        services.AddDbContext<AppDbContext>(
-            options => options.UseSqlite($"Data Source={dbName}")
-        );
-        services.AddScoped<IUnitOfWork, EfUnitOfWork>();
-        services.AddScoped<IUnitRepository, SqlUnitRepository>();
-        services.AddScoped<ICityRepository, SqlCityRepository>();
-        services.AddScoped<IFactionRepository, SqlFactionRepository>();
-        services.AddScoped<IBuildingRepository, SqlBuildingRepository>();
-        services.AddScoped<DiplomacyAi>();
-        services.AddSingleton(GameBalance.Buildings.GetAllTemplates);
-
-        services.AddTransient(typeof(IPipelineBehavior<,>), typeof(LoggingBehavior<,>));
-        services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(
-            typeof(RecruitUnitCommand).Assembly
-        ));
-
-        configure?.Invoke(services);
-
-        var serviceProvider = services.BuildServiceProvider();
-
-        using var scope = serviceProvider.CreateScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        dbContext.Database.EnsureCreated();
-
-        return (dbName, serviceProvider);
-    }
 
     private static BuildingTemplate[] CreateMockTemplates()
     {
@@ -1301,12 +1255,6 @@ public class ApplicationIntegrationTests
         context.Cities.Add(city);
 
         await context.SaveChangesAsync();
-    }
-
-    private static void DeleteDatabase(string name)
-    {
-        SqliteConnection.ClearAllPools();
-        File.Delete(name);
     }
 
     private static int CalculateExpectedStanding(
