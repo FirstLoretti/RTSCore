@@ -2,7 +2,7 @@ namespace RTSCore.Application.Common.Settings;
 
 public class JwtSettings
 {
-    public const string SectionName = "JwSettings";
+    public const string SectionName = "JwtSettings";
 
     public string Secret { get; init; } = string.Empty;
     public string Issuer { get; init; } = string.Empty;

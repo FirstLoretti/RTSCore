@@ -3,9 +3,6 @@ using System.Net.Http.Json;
 
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.Data.Sqlite;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 using RTSCore.Application.Cities.Commands;
@@ -18,10 +15,12 @@ using RTSCore.Domain.Services;
 using RTSCore.Application.Cities.Queries.Common;
 using RTSCore.Application.Units.Commands;
 using RTSCore.Application.Campaign.Commands.Diplomacy;
-using System.Collections;
+using RTSCore.Tests.Base;
+using Microsoft.AspNetCore.Mvc.Testing;
+
 namespace RTSCore.Tests;
 
-public class WebIntegrationTests : IClassFixture<WebApplicationFactory<Program>>, IDisposable
+public class WebIntegrationTests(WebApplicationFactory<Program> factory) : WebTestBase(factory)
 {
     #region DiplomacyController
 
@@ -437,47 +436,6 @@ public class WebIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
     #endregion
 
     #region Common
-
-    private readonly HttpClient _client;
-    private readonly SqliteConnection _sqliteConnection;
-    private readonly WebApplicationFactory<Program> _factory;
-    private readonly HttpContent _emptyContent = new ByteArrayContent([]);
-
-    public WebIntegrationTests(WebApplicationFactory<Program> factory)
-    {
-        _sqliteConnection = new SqliteConnection("Data Source=:memory:");
-        _sqliteConnection.Open();
-
-        _factory = factory.WithWebHostBuilder(builder => builder.ConfigureServices(
-                services =>
-                {
-                    var descriptor = services.SingleOrDefault(d =>
-                        d.ServiceType == typeof(DbContextOptions<AppDbContext>)
-                    );
-
-                    Assert.NotNull(descriptor);
-
-                    services.Remove(descriptor);
-
-                    services.AddDbContext<AppDbContext>(options =>
-                        options.UseSqlite(_sqliteConnection));
-                }));
-
-        _client = _factory.CreateClient();
-
-        using var scope = _factory.Services.CreateScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        dbContext.Database.EnsureCreated();
-    }
-
-    public void Dispose()
-    {
-        _sqliteConnection.Close();
-        _sqliteConnection.Dispose();
-        _client.Dispose();
-
-        GC.SuppressFinalize(this);
-    }
 
     private async Task<IServiceScope> SeedTestWorldAsync(CityId cityId, int? entityCost = 0, Building? buildingToRegister = null)
     {

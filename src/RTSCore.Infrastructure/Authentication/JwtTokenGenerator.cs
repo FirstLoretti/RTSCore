@@ -13,7 +13,7 @@ namespace RTSCore.Infrastructure.Authentication;
 
 public class JwtTokenGenerator(IOptions<JwtSettings> jwtOptions) : IJwtTokenGenerator
 {
-    private readonly JwtSettings _jwtSettings = jwtOptions.Value;
+    private readonly JwtSettings _jwtOptions = jwtOptions.Value;
 
     public string Generate(User user)
     {
@@ -24,16 +24,16 @@ public class JwtTokenGenerator(IOptions<JwtSettings> jwtOptions) : IJwtTokenGene
             new Claim("faction", user.Faction.ToString())
         };
 
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Secret));
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtOptions.Secret));
 
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
         var token = new SecurityTokenDescriptor
         {
             Subject = new ClaimsIdentity(claims),
-            Expires = DateTime.UtcNow.AddMinutes(_jwtSettings.ExpiryInMinutes),
-            Issuer = _jwtSettings.Issuer,
-            Audience = _jwtSettings.Audience,
+            Expires = DateTime.UtcNow.AddMinutes(_jwtOptions.ExpiryInMinutes),
+            Issuer = _jwtOptions.Issuer,
+            Audience = _jwtOptions.Audience,
             SigningCredentials = credentials
         };
 

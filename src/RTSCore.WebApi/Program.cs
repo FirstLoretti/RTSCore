@@ -22,9 +22,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 
-builder.Services.AddDbContext<AppDbContext>(
-    options => options.UseSqlite("Data Source=game.db")
-);
+builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlite("Data Source=game.db"));
 
 builder.Services.AddScoped<IUnitRepository, SqlUnitRepository>();
 builder.Services.AddScoped<IUnitOfWork, EfUnitOfWork>();
@@ -39,7 +37,6 @@ builder.Services.AddSingleton(GameBalance.Units.GetAllTemplates);
 
 builder.Services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection(JwtSettings.SectionName));
-
 
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
