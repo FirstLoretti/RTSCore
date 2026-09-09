@@ -16,7 +16,9 @@ using RTSCore.Application.Campaign.Services.Diplomacy;
 using RTSCore.Application.Common.Settings;
 using RTSCore.Domain.Interfaces.Authentication;
 using RTSCore.Infrastructure.Authentication;
-
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,14 +33,44 @@ builder.Services.AddScoped<IFactionRepository, SqlFactionRepository>();
 builder.Services.AddScoped<ICityRepository, SqlCityRepository>();
 builder.Services.AddScoped<IUserRepository, SqlUserRepository>();
 builder.Services.AddScoped<IRefreshTokenRepository, SqlRefreshTokenRepository>();
-builder.Services.AddScoped<IRefreshTokenGenerator, RefreshTokenGenerator>();
 builder.Services.AddScoped<DiplomacyAi>();
 builder.Services.AddSingleton(Array.Empty<FactionPreset>());
 builder.Services.AddSingleton(GameBalance.Buildings.GetAllTemplates);
 builder.Services.AddSingleton(GameBalance.Units.GetAllTemplates);
-
+builder.Services.AddSingleton<IRefreshTokenGenerator, RefreshTokenGenerator>();
 builder.Services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
+
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection(JwtSettings.SectionName));
+
+var jwtSettings = builder.Configuration.GetSection(JwtSettings.SectionName).Get<JwtSettings>()
+    ?? throw new InvalidOperationException($"Секция конфигурации {nameof(JwtSettings)} не найдена");
+
+var key = Encoding.UTF8.GetBytes(jwtSettings.Secret);
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.MapInboundClaims = false;
+    options.RequireHttpsMetadata = !builder.Environment.IsDevelopment();
+    options.SaveToken = true;
+
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+
+        ValidIssuer = jwtSettings.Issuer,
+        ValidAudience = jwtSettings.Audience,
+        IssuerSigningKey = new SymmetricSecurityKey(key),
+        ClockSkew = TimeSpan.Zero
+    };
+});
 
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
@@ -65,6 +97,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseExceptionHandler();
+app.UseAuthentication();
+app.UseAuthorization();
 app.MapControllers();
 
 app.Run();

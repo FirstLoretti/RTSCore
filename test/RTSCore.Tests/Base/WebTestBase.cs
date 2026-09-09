@@ -3,14 +3,12 @@ using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
-using RTSCore.Application.Common.Settings;
 using RTSCore.Infrastructure.Persistence;
 
 namespace RTSCore.Tests.Base;
 
 public abstract class WebTestBase : IClassFixture<WebApplicationFactory<Program>>, IDisposable
 {
-
     protected readonly HttpClient _client;
     protected readonly WebApplicationFactory<Program> _factory;
     protected readonly HttpContent _emptyContent = new ByteArrayContent([]);
@@ -24,21 +22,11 @@ public abstract class WebTestBase : IClassFixture<WebApplicationFactory<Program>
 
         _factory = factory.WithWebHostBuilder(builder => builder.ConfigureServices(services =>
         {
-            var jwtSettings = new JwtSettings
-            {
-                Secret = "Sp4E5_S2b`Eq_K00_pqR_MEp3z*zqptL_T331L_Wp0_STp6^1lo1_qPs981_2pO.",
-                Issuer = "TotalWarCore",
-                Audience = "TotalWarCoreClient",
-                ExpiryInMinutes = 60
-            };
-
-            services.AddSingleton(Microsoft.Extensions.Options.Options.Create(jwtSettings));
-
             var descriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<AppDbContext>));
-
-            Assert.NotNull(descriptor);
-
-            services.Remove(descriptor);
+            if (descriptor != null)
+            {
+                services.Remove(descriptor);
+            }
 
             services.AddDbContext<AppDbContext>(options => options.UseSqlite(_sqliteConnection));
         }));

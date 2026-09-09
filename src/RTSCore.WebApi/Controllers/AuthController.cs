@@ -1,5 +1,8 @@
+using System.IdentityModel.Tokens.Jwt;
+
 using MediatR;
 
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 using RTSCore.Application.Authentication.Commands;
@@ -25,5 +28,19 @@ public class AuthController(IMediator mediator) : ControllerBase
     {
         var authResponse = await mediator.Send(command, cancellationToken);
         return Ok(authResponse);
+    }
+
+    [Authorize]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [HttpPost("logout")]
+    public async Task<IActionResult> Logout(CancellationToken cancellationToken)
+    {
+        var userIdClaim = User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+
+        if (!Guid.TryParse(userIdClaim, out var userId)) return Unauthorized();
+
+        await mediator.Send(new LogoutUserCommand(userId), cancellationToken);
+        return NoContent();
     }
 }
