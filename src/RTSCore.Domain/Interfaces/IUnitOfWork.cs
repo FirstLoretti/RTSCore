@@ -9,6 +9,7 @@ public interface IUnitOfWork
     IDiplomacyRelationRepository DiplomacyRelationRepository { get; }
     IDiplomacyOfferRepository DiplomacyOfferRepository { get; }
     IUserRepository UserRepository { get; }
+    IRefreshTokenRepository RefreshTokenRepository { get; }
 
     Task SaveChangesAsync(CancellationToken cancellationToken);
 }

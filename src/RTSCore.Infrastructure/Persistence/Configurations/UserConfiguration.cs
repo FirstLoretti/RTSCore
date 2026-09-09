@@ -12,15 +12,12 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.ToTable("Users");
 
         builder.HasKey(u => u.Id);
+
         builder.HasIndex(u => u.Name).IsUnique();
 
         builder.Property(u => u.Name)
             .IsRequired()
             .HasMaxLength(25);
-
-        builder.Property(u => u.Faction)
-            .IsRequired()
-            .HasConversion<string>();
 
         builder.Property(u => u.PasswordHash).IsRequired();
     }

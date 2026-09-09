@@ -45,6 +45,8 @@ public abstract class TestBase : IDisposable
         services.AddScoped<IFactionRepository, SqlFactionRepository>();
         services.AddScoped<IBuildingRepository, SqlBuildingRepository>();
         services.AddScoped<IUserRepository, SqlUserRepository>();
+        services.AddScoped<IRefreshTokenRepository, SqlRefreshTokenRepository>();
+        services.AddScoped<IRefreshTokenGenerator, RefreshTokenGenerator>();
         services.AddScoped<DiplomacyAi>();
 
         services.AddSingleton(GameBalance.Buildings.GetAllTemplates);

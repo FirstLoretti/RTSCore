@@ -3,6 +3,7 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 using RTSCore.Application.Authentication.Commands;
+using RTSCore.Application.Authentication.Common;
 
 namespace RTSCore.WebApi.Controllers;
 
@@ -12,17 +13,17 @@ public class AuthController(IMediator mediator) : ControllerBase
 {
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [HttpPost("register")]
-    public async Task<ActionResult<string>> Register(RegisterUserCommand command, CancellationToken cancellationToken)
+    public async Task<ActionResult<AuthResponse>> Register(RegisterUserCommand command, CancellationToken cancellationToken)
     {
-        string token = await mediator.Send(command, cancellationToken);
-        return Ok(token);
+        var authResponse = await mediator.Send(command, cancellationToken);
+        return Ok(authResponse);
     }
 
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [HttpPost("login")]
-    public async Task<ActionResult<string>> Login(LoginUserCommand command, CancellationToken cancellationToken)
+    public async Task<ActionResult<AuthResponse>> Login(LoginUserCommand command, CancellationToken cancellationToken)
     {
-        string token = await mediator.Send(command, cancellationToken);
-        return Ok(token);
+        var authResponse = await mediator.Send(command, cancellationToken);
+        return Ok(authResponse);
     }
 }

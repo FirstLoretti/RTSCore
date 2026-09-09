@@ -5,8 +5,8 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 
 using RTSCore.Application.Authentication.Commands;
+using RTSCore.Application.Authentication.Common;
 using RTSCore.Domain.Entities;
-using RTSCore.Domain.ValueObjects;
 using RTSCore.Infrastructure.Persistence;
 using RTSCore.Tests.Base;
 
@@ -17,15 +17,17 @@ public class AuthWebIntegrationTests(WebApplicationFactory<Program> factory) : W
     [Fact]
     public async Task Register_WithValidCommand_ShouldReturnOk_WithValidJwtToken()
     {
-        var command = new RegisterUserCommand("TestUser", "TestPassword", FactionType.England);
+        var command = new RegisterUserCommand("TestUser", "TestPassword");
 
         var response = await _client.PostAsJsonAsync("api/auth/register", command);
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-        var token = await response.Content.ReadAsStringAsync();
+        var authResponse = await response.Content.ReadFromJsonAsync<AuthResponse>();
 
-        Assert.False(string.IsNullOrWhiteSpace(token));
+        Assert.NotNull(authResponse);
+        Assert.False(string.IsNullOrWhiteSpace(authResponse.AccessToken));
+        Assert.False(string.IsNullOrWhiteSpace(authResponse.RefreshToken));
     }
 
     [Fact]
@@ -37,7 +39,7 @@ public class AuthWebIntegrationTests(WebApplicationFactory<Program> factory) : W
         using (var scope = _factory.Services.CreateScope())
         {
             var passwordHash = BCrypt.Net.BCrypt.HashPassword(password);
-            var user = new User(name, passwordHash, FactionType.England);
+            var user = new User(name, passwordHash);
 
             var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
@@ -50,7 +52,10 @@ public class AuthWebIntegrationTests(WebApplicationFactory<Program> factory) : W
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-        var token = await response.Content.ReadAsStringAsync();
-        Assert.False(string.IsNullOrWhiteSpace(token));
+        var authResponse = await response.Content.ReadFromJsonAsync<AuthResponse>();
+
+        Assert.NotNull(authResponse);
+        Assert.False(string.IsNullOrWhiteSpace(authResponse.AccessToken));
+        Assert.False(string.IsNullOrWhiteSpace(authResponse.RefreshToken));
     }
 }

@@ -6,9 +6,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 using RTSCore.Application.Authentication.Commands;
+using RTSCore.Application.Authentication.Common;
 using RTSCore.Domain.Entities;
 using RTSCore.Domain.Exeptions;
-using RTSCore.Domain.ValueObjects;
 using RTSCore.Infrastructure.Persistence;
 using RTSCore.Tests.Base;
 
@@ -28,28 +28,27 @@ public class RegisterUserCommandHandlerTests : TestBase
 
         var name = "TestName";
         var password = "TestPassword";
-        var faction = FactionType.England;
 
         if (alreadyExist)
         {
             using var scope = serviceProvider.CreateScope();
 
             var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-            var existingUser = new User("TestName", "TestPassword", FactionType.France);
+            var existingUser = new User("TestName", "TestPassword");
 
             context.Users.Add(existingUser);
             await context.SaveChangesAsync();
         }
 
-        string token = string.Empty;
+        AuthResponse authResponse;
         using (var scope = serviceProvider.CreateScope())
         {
             var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
-            var command = new RegisterUserCommand(name, password, faction);
+            var command = new RegisterUserCommand(name, password);
 
             if (shouldSucceed)
             {
-                token = await mediator.Send(command);
+                authResponse = await mediator.Send(command);
             }
             else
             {
@@ -63,15 +62,18 @@ public class RegisterUserCommandHandlerTests : TestBase
             var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
             var dbUser = await context.Users.FirstOrDefaultAsync(u => u.Name == name);
+            var dbRefreshToken = await context.RefreshTokens.SingleOrDefaultAsync();
 
+            Assert.NotNull(dbRefreshToken);
             Assert.NotNull(dbUser);
-            Assert.Equal(faction, dbUser.Faction);
             Assert.True(BCrypt.Net.BCrypt.Verify(password, dbUser.PasswordHash));
 
-            Assert.False(string.IsNullOrWhiteSpace(token));
-            var jwtToken = new JwtSecurityTokenHandler().ReadJwtToken(token);
-            var factionClaim = jwtToken.Claims.First(c => c.Type == "faction").Value;
-            Assert.Equal(faction.ToString(), factionClaim);
+            Assert.False(string.IsNullOrWhiteSpace(authResponse.AccessToken));
+            Assert.False(string.IsNullOrWhiteSpace(authResponse.RefreshToken));
+
+            var jwtToken = new JwtSecurityTokenHandler().ReadJwtToken(authResponse.AccessToken);
+            var factionClaim = jwtToken.Claims.First(c => c.Type == JwtRegisteredClaimNames.UniqueName).Value;
+            Assert.Equal(name, factionClaim);
         }
     }
 }

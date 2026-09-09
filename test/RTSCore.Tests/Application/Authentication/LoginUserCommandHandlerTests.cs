@@ -2,12 +2,13 @@ using System.IdentityModel.Tokens.Jwt;
 
 using MediatR;
 
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 using RTSCore.Application.Authentication.Commands;
+using RTSCore.Application.Authentication.Common;
 using RTSCore.Domain.Entities;
 using RTSCore.Domain.Exeptions;
-using RTSCore.Domain.ValueObjects;
 using RTSCore.Infrastructure.Persistence;
 using RTSCore.Tests.Base;
 
@@ -28,7 +29,6 @@ public class LoginUserCommandHandlerTests : TestBase
         var serviceProvider = SetupTestInvironment();
         var name = "CorrectName";
         var password = "CorrectPassword";
-        var faction = FactionType.England;
 
         using (var scope = serviceProvider.CreateScope())
         {
@@ -36,11 +36,11 @@ public class LoginUserCommandHandlerTests : TestBase
 
             var passwordHash = BCrypt.Net.BCrypt.HashPassword(password);
 
-            context.Add(new User(name, passwordHash, faction));
+            context.Add(new User(name, passwordHash));
             await context.SaveChangesAsync();
         }
 
-        string token = string.Empty;
+        AuthResponse authResponse;
         using (var scope = serviceProvider.CreateScope())
         {
             var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
@@ -49,7 +49,7 @@ public class LoginUserCommandHandlerTests : TestBase
 
             if (shouldSucceed)
             {
-                token = await mediator.Send(command);
+                authResponse = await mediator.Send(command);
             }
             else
             {
@@ -58,11 +58,20 @@ public class LoginUserCommandHandlerTests : TestBase
             }
         }
 
-        Assert.False(string.IsNullOrWhiteSpace(token));
+        using (var scope = serviceProvider.CreateScope())
+        {
+            var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            var refreshToken = await context.RefreshTokens.SingleOrDefaultAsync();
 
-        var jwtToken = new JwtSecurityTokenHandler().ReadJwtToken(token);
-        var factionClaim = jwtToken.Claims.First(c => c.Type == "faction").Value;
+            Assert.NotNull(refreshToken);
+        }
 
-        Assert.Equal(faction.ToString(), factionClaim);
+        Assert.False(string.IsNullOrWhiteSpace(authResponse.AccessToken));
+        Assert.False(string.IsNullOrWhiteSpace(authResponse.RefreshToken));
+
+        var jwtToken = new JwtSecurityTokenHandler().ReadJwtToken(authResponse.AccessToken);
+        var nameClaim = jwtToken.Claims.First(c => c.Type == JwtRegisteredClaimNames.UniqueName).Value;
+
+        Assert.Equal(name, nameClaim);
     }
 }

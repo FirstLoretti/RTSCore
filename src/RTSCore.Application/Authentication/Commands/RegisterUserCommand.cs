@@ -1,7 +1,7 @@
 using MediatR;
 
-using RTSCore.Domain.ValueObjects;
+using RTSCore.Application.Authentication.Common;
 
 namespace RTSCore.Application.Authentication.Commands;
 
-public record RegisterUserCommand(string Name, string Password, FactionType Faction) : IRequest<string>;
+public record RegisterUserCommand(string Name, string Password) : IRequest<AuthResponse>;

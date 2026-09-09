@@ -11,6 +11,7 @@ public class EfUnitOfWork(AppDbContext context) : IUnitOfWork
     public IDiplomacyRelationRepository DiplomacyRelationRepository { get; } = new SqlDiplomacyRelationRepository(context);
     public IDiplomacyOfferRepository DiplomacyOfferRepository { get; } = new SqlDiplomacyOfferRepository(context);
     public IUserRepository UserRepository { get; } = new SqlUserRepository(context);
+    public IRefreshTokenRepository RefreshTokenRepository { get; } = new SqlRefreshTokenRepository(context);
 
     public async Task SaveChangesAsync(CancellationToken cancellationToken)
     {
