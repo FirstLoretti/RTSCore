@@ -15,4 +15,9 @@ public class SqlRefreshTokenRepository(AppDbContext context) : IRefreshTokenRepo
                 .Where(t => t.UserId == userId)
                 .ExecuteDeleteAsync(cancellationToken);
     }
+
+    public async Task<RefreshToken?> GetTokenAsync(string refreshToken, CancellationToken cancellationToken)
+    {
+        return await context.RefreshTokens.FirstOrDefaultAsync(t => t.Token == refreshToken, cancellationToken);
+    }
 }

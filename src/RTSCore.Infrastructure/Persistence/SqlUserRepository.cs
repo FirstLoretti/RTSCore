@@ -21,4 +21,9 @@ public class SqlUserRepository(AppDbContext context) : IUserRepository
     {
         return await context.Users.FirstOrDefaultAsync(u => u.Name == name, cancellationToken);
     }
+
+    public async Task<User?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
+    {
+        return await context.Users.FirstOrDefaultAsync(u => u.Id == id, cancellationToken);
+    }
 }

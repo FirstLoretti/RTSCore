@@ -8,4 +8,5 @@ public interface IUserRepository
 
     Task<bool> ExistAsync(string name, CancellationToken cancellationToken);
     Task<User?> GetByNameAsync(string name, CancellationToken cancellationToken);
+    Task<User?> GetByIdAsync(Guid id, CancellationToken cancellationToken);
 }

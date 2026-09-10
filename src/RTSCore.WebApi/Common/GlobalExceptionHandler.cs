@@ -62,8 +62,8 @@ public class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger)
                 "Один или несколько параметров запроса не прошли проверку"),
             NotFoundException =>
                 (StatusCodes.Status404NotFound,
-                 "Сущность не найдена",
-                 exception.Message),
+                "Сущность не найдена",
+                exception.Message),
             GameRuleException =>
                 (StatusCodes.Status422UnprocessableEntity,
                 "Нарушение игровых правил",

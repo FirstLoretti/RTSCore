@@ -11,9 +11,9 @@ using RTSCore.Domain.Interfaces.Authentication;
 
 namespace RTSCore.Infrastructure.Authentication;
 
-public class JwtTokenGenerator(IOptions<JwtSettings> jwtOptions) : IJwtTokenGenerator
+public class JwtTokenGenerator(IOptions<JwtSettings> jwtSettings) : IJwtTokenGenerator
 {
-    private readonly JwtSettings _jwtOptions = jwtOptions.Value;
+    private readonly JwtSettings _jwtSettings = jwtSettings.Value;
 
     public string Generate(User user)
     {
@@ -23,16 +23,16 @@ public class JwtTokenGenerator(IOptions<JwtSettings> jwtOptions) : IJwtTokenGene
             new Claim(JwtRegisteredClaimNames.UniqueName, user.Name)
         };
 
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtOptions.Secret));
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Secret));
 
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
         var token = new SecurityTokenDescriptor
         {
             Subject = new ClaimsIdentity(claims),
-            Expires = DateTime.UtcNow.AddMinutes(_jwtOptions.ExpiryInMinutes),
-            Issuer = _jwtOptions.Issuer,
-            Audience = _jwtOptions.Audience,
+            Expires = DateTime.UtcNow.AddMinutes(_jwtSettings.ExpiryInMinutes),
+            Issuer = _jwtSettings.Issuer,
+            Audience = _jwtSettings.Audience,
             SigningCredentials = credentials
         };
 
@@ -40,5 +40,31 @@ public class JwtTokenGenerator(IOptions<JwtSettings> jwtOptions) : IJwtTokenGene
         var securityToken = tokenHandler.CreateToken(token);
 
         return tokenHandler.WriteToken(securityToken);
+    }
+
+    public ClaimsPrincipal GetPrincipalFromExpiredToken(string token)
+    {
+        var tokenHandler = new JwtSecurityTokenHandler();
+
+        tokenHandler.InboundClaimTypeMap.Clear();
+
+        var validationParameters = new TokenValidationParameters
+        {
+            ValidateAudience = true,
+            ValidateIssuer = true,
+            ValidateIssuerSigningKey = true,
+            ValidateLifetime = false,
+
+            ValidIssuer = _jwtSettings.Issuer,
+            ValidAudience = _jwtSettings.Audience,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Secret))
+        };
+
+        var principal = tokenHandler.ValidateToken(token, validationParameters, out SecurityToken securityToken);
+
+        return securityToken is not JwtSecurityToken jwtToken ||
+            !jwtToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase)
+            ? throw new SecurityTokenException("Invalid token")
+            : principal;
     }
 }
