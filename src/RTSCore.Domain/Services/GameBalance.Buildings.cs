@@ -23,7 +23,12 @@ public partial class GameBalance
                         DisplayName: "Казарма",
                         Cost: 1000,
                         TurnsToConstruct: 2,
-                        AllowedCityTypes: [CityType.Settlement,CityType.Village]
+                        AllowedCityTypes: [CityType.Settlement,CityType.Village],
+                        Garrison: new()
+                        {
+                            {UnitType.EnglandPeasant, 2},
+                            {UnitType.EnglandPeasantArcher, 2}
+                        }
                     )
                 },
 

@@ -8,8 +8,6 @@ using RTSCore.Domain.Interfaces;
 using RTSCore.Domain.Services;
 using RTSCore.Domain.ValueObjects;
 
-using Ai = RTSCore.Domain.Services.GameBalance.Diplomacy.Ai;
-
 namespace RTSCore.Application.Campaign.Services.Diplomacy;
 
 public class DiplomacyAi(IUnitOfWork unitOfWork, IMediator mediator)
@@ -127,7 +125,6 @@ public class DiplomacyAi(IUnitOfWork unitOfWork, IMediator mediator)
         }
     }
 
-
     private async Task<bool> EvaluateTradeOfferUtilityAsync(
         FactionType aiFaction,
         FactionType targetFaction,
@@ -141,16 +138,19 @@ public class DiplomacyAi(IUnitOfWork unitOfWork, IMediator mediator)
         if (relation.HasTradeAgreement) return false;
         if (relation.Standing < GameBalance.Diplomacy.MinStandingForTrade) return false;
 
+        var weights = GameBalance.AiPersonalities.GetPersonality(aiFaction).DiplomacyWeights;
+
         var standingScore = (int)((relation.Standing + DiplomacyRelation.MaxStanding) * 0.5f);
 
         var factionCityCount = factionToCitiesCount.GetValueOrDefault(targetFaction);
         var economicScore = Math.Min(
-            factionCityCount * Ai.TradeScorePerTargetCity, DiplomacyRelation.MaxStanding
+            factionCityCount * GameBalance.AiPersonalities.TradeScorePerPartnerCity,
+            DiplomacyRelation.MaxStanding
         );
 
-        var finalScore = (standingScore * Ai.TradeStandingWeight) + (economicScore * Ai.TradeEconomicWeight);
+        var finalScore = (standingScore * weights.TradeStandingWeight) + (economicScore * weights.TradeEconomicWeight);
 
-        return finalScore >= Ai.TradeOfferThreshold;
+        return finalScore > weights.TradeThreshold;
     }
 
     private async Task<bool> EvaluatePeaceOfferUtilityAsync(
@@ -170,18 +170,18 @@ public class DiplomacyAi(IUnitOfWork unitOfWork, IMediator mediator)
         var targetPower = factionToMilitaryPower.GetValueOrDefault(targetFaction);
         if (targetPower <= 0) return false;
 
+        var weights = GameBalance.AiPersonalities.GetPersonality(aiFaction).DiplomacyWeights;
+
         var myPower = factionToMilitaryPower.GetValueOrDefault(aiFaction);
         var powerRatio = (float)myPower / targetPower;
 
-        var defeatScore = powerRatio < Ai.PeaceDesperationRatioThreshold
-            ? float.Clamp((1.0f - powerRatio) * 100, 0, 100)
-            : 0;
+        var defeatScore = float.Clamp((1.0f - powerRatio) * 100, 0, 100);
 
         var standingScore = (relation.Standing + 100) * 0.5f;
 
-        var finalScore = (defeatScore * Ai.PeaceDefeatWeight) + (standingScore * Ai.PeaceStandingWeight);
+        var finalScore = (defeatScore * weights.PeaceDefeatWeight) + (standingScore * weights.PeaceStandingWeight);
 
-        return finalScore > Ai.PeaceOfferThreshold;
+        return finalScore > weights.PeaсeThreshold;
     }
 
     private async Task<bool> EvaluateDeclareWarUtilityAsync(
@@ -199,13 +199,17 @@ public class DiplomacyAi(IUnitOfWork unitOfWork, IMediator mediator)
 
         if (relation.InWar) return false;
 
+        var weights = GameBalance.AiPersonalities.GetPersonality(aiFaction).DiplomacyWeights;
+
         var hostilityScore = (DiplomacyRelation.MaxStanding - relation.Standing) * 0.5f;
         var targetPower = factionToMilitaryPower.GetValueOrDefault(targetFaction);
         var powerRatio = (float)targetPower / myPower;
         var weaknessScore = float.Clamp((1.0f - powerRatio) * 100, 0f, 100f);
 
-        var finalScore = (hostilityScore * Ai.WarHostilityWeight) + (weaknessScore * Ai.WarWeaknessWeight);
+        var finalScore =
+            (hostilityScore * weights.WarHostilityWeight) +
+            (weaknessScore * weights.WarTargetWeaknessWeight);
 
-        return finalScore > Ai.WarDeclarationThreshold;
+        return finalScore > weights.WarThreshold;
     }
 }
