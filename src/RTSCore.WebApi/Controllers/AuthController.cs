@@ -4,6 +4,7 @@ using MediatR;
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
 
 using RTSCore.Application.Authentication.Commands;
 using RTSCore.Application.Authentication.Common;
@@ -42,5 +43,15 @@ public class AuthController(IMediator mediator) : ControllerBase
 
         await mediator.Send(new LogoutUserCommand(userId), cancellationToken);
         return NoContent();
+    }
+
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [HttpPost("refresh")]
+    public async Task<ActionResult<AuthResponse>> Refresh(
+        RefreshTokensCommand command, CancellationToken cancellationToken
+    )
+    {
+        var authResponse = await mediator.Send(command, cancellationToken);
+        return Ok(authResponse);
     }
 }

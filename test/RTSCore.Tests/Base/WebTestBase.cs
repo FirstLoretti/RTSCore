@@ -1,8 +1,14 @@
+using System.Text;
+
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 
+using RTSCore.Application.Common.Settings;
 using RTSCore.Infrastructure.Persistence;
 
 namespace RTSCore.Tests.Base;
@@ -22,6 +28,25 @@ public abstract class WebTestBase : IClassFixture<WebApplicationFactory<Program>
 
         _factory = factory.WithWebHostBuilder(builder => builder.ConfigureServices(services =>
         {
+            var testSettings = new JwtSettings
+            {
+                Secret = "S[Xp4E5_/2b`Eq_K00_pqR_MEpzz*zqptL_T331L_Wp0_STp6^1l[1_qPs981_2pO.",
+                Issuer = "TestServer",
+                Audience = "TestClient",
+                ExpiryInMinutes = 60
+            };
+
+            services.AddSingleton(Options.Create(testSettings));
+
+            var key = Encoding.UTF8.GetBytes(testSettings.Secret);
+            services.PostConfigure<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme, options =>
+            {
+                options.TokenValidationParameters.IssuerSigningKey = new SymmetricSecurityKey(key);
+
+                options.TokenValidationParameters.ValidIssuer = testSettings.Issuer;
+                options.TokenValidationParameters.ValidAudience = testSettings.Audience;
+            });
+
             var descriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<AppDbContext>));
             if (descriptor != null)
             {

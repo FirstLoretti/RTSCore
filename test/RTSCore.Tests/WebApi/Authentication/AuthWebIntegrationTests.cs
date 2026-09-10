@@ -11,7 +11,7 @@ using RTSCore.Domain.Entities;
 using RTSCore.Infrastructure.Persistence;
 using RTSCore.Tests.Base;
 
-namespace RTSCore.Tests.WebApi;
+namespace RTSCore.Tests.WebApi.Authentication;
 
 public class AuthWebIntegrationTests(WebApplicationFactory<Program> factory) : WebTestBase(factory)
 {
