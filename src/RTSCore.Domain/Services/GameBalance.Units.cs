@@ -1,6 +1,7 @@
 using System.Collections.Frozen;
 using System.Collections.Immutable;
 
+using RTSCore.Domain.Exeptions;
 using RTSCore.Domain.ValueObjects;
 
 namespace RTSCore.Domain.Services;
@@ -9,7 +10,6 @@ public partial class GameBalance
 {
     public static class Units
     {
-
         public const float HealthWeight = 1.0f;
         public const float DamageWeight = 2.0f;
         public const float ArmorWeight = 2.0f;
@@ -24,9 +24,9 @@ public partial class GameBalance
             Dictionary<UnitType, UnitTemplate> temporary = new()
             {
                 {
-                    UnitType.EnglandPeasant,
+                    UnitType.Peasant,
                     new UnitTemplate(
-                        Type: UnitType.EnglandPeasant,
+                        Type: UnitType.Peasant,
                         DisplayName: "Peasant",
                         Cost: 150,
                         MaxHealth: 100,
@@ -42,9 +42,9 @@ public partial class GameBalance
                 },
 
                 {
-                    UnitType.EnglandMilitia,
+                    UnitType.Militia,
                     new UnitTemplate(
-                        Type: UnitType.EnglandMilitia,
+                        Type: UnitType.Militia,
                         DisplayName: "Militia",
                         Cost: 250,
                         MaxHealth: 115,
@@ -74,6 +74,11 @@ public partial class GameBalance
                         DamageGrowthRate: 1f,
                         TurnsToRecruit: 1
                     )
+                },
+
+                {
+                    UnitType.Knight,
+                    new UnitTemplate(UnitType.Knight,"Knight", 1, 1, 1, 1, 1, 1, 1f, 1f, 1)
                 }
             };
 
@@ -83,7 +88,7 @@ public partial class GameBalance
         public static UnitTemplate GetTemplate(UnitType type)
         {
             return !TypeToTemplate.TryGetValue(type, out var template)
-                ? throw new ArgumentException(
+                ? throw new NotFoundException(
                     $"[{nameof(Units)}] Шаблон юнита {type} не найден в системе"
                 )
                 : template;

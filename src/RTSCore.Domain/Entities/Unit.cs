@@ -8,8 +8,11 @@ public class Unit
 {
     public UnitId Id { get; init; }
     public UnitType Type { get; init; }
-    public FactionType OwnerFaction { get; init; }
+    public FactionType Faction { get; init; }
+
     public CityId? CurrentCityId { get; private set; }
+    public string? ArmyId { get; private set; }
+
     public int Health { get; private set; }
     public int Damage { get; private set; }
     public int Armor { get; private set; }
@@ -22,7 +25,7 @@ public class Unit
     public Unit(UnitId id, FactionType ownerFaction, UnitTemplate template, CityId? currentCityId = null)
     {
         Id = id;
-        OwnerFaction = ownerFaction;
+        Faction = ownerFaction;
         CurrentCityId = currentCityId;
 
         Type = template.Type;
@@ -37,7 +40,7 @@ public class Unit
     private Unit(UnitId id, FactionType ownerFaction, UnitTemplate template, int turnsToRecruit, CityId? currentCityId = null)
     {
         Id = id;
-        OwnerFaction = ownerFaction;
+        Faction = ownerFaction;
         CurrentCityId = currentCityId;
 
         Type = template.Type;
@@ -47,6 +50,8 @@ public class Unit
         TurnsToRecruit = turnsToRecruit;
 
     }
+
+    public void AssignToArmy(string armyId) => ArmyId = armyId;
 
     public static Unit CreateWithCustomStatus(
         UnitId id, FactionType ownerFaction, UnitTemplate template, int turnsToRecruit, CityId? currentCityId = null)

@@ -47,9 +47,12 @@ public abstract class TestBase : IDisposable
         services.AddScoped<IUserRepository, SqlUserRepository>();
         services.AddScoped<IRefreshTokenRepository, SqlRefreshTokenRepository>();
         services.AddScoped<IRefreshTokenGenerator, RefreshTokenGenerator>();
+        services.AddScoped<IArmyRepository, SqlArmyRepository>();
         services.AddScoped<DiplomacyAi>();
 
         services.AddSingleton(GameBalance.Buildings.GetAllTemplates);
+        services.AddSingleton(GameBalance.Units.GetAllTemplates);
+
         services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
         services.AddSingleton(Options.Create(testJwtSettings));
 

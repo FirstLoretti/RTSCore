@@ -17,8 +17,11 @@ public class CityConfiguration : IEntityTypeConfiguration<City>
             dbValue => new CityId(dbValue)
         );
 
+        builder.ComplexProperty(c => c.Coordinates);
+
         builder.Property(c => c.Type).HasConversion<string>();
         builder.Property(c => c.OwnerFaction).HasConversion<string>();
         builder.Property(c => c.Population).HasConversion<int>();
+        builder.Property(c => c.Governor).HasConversion<string>();
     }
 }

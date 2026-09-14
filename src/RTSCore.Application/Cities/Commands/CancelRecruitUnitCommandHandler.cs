@@ -28,9 +28,9 @@ public class CancelRecruitUnitCommandHandler(
            );
         }
 
-        var faction = await unitOfWork.FactionRepository.GetFactionAsync(unit.OwnerFaction, cancellationToken)
+        var faction = await unitOfWork.FactionRepository.GetFactionAsync(unit.Faction, cancellationToken)
             ?? throw new NotFoundException(
-                $"[{nameof(CancelRecruitUnitCommandHandler)}] Фракции {unit.OwnerFaction} не существует"
+                $"[{nameof(CancelRecruitUnitCommandHandler)}] Фракции {unit.Faction} не существует"
             );
 
         var template = unitTemplates.FirstOrDefault(t => t.Type == unit.Type)

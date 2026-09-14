@@ -10,17 +10,20 @@ public class City
     public CityType Type { get; private set; }
     public FactionType OwnerFaction { get; private set; }
     public int Population { get; private set; }
+    public Coordinates Coordinates { get; private set; }
+    public UnitType Governor { get; private set; } = UnitType.Knight;
 
     public IReadOnlyCollection<Building> Buildings => _buildings.AsReadOnly();
 
     private readonly List<Building> _buildings = [];
 
-    public City(CityPreset cityPreset, FactionType ownerFaction)
+    public City(CityPreset cityPreset, FactionType ownerFaction, Coordinates? coordinates = null)
     {
         Id = cityPreset.Id;
         Type = cityPreset.Type;
         OwnerFaction = ownerFaction;
         Population = cityPreset.CurrentPopulation;
+        Coordinates = coordinates ?? new Coordinates(0, 0);
 
         foreach (var buildingType in cityPreset.BuildingTypes)
         {

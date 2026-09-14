@@ -24,8 +24,6 @@ public class BuildingConfiguration : IEntityTypeConfiguration<Building>
 
         builder.Property(b => b.Type).HasConversion<string>();
         builder.Property(b => b.OwnerFaction).HasConversion<string>();
-        builder.Property(b => b.IsConstructed).HasConversion<bool>();
-        builder.Property(b => b.TurnsToConstruct).HasConversion<int>();
 
         builder.HasOne<City>()
             .WithMany(c => c.Buildings)

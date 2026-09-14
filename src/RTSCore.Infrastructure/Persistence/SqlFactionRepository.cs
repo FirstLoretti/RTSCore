@@ -45,7 +45,7 @@ public class SqlFactionRepository(AppDbContext context) : IFactionRepository
         var militaryPower = await context.Units
             .AsNoTracking()
             .Where(u => u.TurnsToRecruit <= 0 && u.Health > 0)
-            .GroupBy(u => u.OwnerFaction)
+            .GroupBy(u => u.Faction)
             .Select(g => new
             {
                 Faction = g.Key,

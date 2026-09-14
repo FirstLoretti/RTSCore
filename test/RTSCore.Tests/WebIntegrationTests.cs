@@ -182,7 +182,7 @@ public class WebIntegrationTests(WebApplicationFactory<Program> factory) : WebTe
         using (var scope = _factory.Services.CreateScope())
         {
             var template = new UnitTemplate(
-                UnitType.EnglandMilitia, "Test Unit", 1, 1, 1, 1, 1, 1, 1, 1,
+                UnitType.Militia, "Test Unit", 1, 1, 1, 1, 1, 1, 1, 1,
                 TurnsToRecruit: 0
             );
             var unit = Unit.CreateWithCustomStatus(unitId, FactionType.England, template, turnsToRecruit: 0);
@@ -294,7 +294,7 @@ public class WebIntegrationTests(WebApplicationFactory<Program> factory) : WebTe
     public async Task TrainUnit_WithValidCommand_ShouldReturnNoContent()
     {
         var cityId = new CityId("test_london");
-        var unitType = UnitType.EnglandPeasant;
+        var unitType = UnitType.Peasant;
         var unitCost = GameBalance.Units.GetTemplate(unitType).Cost;
         var ownerFaction = FactionType.England;
         var building = Building.CreateWithCustomStatus(
@@ -366,7 +366,7 @@ public class WebIntegrationTests(WebApplicationFactory<Program> factory) : WebTe
         using var scope = await SeedTestWorldAsync(cityId, unitCost, buildingToRegister: building);
 
         var template = new UnitTemplate(
-            UnitType.EnglandPeasant, "Test Peasant", unitCost, 1, 1, 1, 1, 1, 1, 1,
+            UnitType.Peasant, "Test Peasant", unitCost, 1, 1, 1, 1, 1, 1, 1,
             TurnsToRecruit: 1, RequiredBuilding: buildingType);
         var unit = Unit.CreateWithCustomStatus(
             unitId, ownerFaction, template,
@@ -410,7 +410,7 @@ public class WebIntegrationTests(WebApplicationFactory<Program> factory) : WebTe
     public async Task GetRecruitOptions_ShouldReturnOk_AndValidCatalog()
     {
         var cityId = new CityId("test_london");
-        var unitCost = GameBalance.Units.GetTemplate(UnitType.EnglandPeasant).Cost;
+        var unitCost = GameBalance.Units.GetTemplate(UnitType.Peasant).Cost;
         var building = Building.CreateWithCustomStatus(
             "test_building", BuildingType.ReqruitBarrack, FactionType.England, cityId,
             isConstructed: true,
@@ -427,9 +427,9 @@ public class WebIntegrationTests(WebApplicationFactory<Program> factory) : WebTe
         var catalog = await response.Content.ReadFromJsonAsync<IEnumerable<CityCatalogOptionDto<UnitType>>>();
 
         Assert.NotNull(catalog);
-        Assert.Contains(catalog, dto => dto.Type == UnitType.EnglandPeasant);
+        Assert.Contains(catalog, dto => dto.Type == UnitType.Peasant);
 
-        var unit = catalog.First(u => u.Type == UnitType.EnglandPeasant);
+        var unit = catalog.First(u => u.Type == UnitType.Peasant);
         Assert.Equal(CityCatalogOptionAvailability.Available, unit.Availability);
     }
 

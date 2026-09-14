@@ -26,8 +26,8 @@ public partial class GameBalance
                         AllowedCityTypes: [CityType.Settlement,CityType.Village],
                         Garrison: new()
                         {
-                            {UnitType.EnglandPeasant, 2},
-                            {UnitType.EnglandPeasantArcher, 2}
+                            {UnitType.Peasant, 2},
+                            {UnitType.PeasantArcher, 2}
                         }
                     )
                 },

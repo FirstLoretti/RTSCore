@@ -27,8 +27,8 @@ public class ApplicationIntegrationTests : TestBase
     #region UnitCommands
 
     [Theory]
-    [InlineData(UnitType.EnglandPeasant, 0, true)]
-    [InlineData(UnitType.EnglandPeasant, 1, false)]
+    [InlineData(UnitType.Peasant, 0, true)]
+    [InlineData(UnitType.Peasant, 1, false)]
     [InlineData(UnitType.Invulnerable, 0, false)]
     public async Task Mediator_DisbandUnit_ShouldHandleRulesCorrectly(
         UnitType unitType,
@@ -40,7 +40,7 @@ public class ApplicationIntegrationTests : TestBase
 
         var templates = new UnitTemplate[]
         {
-            new (UnitType.EnglandPeasant, "Test Peasant", 1, 1, 1, 1, 1, 1, 1, 1, 1),
+            new (UnitType.Peasant, "Test Peasant", 1, 1, 1, 1, 1, 1, 1, 1, 1),
             new (UnitType.Invulnerable, "Test Invulnerable", 1, 1, 1, 1, 1, 1, 1, 1, 1)
         };
 
@@ -710,7 +710,7 @@ public class ApplicationIntegrationTests : TestBase
         var unitTemplates = new UnitTemplate[]
         {
             new(
-                UnitType.EnglandPeasant, "Test Peasant", 1000, 1, 1, 1, 1, 1, 1, 1,
+                UnitType.Peasant, "Test Peasant", 1000, 1, 1, 1, 1, 1, 1, 1,
                 TurnsToRecruit: isTrained ? 0 : 1, RequiredBuilding: BuildingType.ReqruitBarrack
             )
         };
@@ -935,7 +935,7 @@ public class ApplicationIntegrationTests : TestBase
         var unitTemplates = new UnitTemplate[]
         {
             new(
-                UnitType.EnglandPeasant, "Test Unit", templateCost, 1,1,1,1,1,1,1,1,
+                UnitType.Peasant, "Test Unit", templateCost, 1,1,1,1,1,1,1,1,
                 RequiredBuilding: BuildingType.ReqruitBarrack
             )
         };
@@ -962,7 +962,7 @@ public class ApplicationIntegrationTests : TestBase
 
 
 
-        var unitOption = catalog.FirstOrDefault(u => u.Type == UnitType.EnglandPeasant);
+        var unitOption = catalog.FirstOrDefault(u => u.Type == UnitType.Peasant);
 
         if (shouldBeInCatalog)
         {
@@ -986,7 +986,7 @@ public class ApplicationIntegrationTests : TestBase
         var ownerFaction = FactionType.England;
         var cityType = CityType.Village;
         var buildingType = BuildingType.ReqruitBarrack;
-        var unitType = UnitType.EnglandPeasant;
+        var unitType = UnitType.Peasant;
 
         var unitTemplates = new UnitTemplate[]
         {
@@ -1110,7 +1110,7 @@ public class ApplicationIntegrationTests : TestBase
         Guid offerId;
         UnitTemplate[] unitTemplates =
         [
-            new(UnitType.EnglandPeasant, "TU", 0, MaxHealth: 100, Damage: 10, Armor: 10, 0, 0, 0, 0, 0)
+            new(UnitType.Peasant, "TU", 0, MaxHealth: 100, Damage: 10, Armor: 10, 0, 0, 0, 0, 0)
         ];
 
         var serviceProvider = SetupTestInvironment(services =>

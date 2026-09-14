@@ -10,6 +10,7 @@ public interface IUnitOfWork
     IDiplomacyOfferRepository DiplomacyOfferRepository { get; }
     IUserRepository UserRepository { get; }
     IRefreshTokenRepository RefreshTokenRepository { get; }
+    IArmyRepository ArmyRepository { get; }
 
     Task SaveChangesAsync(CancellationToken cancellationToken);
 }
