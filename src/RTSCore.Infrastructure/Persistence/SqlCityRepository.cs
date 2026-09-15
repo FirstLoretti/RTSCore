@@ -54,4 +54,9 @@ public class SqlCityRepository(AppDbContext context) : ICityRepository
             .Select(g => new { Faction = g.Key, Count = g.Count() })
             .ToDictionaryAsync(x => x.Faction, x => x.Count, cancellationToken);
     }
+
+    public async Task<IReadOnlyCollection<City>> GetCitiesAsync(FactionType faction, CancellationToken cancellationToken)
+    {
+        return await context.Cities.Where(c => c.OwnerFaction == faction).ToListAsync(cancellationToken);
+    }
 }

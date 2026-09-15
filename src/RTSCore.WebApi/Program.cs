@@ -19,6 +19,7 @@ using RTSCore.Infrastructure.Authentication;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using RTSCore.Domain.ValueObjects;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -35,6 +36,7 @@ builder.Services.AddScoped<IUserRepository, SqlUserRepository>();
 builder.Services.AddScoped<IRefreshTokenRepository, SqlRefreshTokenRepository>();
 builder.Services.AddScoped<IArmyRepository, SqlArmyRepository>();
 builder.Services.AddScoped<DiplomacyAi>();
+builder.Services.AddSingleton<ICityBuildingRegistry, CityBuildingRegistry>();
 builder.Services.AddSingleton(Array.Empty<FactionPreset>());
 builder.Services.AddSingleton(GameBalance.Buildings.GetAllTemplates);
 builder.Services.AddSingleton(GameBalance.Units.GetAllTemplates);

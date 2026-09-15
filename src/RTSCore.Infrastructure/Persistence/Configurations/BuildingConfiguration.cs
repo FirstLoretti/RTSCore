@@ -29,5 +29,7 @@ public class BuildingConfiguration : IEntityTypeConfiguration<Building>
             .WithMany(c => c.Buildings)
             .HasForeignKey(b => b.CityId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Ignore(b => b.Category);
     }
 }

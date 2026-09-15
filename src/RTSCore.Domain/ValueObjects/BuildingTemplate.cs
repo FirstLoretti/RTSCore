@@ -8,6 +8,8 @@ public record BuildingTemplate(
     int Cost,
     int TurnsToConstruct,
     CityType[] AllowedCityTypes,
+    BuildingCategory Category,
+    int AiUtility,
     BuildingType? RequiredPreviousTier = null,
     BuildingEffect[]? Effects = null,
     Dictionary<UnitType, int>? Garrison = null

@@ -5,5 +5,6 @@ public record CityPreset(
     string DisplayName,
     CityType Type,
     int CurrentPopulation,
-    BuildingType[] BuildingTypes
+    BuildingType[] BuildingTypes,
+    List<BuildingType>? ConstructOptions = null
 );

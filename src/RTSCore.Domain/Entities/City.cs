@@ -14,7 +14,6 @@ public class City
     public UnitType Governor { get; private set; } = UnitType.Knight;
 
     public IReadOnlyCollection<Building> Buildings => _buildings.AsReadOnly();
-
     private readonly List<Building> _buildings = [];
 
     public City(CityPreset cityPreset, FactionType ownerFaction, Coordinates? coordinates = null)
@@ -38,6 +37,20 @@ public class City
 
     private City() { }
 
+    public BuildingType[] GetAvailableBuildingOptions(IReadOnlyCollection<BuildingType> options)
+    {
+        if (options == null) throw new ArgumentNullException(nameof(options), "Коллекция не может быть пустой");
+
+        if (options.Count == 0) return [];
+
+        var currentBuildings = _buildings
+            .Where(b => b.IsConstructed || b.InConstructProcess)
+            .Select(b => b.Type)
+            .ToHashSet();
+
+        return [.. options.Where(o => !currentBuildings.Contains(o))];
+    }
+
     public void GrowPopulation(float growthRate)
     {
         if (growthRate <= 0) return;
@@ -47,11 +60,6 @@ public class City
         Population = Math.Min(Population + growthBonus, template.MaxPopulation);
 
         if (Population < 0) Population = 0;
-    }
-
-    public void RegisterBuilding(Building building)
-    {
-        _buildings.Add(building);
     }
 
     public int CalculateTaxIncome(float taxRatePerCitizen)
@@ -67,5 +75,19 @@ public class City
             .SelectMany(t => t.Effects)
             .Where(e => e.Type == BuildingEffectType.GoldIncome)
             .Sum(e => e.Value);
+    }
+
+    public void RegisterBuilding(Building building)
+    {
+        building.AddToConstruct();
+
+        _buildings.Add(building);
+
+        building.OnBuildingCompleted += HandleBuildingCompleted;
+    }
+
+    private void HandleBuildingCompleted(Building building)
+    {
+        building.OnBuildingCompleted -= HandleBuildingCompleted;
     }
 }

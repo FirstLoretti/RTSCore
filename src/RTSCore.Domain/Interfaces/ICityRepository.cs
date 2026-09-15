@@ -13,9 +13,10 @@ public interface ICityRepository
     Task<City?> GetWithBuildingsAsync(CityId id, CancellationToken cancellationToken);
     Task<IReadOnlyList<City>> GetWithBuildingsAsync(CancellationToken cancellationToken);
     Task<IReadOnlyList<City>> GetWithBuildingsAsync(FactionType faction, CancellationToken cancellationToken);
+    Task<IReadOnlyCollection<City>> GetCitiesAsync(FactionType faction, CancellationToken cancellationToken);
+
     Task<Dictionary<FactionType, int>> GetFactionToCityCount(
         IEnumerable<FactionType> factions,
         CancellationToken cancellationToken
     );
-
 }

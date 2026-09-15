@@ -20,10 +20,12 @@ public partial class GameBalance
                     BuildingType.ReqruitBarrack,
                     new BuildingTemplate(
                         Type: BuildingType.ReqruitBarrack,
-                        DisplayName: "Казарма",
+                        DisplayName: "Сборное место",
                         Cost: 1000,
                         TurnsToConstruct: 2,
                         AllowedCityTypes: [CityType.Settlement,CityType.Village],
+                        Category: BuildingCategory.Military,
+                        AiUtility : 50,
                         Garrison: new()
                         {
                             {UnitType.Peasant, 2},
@@ -36,10 +38,12 @@ public partial class GameBalance
                     BuildingType.MilitiaBarrack,
                     new BuildingTemplate(
                         Type: BuildingType.MilitiaBarrack,
-                        DisplayName: "Казарма Ополченцев",
+                        DisplayName: "Казарма Ополчения",
                         Cost: 3000,
                         TurnsToConstruct: 4,
                         AllowedCityTypes: [CityType.Settlement],
+                        Category: BuildingCategory.Military,
+                        AiUtility: 50,
                         RequiredPreviousTier: BuildingType.ReqruitBarrack
                     )
                 },
@@ -52,6 +56,8 @@ public partial class GameBalance
                         Cost: 1500,
                         TurnsToConstruct: 2,
                         AllowedCityTypes: [CityType.Settlement,CityType.Village],
+                        Category: BuildingCategory.Economic,
+                        AiUtility: 50,
                         Effects: [new(BuildingEffectType.GoldIncome, 150)]
                     )
                 },
@@ -64,6 +70,8 @@ public partial class GameBalance
                         Cost: 500,
                         TurnsToConstruct: 2,
                         AllowedCityTypes: [CityType.Settlement, CityType.Village],
+                        Category: BuildingCategory.Economic,
+                        AiUtility: 50,
                         Effects: [new(BuildingEffectType.PopulationGrowth, 0.05f), new(BuildingEffectType.GoldIncome, 25f)]
                     )
                 },
@@ -76,6 +84,8 @@ public partial class GameBalance
                         Cost: 1500,
                         TurnsToConstruct: 4,
                         AllowedCityTypes: [CityType.Settlement],
+                        Category : BuildingCategory.Economic,
+                        AiUtility: 50,
                         Effects: [new(BuildingEffectType.PopulationGrowth, 0.1f), new(BuildingEffectType.GoldIncome, 100f)]
                     )
                 }

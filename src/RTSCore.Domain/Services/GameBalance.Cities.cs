@@ -1,5 +1,6 @@
 using System.Collections.Frozen;
 
+using RTSCore.Domain.Exeptions;
 using RTSCore.Domain.ValueObjects;
 
 namespace RTSCore.Domain.Services;
@@ -19,7 +20,9 @@ public partial class GameBalance
                     new CityTemplate(
                         DisplayName: "Деревня",
                         Type: CityType.Village,
-                        MaxPopulation: 1000
+                        MaxPopulation: 1000,
+                        BuildingOptions :
+                        [BuildingType.CultivatedField, BuildingType.ReqruitBarrack, BuildingType.Market]
                     )
                 },
 
@@ -28,7 +31,10 @@ public partial class GameBalance
                     new CityTemplate(
                         DisplayName : "Посёлок",
                         Type: CityType.Settlement,
-                        MaxPopulation: 3000
+                        MaxPopulation: 3000,
+                        BuildingOptions:
+                        [BuildingType.CultivatedField, BuildingType.ReqruitBarrack, BuildingType.Market,
+                        BuildingType.CultivatedFieldsComplex, BuildingType.MilitiaBarrack]
                     )
                 }
             };
@@ -43,6 +49,13 @@ public partial class GameBalance
                     $"[{nameof(Cities)}] Шаблон города {template} не найден в системе"
                 )
                 : template;
+        }
+
+        public static List<BuildingType> GetBuildingOptions(CityType type)
+        {
+            return TypeToTemplate.TryGetValue(type, out var template)
+                ? template.BuildingOptions
+                : throw new NotFoundException($"Тип города {type} не найден");
         }
     }
 }

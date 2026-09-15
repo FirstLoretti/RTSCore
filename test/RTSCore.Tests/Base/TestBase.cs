@@ -12,6 +12,7 @@ using RTSCore.Application.Common.Settings;
 using RTSCore.Domain.Interfaces;
 using RTSCore.Domain.Interfaces.Authentication;
 using RTSCore.Domain.Services;
+using RTSCore.Domain.ValueObjects;
 using RTSCore.Infrastructure.Authentication;
 using RTSCore.Infrastructure.Persistence;
 
@@ -50,6 +51,7 @@ public abstract class TestBase : IDisposable
         services.AddScoped<IArmyRepository, SqlArmyRepository>();
         services.AddScoped<DiplomacyAi>();
 
+        services.AddSingleton<ICityBuildingRegistry, CityBuildingRegistry>();
         services.AddSingleton(GameBalance.Buildings.GetAllTemplates);
         services.AddSingleton(GameBalance.Units.GetAllTemplates);
 

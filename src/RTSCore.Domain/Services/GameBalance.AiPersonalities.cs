@@ -8,9 +8,12 @@ public static partial class GameBalance
 {
     public static class AiPersonalities
     {
-        public static readonly int TradeScorePerPartnerCity = 10;
-
         public static readonly AiPersonality Conqueror = new(
+            AiStrategicType.Aggressive,
+            new BuildingWeights(
+                EconomicMultiplier: 0.85f,
+                MilitaryMultiplier: 1.15f
+            ),
             new DiplomacyWeights(
                 WarTargetWeaknessWeight: 0.5f,
                 WarHostilityWeight: 0.5f,
@@ -23,11 +26,15 @@ public static partial class GameBalance
                 TradeEconomicWeight: 0.5f,
                 TradeStandingWeight: 0.25f,
                 TradeThreshold: 30f // 3 City, Standing = 0, NoTrade
-            ),
-            AiStrategicType.Aggressive
+            )
         );
 
         public static readonly AiPersonality Defender = new(
+            AiStrategicType.Defensive,
+            new BuildingWeights(
+                EconomicMultiplier: 1.15f,
+                MilitaryMultiplier: 0.85f
+            ),
             new DiplomacyWeights(
                 WarTargetWeaknessWeight: 0.15f,
                 WarHostilityWeight: 0.25f,
@@ -40,8 +47,7 @@ public static partial class GameBalance
                 TradeEconomicWeight: 0.5f,
                 TradeStandingWeight: 0.5f,
                 TradeThreshold: 30f // 1 City, Standing = 0
-            ),
-            AiStrategicType.Defensive
+            )
         );
 
         public static AiPersonality GetPersonality(FactionType faction) => faction switch

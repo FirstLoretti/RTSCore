@@ -173,12 +173,13 @@ public class ApplicationIntegrationTests : TestBase
         var partnerCityCount = 2;
 
         var marketTemplate = new BuildingTemplate(
-           BuildingType.Market, "MT", Cost: 0, TurnsToConstruct: 0, [CityType.Village], null,
-           [new(BuildingEffectType.GoldIncome, 150f)]
+           BuildingType.Market, "MT", Cost: 0, TurnsToConstruct: 0, [CityType.Village], BuildingCategory.Military, 50,
+           Effects: [new(BuildingEffectType.GoldIncome, 150f)]
         );
         var fieldTemplate = new BuildingTemplate(
-            BuildingType.CultivatedField, "FT", Cost: 0, TurnsToConstruct: 0, [CityType.Village], null,
-            [new(BuildingEffectType.PopulationGrowth, 0.05f), new(BuildingEffectType.GoldIncome, 25f)]
+            BuildingType.CultivatedField, "FT", Cost: 0, TurnsToConstruct: 0,
+            [CityType.Village], BuildingCategory.Military, 50,
+            Effects: [new(BuildingEffectType.PopulationGrowth, 0.05f), new(BuildingEffectType.GoldIncome, 25f)]
         );
 
         using (var scope = serviceProvider.CreateScope())
@@ -999,7 +1000,7 @@ public class ApplicationIntegrationTests : TestBase
         var buildingTemplates = new BuildingTemplate[]
         {
             new(
-                buildingType, "Test Barrack", 1000, 1, [cityType]
+                buildingType, "Test Barrack", 1000, 1, [cityType], BuildingCategory.Military, 50
             )
         };
 
@@ -1200,6 +1201,8 @@ public class ApplicationIntegrationTests : TestBase
                 DisplayName: "Test Reqruit Barrack",
                 Cost: 500,
                 TurnsToConstruct: 1,
+                Category: BuildingCategory.Military,
+                AiUtility: 50,
                 AllowedCityTypes:[CityType.Village, CityType.Settlement]
             ),
             new(
@@ -1208,6 +1211,8 @@ public class ApplicationIntegrationTests : TestBase
                 Cost: 1000,
                 TurnsToConstruct: 2,
                 AllowedCityTypes:[CityType.Settlement],
+                Category: BuildingCategory.Military,
+                AiUtility: 50,
                 RequiredPreviousTier: BuildingType.ReqruitBarrack
             ),
         };

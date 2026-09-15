@@ -144,7 +144,7 @@ public class DiplomacyAi(IUnitOfWork unitOfWork, IMediator mediator)
 
         var factionCityCount = factionToCitiesCount.GetValueOrDefault(targetFaction);
         var economicScore = Math.Min(
-            factionCityCount * GameBalance.AiPersonalities.TradeScorePerPartnerCity,
+            factionCityCount * GameBalance.AiSettings.TradeScorePerPartnerCity,
             DiplomacyRelation.MaxStanding
         );
 

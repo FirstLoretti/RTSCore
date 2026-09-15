@@ -1,3 +1,7 @@
 namespace RTSCore.Domain.ValueObjects.AI;
 
-public record AiPersonality(DiplomacyWeights DiplomacyWeights, AiStrategicType StrategicType);
+public record AiPersonality(
+    AiStrategicType StrategicType,
+    BuildingWeights BuildingWeights,
+    DiplomacyWeights DiplomacyWeights
+);
