@@ -15,7 +15,9 @@ namespace RTSCore.Tests.Application.Armies;
 
 public class CreateArmyCommandHandlerTests : TestBase
 {
-    private readonly UnitTemplate[] _unitTemplates = [new(UnitType.Knight, "Unit", 1, 1, 1, 1, 1, 1, 1, 1, 1)];
+    private readonly UnitTemplate[] _unitTemplates = [new(
+        UnitType.Knight, "Unit", 1, 1, 1, 1, 1, 1, 1, 1, 1, UnitCategory.Infantry,1
+    )];
     private readonly CityId _cityId = "id";
 
     [Fact]

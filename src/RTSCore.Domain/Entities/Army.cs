@@ -57,6 +57,14 @@ public class Army
         _units.Add(unit);
     }
 
+    public void AssignUnit(Unit unit)
+    {
+        if (unit.Faction != Faction) throw new GameRuleException("Нельзя нанять юнита, нанятого чужой фракцией.");
+
+        _units.Add(unit);
+        unit.AssignToArmy(Id);
+    }
+
     private void AssignGeneral(Unit general)
     {
         if (general.Faction != Faction) throw new GameRuleException("Нельзя нанять генерала, нанятого чужой фракцией.");

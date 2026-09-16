@@ -8,66 +8,50 @@ using RTSCore.Domain.ValueObjects;
 namespace RTSCore.Application.Cities.Commands;
 
 public class RecruitUnitCommandHandler(
-    IUnitRepository repository,
     IUnitOfWork unitOfWork,
     IReadOnlyCollection<UnitTemplate> unitTemplates
 ) : IRequestHandler<RecruitUnitCommand>
 {
     public async Task Handle(RecruitUnitCommand request, CancellationToken cancellationToken)
     {
+        var army = await unitOfWork.ArmyRepository.GetAsync(request.ArmyId, cancellationToken)
+            ?? throw new NotFoundException(
+                $"[{nameof(RecruitUnitCommandHandler)}] " +
+                $"Армии {request.ArmyId} нет на карте кампании"
+            );
+
+        var city = await unitOfWork.CityRepository.GetCityByCoordAsync(army.Coordinates, cancellationToken)
+            ?? throw new NotFoundException("Армия не в городе. Найм невозможен");
+
         var template = unitTemplates.FirstOrDefault(u => u.Type == request.Type)
             ?? throw new NotFoundException(
                 $"[{nameof(RecruitUnitCommandHandler)}] " +
                 $"Шаблон для юнита типа {request.Type} не содержится в {nameof(GameBalance.Units)}"
             );
 
-        var city = await unitOfWork.CityRepository.GetWithBuildingsAsync(request.CityId, cancellationToken)
+        if (army.Faction != request.OwnerFaction) throw new GameRuleException("Фракция отряда и армии не совпадает.");
+        if (!army.HasFreeSlots) throw new GameRuleException("У армии нет свободных слотов для найма");
+
+        var faction = await unitOfWork.FactionRepository.GetFactionAsync(army.Faction, cancellationToken)
             ?? throw new NotFoundException(
                 $"[{nameof(RecruitUnitCommandHandler)}] " +
-                $"Поселения {request.CityId} нет на карте кампании"
+                $"Фракции {army.Faction} нет в текущей игре"
             );
 
-        if (city.OwnerFaction != request.OwnerFaction)
-        {
-            throw new GameRuleException(
-                $"[{nameof(RecruitUnitCommandHandler)}] " +
-                $"Фракция {request.OwnerFaction} не может нанимать в поселении фракции {city.OwnerFaction}"
-            );
-        }
+        if (faction.Gold < template.Cost) throw new GameRuleException("Недостаточно денег для найма отряда.");
 
-        var faction = await unitOfWork.FactionRepository.GetFactionAsync(city.OwnerFaction, cancellationToken)
-            ?? throw new NotFoundException(
-                $"[{nameof(RecruitUnitCommandHandler)}] " +
-                $"Фракции {city.OwnerFaction} нет в текущей игре"
-            );
-
-        if (faction.Gold < template.Cost)
-        {
-            throw new GameRuleException(
-                $"[{nameof(RecruitUnitCommandHandler)}] Недостаточно денег для найма {template.DisplayName}"
-            );
-        }
-
-        if (template.RequiredBuilding is BuildingType requiredBuilding)
-        {
-            var hasRequiredBuilding = city.Buildings.Any(b => b.Type == requiredBuilding && b.IsConstructed);
-            if (!hasRequiredBuilding)
-            {
-                throw new GameRuleException(
-                    $"[{nameof(RecruitUnitCommandHandler)}] Нельзя нанять {request.Type}. " +
-                    $"В городе {request.CityId} отсутствует здание типа {nameof(requiredBuilding)}"
-                );
-            }
-        }
+        var allowedUnit = city.GetAvailableRecruitOptions([request.Type]);
+        if (allowedUnit.Length == 0)
+            throw new GameRuleException($"Юнит {request.Type} недоступен для найма в городе {city}");
 
         faction.SpendGold(template.Cost);
 
         var unitId = new UnitId($"unit_{request.Type}_{Guid.NewGuid().ToString("N")[..5]}");
-        var unit = new Domain.Entities.Unit(unitId, request.OwnerFaction, template, request.CityId);
+        var unit = new Domain.Entities.Unit(unitId, request.OwnerFaction, template);
+        army.AssignUnit(unit);
 
-        repository.Add(unit);
+        unitOfWork.UnitRepository.Add(unit);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
-
     }
 }

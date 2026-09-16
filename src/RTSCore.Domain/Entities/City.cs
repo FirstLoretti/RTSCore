@@ -37,18 +37,36 @@ public class City
 
     private City() { }
 
-    public BuildingType[] GetAvailableBuildingOptions(IReadOnlyCollection<BuildingType> options)
+    public UnitType[] GetAvailableRecruitOptions(IReadOnlyCollection<UnitType> allOptions)
     {
-        if (options == null) throw new ArgumentNullException(nameof(options), "Коллекция не может быть пустой");
+        ArgumentNullException.ThrowIfNull(allOptions);
+
+        if (allOptions.Count == 0) return [];
+
+        var constructedBuildings = _buildings
+            .Where(b => b.IsConstructed)
+            .Select(b => b.Type)
+            .ToHashSet();
+
+        return [..allOptions.Where(unitType =>
+            {
+                var unit = GameBalance.Units.GetTemplate(unitType);
+                return unit.RequiredBuilding == null || constructedBuildings.Contains(unit.RequiredBuilding.Value);
+            })];
+    }
+
+    public BuildingType[] GetAvailableConstructOptions(IReadOnlyCollection<BuildingType> options)
+    {
+        ArgumentNullException.ThrowIfNull(options);
 
         if (options.Count == 0) return [];
 
-        var currentBuildings = _buildings
+        var activeBuildings = _buildings
             .Where(b => b.IsConstructed || b.InConstructProcess)
             .Select(b => b.Type)
             .ToHashSet();
 
-        return [.. options.Where(o => !currentBuildings.Contains(o))];
+        return [.. options.Where(o => !activeBuildings.Contains(o))];
     }
 
     public void GrowPopulation(float growthRate)
@@ -79,11 +97,13 @@ public class City
 
     public void RegisterBuilding(Building building)
     {
-        building.AddToConstruct();
+        if (!building.IsConstructed)
+        {
+            building.StartConstruct();
+            building.OnBuildingCompleted += HandleBuildingCompleted;
+        }
 
         _buildings.Add(building);
-
-        building.OnBuildingCompleted += HandleBuildingCompleted;
     }
 
     private void HandleBuildingCompleted(Building building)

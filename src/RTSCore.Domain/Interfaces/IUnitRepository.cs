@@ -9,4 +9,6 @@ public interface IUnitRepository
     void Delete(Unit unit);
 
     Task<Unit?> GetUnitAsync(UnitId id, CancellationToken cancellationToken);
+
+    Task<IReadOnlyCollection<Unit>> GetUnitsAsync(FactionType faction, CancellationToken cancellationToken);
 }

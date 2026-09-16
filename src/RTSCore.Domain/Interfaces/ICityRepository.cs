@@ -10,7 +10,9 @@ public interface ICityRepository
     void AddRange(IEnumerable<City> cities);
 
     Task<City?> GetCityAsync(CityId id, CancellationToken cancellationToken);
+    Task<City?> GetCityByCoordAsync(Coordinates coordinates, CancellationToken cancellationToken);
     Task<City?> GetWithBuildingsAsync(CityId id, CancellationToken cancellationToken);
+
     Task<IReadOnlyList<City>> GetWithBuildingsAsync(CancellationToken cancellationToken);
     Task<IReadOnlyList<City>> GetWithBuildingsAsync(FactionType faction, CancellationToken cancellationToken);
     Task<IReadOnlyCollection<City>> GetCitiesAsync(FactionType faction, CancellationToken cancellationToken);

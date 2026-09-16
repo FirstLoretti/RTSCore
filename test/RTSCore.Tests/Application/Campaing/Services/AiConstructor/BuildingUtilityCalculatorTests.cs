@@ -40,6 +40,8 @@ public class BuildingUtilityCalculatorTests
 
         var aiPersonality = new AiPersonality(
             AiStrategicType.Aggressive,
+            new BudgetWeights(1, 1),
+            new UnitWeights(1, 1),
             new BuildingWeights(EconomicMultiplier: 0.75f, MilitaryMultiplier: 1.25f),
             new DiplomacyWeights(1, 1, 1, 1, 1, 1, 1, 1, 1)
         );

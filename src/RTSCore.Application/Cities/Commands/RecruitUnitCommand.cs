@@ -4,8 +4,4 @@ using RTSCore.Domain.ValueObjects;
 
 namespace RTSCore.Application.Cities.Commands;
 
-public record struct RecruitUnitCommand(
-    string CityId,
-    UnitType Type,
-    FactionType OwnerFaction
-) : IRequest;
+public record RecruitUnitCommand(string ArmyId, UnitType Type, FactionType OwnerFaction) : IRequest;

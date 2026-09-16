@@ -61,7 +61,7 @@ public class Building
         return new Building(id, type, ownerFaction, cityId, isConstructed, turnsToConstruct);
     }
 
-    public void AddToConstruct() => InConstructProcess = true;
+    public void StartConstruct() => InConstructProcess = true;
 
     public void AdvanceConstruction()
     {

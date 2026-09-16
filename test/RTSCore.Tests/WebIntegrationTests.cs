@@ -183,7 +183,7 @@ public class WebIntegrationTests(WebApplicationFactory<Program> factory) : WebTe
         {
             var template = new UnitTemplate(
                 UnitType.Militia, "Test Unit", 1, 1, 1, 1, 1, 1, 1, 1,
-                TurnsToRecruit: 0
+                TurnsToRecruit: 0, UnitCategory.Infantry, 1
             );
             var unit = Unit.CreateWithCustomStatus(unitId, FactionType.England, template, turnsToRecruit: 0);
 
@@ -293,18 +293,35 @@ public class WebIntegrationTests(WebApplicationFactory<Program> factory) : WebTe
     [Fact]
     public async Task TrainUnit_WithValidCommand_ShouldReturnNoContent()
     {
-        var cityId = new CityId("test_london");
-        var unitType = UnitType.Peasant;
-        var unitCost = GameBalance.Units.GetTemplate(unitType).Cost;
+        var cityId = new CityId("city_id");
         var ownerFaction = FactionType.England;
+        var unitTemplate = GameBalance.Units.GetTemplate(UnitType.Peasant);
+        var general = new Unit("unit_id", ownerFaction, unitTemplate);
+        var army = Army.Create(ownerFaction, new(0f, 0f), 1, 20, general);
         var building = Building.CreateWithCustomStatus(
             "test_barrack", BuildingType.ReqruitBarrack, ownerFaction, cityId,
             isConstructed: true, turnsToConstruct: 0
         );
 
-        using var scope = await SeedTestWorldAsync(cityId, unitCost, building);
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-        var command = new RecruitUnitCommand(cityId, unitType, ownerFaction);
+            var faction = new Faction(FactionType.England, unitTemplate.Cost + 100, PlayerType.Human);
+            var cityPreset = new CityPreset(cityId, "London Test", CityType.Village, 1000, []);
+            var city = new City(cityPreset, faction.Type, new(0f, 0f));
+
+            city.RegisterBuilding(building);
+
+            context.Cities.Add(city);
+            context.Factions.Add(faction);
+            context.Units.Add(general);
+            context.Armies.Add(army);
+
+            await context.SaveChangesAsync();
+        }
+
+        var command = new RecruitUnitCommand(army.Id, UnitType.Peasant, ownerFaction);
 
         var response = await _client.PostAsJsonAsync("api/city/trainUnit", command);
 
@@ -367,7 +384,7 @@ public class WebIntegrationTests(WebApplicationFactory<Program> factory) : WebTe
 
         var template = new UnitTemplate(
             UnitType.Peasant, "Test Peasant", unitCost, 1, 1, 1, 1, 1, 1, 1,
-            TurnsToRecruit: 1, RequiredBuilding: buildingType);
+            TurnsToRecruit: 1, UnitCategory.Infantry, 1, RequiredBuilding: buildingType);
         var unit = Unit.CreateWithCustomStatus(
             unitId, ownerFaction, template,
             turnsToRecruit: 1, currentCityId: cityId
@@ -437,14 +454,15 @@ public class WebIntegrationTests(WebApplicationFactory<Program> factory) : WebTe
 
     #region Common
 
-    private async Task<IServiceScope> SeedTestWorldAsync(CityId cityId, int? entityCost = 0, Building? buildingToRegister = null)
+    private async Task<IServiceScope> SeedTestWorldAsync(
+        CityId cityId, int? entityCost = 0, Building? buildingToRegister = null)
     {
         var scope = _factory.Services.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
         var faction = new Faction(FactionType.England, entityCost ?? 0, PlayerType.Human);
         var cityPreset = new CityPreset(cityId, "London Test", CityType.Settlement, 1000, []);
-        var city = new City(cityPreset, faction.Type);
+        var city = new City(cityPreset, faction.Type, new(0f, 0f));
 
         if (buildingToRegister != null)
         {
@@ -453,7 +471,6 @@ public class WebIntegrationTests(WebApplicationFactory<Program> factory) : WebTe
 
         context.Cities.Add(city);
         context.Factions.Add(faction);
-
         await context.SaveChangesAsync();
 
         return scope;

@@ -10,6 +10,14 @@ public static partial class GameBalance
     {
         public static readonly AiPersonality Conqueror = new(
             AiStrategicType.Aggressive,
+            new BudgetWeights(
+                Construction: 0.75f,
+                Recruitment: 1.25f
+            ),
+            new UnitWeights(
+                InfantryMultiplier: 0.65f,
+                RangeInfantryMultiplier: 0.35f
+            ),
             new BuildingWeights(
                 EconomicMultiplier: 0.85f,
                 MilitaryMultiplier: 1.15f
@@ -31,6 +39,14 @@ public static partial class GameBalance
 
         public static readonly AiPersonality Defender = new(
             AiStrategicType.Defensive,
+            new BudgetWeights(
+                Construction: 1.25f,
+                Recruitment: 0.75f
+            ),
+            new UnitWeights(
+                InfantryMultiplier: 0.55f,
+                RangeInfantryMultiplier: 0.45f
+            ),
             new BuildingWeights(
                 EconomicMultiplier: 1.15f,
                 MilitaryMultiplier: 0.85f

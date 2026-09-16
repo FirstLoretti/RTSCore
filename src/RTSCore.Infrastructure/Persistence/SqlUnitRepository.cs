@@ -1,3 +1,5 @@
+using Microsoft.EntityFrameworkCore;
+
 using RTSCore.Domain.Entities;
 using RTSCore.Domain.Interfaces;
 using RTSCore.Domain.ValueObjects;
@@ -12,5 +14,12 @@ public class SqlUnitRepository(AppDbContext context) : IUnitRepository
     public async Task<Unit?> GetUnitAsync(UnitId id, CancellationToken cancellationToken)
     {
         return await context.Units.FindAsync([id], cancellationToken);
+    }
+
+    public async Task<IReadOnlyCollection<Unit>> GetUnitsAsync(FactionType faction, CancellationToken cancellationToken)
+    {
+        return await context.Units
+            .Where(u => u.Faction == faction)
+            .ToListAsync(cancellationToken);
     }
 }

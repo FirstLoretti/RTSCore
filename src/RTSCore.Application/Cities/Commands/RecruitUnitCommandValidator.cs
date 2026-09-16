@@ -8,7 +8,7 @@ public class RecruitUnitCommandValidator : AbstractValidator<RecruitUnitCommand>
 {
     public RecruitUnitCommandValidator()
     {
-        RuleFor(c => c.CityId).NotEmpty().Length(3, 30);
+        RuleFor(c => c.ArmyId).MaximumLength(256);
 
         RuleFor(c => c.OwnerFaction).IsInEnum().NotEqual(FactionType.None);
 

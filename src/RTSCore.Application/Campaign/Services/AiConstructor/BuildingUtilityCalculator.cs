@@ -37,7 +37,7 @@ public class BuildingUtilityCalculator(
         foreach (var city in cities)
         {
             var options = buildingRegistry.GetBuildingOptions(city.Type);
-            var availableOptions = city.GetAvailableBuildingOptions(options);
+            var availableOptions = city.GetAvailableConstructOptions(options);
 
             foreach (var type in availableOptions)
             {

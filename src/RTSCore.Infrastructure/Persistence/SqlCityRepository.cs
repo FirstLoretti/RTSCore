@@ -16,6 +16,14 @@ public class SqlCityRepository(AppDbContext context) : ICityRepository
         return await context.Cities.FindAsync([id], cancellationToken);
     }
 
+    public async Task<City?> GetCityByCoordAsync(Coordinates coordinates, CancellationToken cancellationToken)
+    {
+        return await context.Cities
+            .Where(c => c.Coordinates == coordinates)
+            .Include(c => c.Buildings)
+            .FirstOrDefaultAsync(cancellationToken);
+    }
+
     public async Task<City?> GetWithBuildingsAsync(CityId id, CancellationToken cancellationToken)
     {
         return await context.Cities

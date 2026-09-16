@@ -37,10 +37,30 @@ public partial class GameBalance
                         HealthGrowthRate: 1.1f,
                         DamageGrowthRate: 1.15f,
                         TurnsToRecruit: 1,
+                        Category: UnitCategory.Infantry,
+                        AiUtility: 50,
                         RequiredBuilding: BuildingType.ReqruitBarrack
                     )
                 },
-
+                {
+                    UnitType.PeasantArcher,
+                    new UnitTemplate(
+                        Type: UnitType.Peasant,
+                        DisplayName: "Peasant Archer",
+                        Cost: 150,
+                        MaxHealth: 100,
+                        Damage: 25,
+                        Armor: 2,
+                        Speed: 5,
+                        ExpKillReward: 50,
+                        HealthGrowthRate: 1.1f,
+                        DamageGrowthRate: 1.15f,
+                        TurnsToRecruit: 1,
+                        Category: UnitCategory.RangeInfantry,
+                        AiUtility: 50,
+                        RequiredBuilding: BuildingType.ReqruitBarrack
+                    )
+                },
                 {
                     UnitType.Militia,
                     new UnitTemplate(
@@ -55,6 +75,8 @@ public partial class GameBalance
                         HealthGrowthRate: 1.15f,
                         DamageGrowthRate: 1.10f,
                         TurnsToRecruit: 2,
+                        Category: UnitCategory.Infantry,
+                        AiUtility: 67,
                         RequiredBuilding: BuildingType.MilitiaBarrack
                     )
                 },
@@ -72,13 +94,15 @@ public partial class GameBalance
                         ExpKillReward: 1,
                         HealthGrowthRate: 1f,
                         DamageGrowthRate: 1f,
-                        TurnsToRecruit: 1
+                        TurnsToRecruit: 1,
+                        UnitCategory.Infantry,
+                        AiUtility: 1
                     )
                 },
 
                 {
                     UnitType.Knight,
-                    new UnitTemplate(UnitType.Knight,"Knight", 1, 1, 1, 1, 1, 1, 1f, 1f, 1)
+                    new UnitTemplate(UnitType.Knight,"Knight", 1, 1, 1, 1, 1, 1, 1f, 1f, 1,UnitCategory.Infantry, 1)
                 }
             };
 

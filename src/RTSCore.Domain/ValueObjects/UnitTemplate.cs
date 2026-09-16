@@ -14,5 +14,7 @@ public record UnitTemplate(
     float HealthGrowthRate,
     float DamageGrowthRate,
     int TurnsToRecruit,
+    UnitCategory Category,
+    int AiUtility,
     BuildingType? RequiredBuilding = null
 ) : ICatalogOption<UnitType>;
