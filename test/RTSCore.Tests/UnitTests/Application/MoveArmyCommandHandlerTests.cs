@@ -32,7 +32,7 @@ public class MoveArmyCommandHandlerTests
         unitOfWork.ArmyRepository.GetAsync(armyId, ct).Returns(army);
         movementService.CalculateMovementCost(Arg.Any<Vector2>(), Arg.Any<Vector2>()).Returns(100);
 
-        var command = new MoveArmyCommand(armyId, destination);
+        var command = new MoveArmyCommand(armyId, 10f, 10f);
         var handler = new MoveArmyCommandHandler(unitOfWork, movementService);
 
         var response = await handler.Handle(command, ct);
@@ -41,7 +41,8 @@ public class MoveArmyCommandHandlerTests
         army.MovementPoints.Should().Be(0);
 
         response.ArmyId.Should().Be(armyId);
-        response.Coordinates.Should().Be(destination);
+        response.X.Should().Be(destination.X);
+        response.Y.Should().Be(destination.Y);
         response.MovementPoints.Should().Be(0);
 
         await unitOfWork.Received(1).SaveChangesAsync(ct);
@@ -56,7 +57,7 @@ public class MoveArmyCommandHandlerTests
 
         unitOfWork.ArmyRepository.GetAsync("unknown_id", ct).Returns((Army)null!);
 
-        var command = new MoveArmyCommand("unknown_id", new(10f, 10f));
+        var command = new MoveArmyCommand("unknown_id", 10f, 10f);
         var handler = new MoveArmyCommandHandler(unitOfWork, movementService);
 
         var action = () => handler.Handle(command, ct);
@@ -75,7 +76,7 @@ public class MoveArmyCommandHandlerTests
         var army = Army.CreateWithoutGeneral(FactionType.England, new(0f, 0f), 100, 20);
         unitOfWork.ArmyRepository.GetAsync(army.Id, ct).Returns(army);
 
-        var command = new MoveArmyCommand(army.Id, new(10f, 10f));
+        var command = new MoveArmyCommand(army.Id, 10f, 10f);
         var handler = new MoveArmyCommandHandler(unitOfWork, movementService);
 
         var action = () => handler.Handle(command, ct);
@@ -99,7 +100,7 @@ public class MoveArmyCommandHandlerTests
         unitOfWork.ArmyRepository.GetAsync(army.Id, ct).Returns(army);
         movementService.CalculateMovementCost(Arg.Any<Vector2>(), Arg.Any<Vector2>()).Returns(200);
 
-        var command = new MoveArmyCommand(army.Id, new(10f, 10f));
+        var command = new MoveArmyCommand(army.Id, 10f, 10f);
         var handler = new MoveArmyCommandHandler(unitOfWork, movementService);
 
         var action = () => handler.Handle(command, ct);

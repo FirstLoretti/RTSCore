@@ -1,3 +1,5 @@
+using System.Numerics;
+
 using MediatR;
 
 using RTSCore.Application.Common;
@@ -20,11 +22,12 @@ public class MoveArmyCommandHandler(
 
         if (!army.HasGeneral) throw new GameRuleException("Армия не может перемещаться без генерала.");
 
-        var movementCost = campaingMovementService.CalculateMovementCost(army.Coordinates, request.Destination);
-        army.MoveTo(request.Destination, movementCost);
+        var destination = new Vector2(request.X, request.Y);
+        var movementCost = campaingMovementService.CalculateMovementCost(army.Coordinates, destination);
+        army.MoveTo(destination, movementCost);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
-        return new MoveArmyCommandResponse(army.Id, army.Coordinates, army.MovementPoints);
+        return new MoveArmyCommandResponse(army.Id, army.Coordinates.X, army.Coordinates.Y, army.MovementPoints);
     }
 }

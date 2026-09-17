@@ -4,7 +4,6 @@ using MediatR;
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
 
 using RTSCore.Application.Authentication.Commands;
 using RTSCore.Application.Authentication.Common;

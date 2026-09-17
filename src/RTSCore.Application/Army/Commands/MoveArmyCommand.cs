@@ -4,4 +4,4 @@ using MediatR;
 
 namespace RTSCore.Application.Army.Commands;
 
-public record MoveArmyCommand(string ArmyId, Vector2 Destination) : IRequest<MoveArmyCommandResponse>;
+public record MoveArmyCommand(string ArmyId, float X, float Y) : IRequest<MoveArmyCommandResponse>;
