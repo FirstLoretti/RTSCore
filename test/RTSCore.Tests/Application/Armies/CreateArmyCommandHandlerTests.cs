@@ -84,7 +84,7 @@ public class CreateArmyCommandHandlerTests : TestBase
     private async Task<ServiceProvider> ArrangeEnvironment(UnitTemplate[] unitTemplates)
     {
         var cityPreset = new CityPreset(_cityId, "City", CityType.Village, 1, []);
-        var city = new City(cityPreset, FactionType.England, new Coordinates(5, 5));
+        var city = new City(cityPreset, FactionType.England, new(5f, 5f));
 
         var serviceProvider = SetupTestInvironment(options =>
             options.AddSingleton<IReadOnlyCollection<UnitTemplate>>(unitTemplates)

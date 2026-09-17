@@ -1,3 +1,5 @@
+using System.Numerics;
+
 using RTSCore.Domain.Entities;
 using RTSCore.Domain.ValueObjects;
 
@@ -10,7 +12,7 @@ public interface ICityRepository
     void AddRange(IEnumerable<City> cities);
 
     Task<City?> GetCityAsync(CityId id, CancellationToken cancellationToken);
-    Task<City?> GetCityByCoordAsync(Coordinates coordinates, CancellationToken cancellationToken);
+    Task<City?> GetCityByCoordAsync(Vector2 coordinates, CancellationToken cancellationToken);
     Task<City?> GetWithBuildingsAsync(CityId id, CancellationToken cancellationToken);
 
     Task<IReadOnlyList<City>> GetWithBuildingsAsync(CancellationToken cancellationToken);

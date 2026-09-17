@@ -1,3 +1,5 @@
+using System.Numerics;
+
 using RTSCore.Domain.Services;
 using RTSCore.Domain.ValueObjects;
 using RTSCore.Domain.ValueObjects.Presets;
@@ -10,19 +12,19 @@ public class City
     public CityType Type { get; private set; }
     public FactionType OwnerFaction { get; private set; }
     public int Population { get; private set; }
-    public Coordinates Coordinates { get; private set; }
+    public Vector2 Coordinates { get; private set; }
     public UnitType Governor { get; private set; } = UnitType.Knight;
 
     public IReadOnlyCollection<Building> Buildings => _buildings.AsReadOnly();
     private readonly List<Building> _buildings = [];
 
-    public City(CityPreset cityPreset, FactionType ownerFaction, Coordinates? coordinates = null)
+    public City(CityPreset cityPreset, FactionType ownerFaction, Vector2? coordinates = null)
     {
         Id = cityPreset.Id;
         Type = cityPreset.Type;
         OwnerFaction = ownerFaction;
         Population = cityPreset.CurrentPopulation;
-        Coordinates = coordinates ?? new Coordinates(0, 0);
+        Coordinates = coordinates ?? new Vector2(0f, 0f);
 
         foreach (var buildingType in cityPreset.BuildingTypes)
         {

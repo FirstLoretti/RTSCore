@@ -1,3 +1,5 @@
+using System.Numerics;
+
 using Microsoft.EntityFrameworkCore;
 
 using RTSCore.Domain.Entities;
@@ -16,7 +18,7 @@ public class SqlCityRepository(AppDbContext context) : ICityRepository
         return await context.Cities.FindAsync([id], cancellationToken);
     }
 
-    public async Task<City?> GetCityByCoordAsync(Coordinates coordinates, CancellationToken cancellationToken)
+    public async Task<City?> GetCityByCoordAsync(Vector2 coordinates, CancellationToken cancellationToken)
     {
         return await context.Cities
             .Where(c => c.Coordinates == coordinates)

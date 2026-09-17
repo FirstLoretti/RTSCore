@@ -59,6 +59,8 @@ public abstract class TestBase : IDisposable
         services.AddSingleton(Options.Create(testJwtSettings));
 
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(LoggingBehavior<,>));
+        services.AddTransient<ICampaignMovementService, CampaignMovementService>();
+
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(
             typeof(RecruitUnitCommand).Assembly
         ));
