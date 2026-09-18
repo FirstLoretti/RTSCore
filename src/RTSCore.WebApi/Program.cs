@@ -36,12 +36,14 @@ builder.Services.AddScoped<IUserRepository, SqlUserRepository>();
 builder.Services.AddScoped<IRefreshTokenRepository, SqlRefreshTokenRepository>();
 builder.Services.AddScoped<IArmyRepository, SqlArmyRepository>();
 builder.Services.AddScoped<DiplomacyAi>();
+
 builder.Services.AddSingleton<ICityBuildingRegistry, CityBuildingRegistry>();
 builder.Services.AddSingleton(Array.Empty<FactionPreset>());
 builder.Services.AddSingleton(GameBalance.Buildings.GetAllTemplates);
 builder.Services.AddSingleton(GameBalance.Units.GetAllTemplates);
 builder.Services.AddSingleton<IRefreshTokenGenerator, RefreshTokenGenerator>();
 builder.Services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
+builder.Services.AddSingleton<IAutoBattleCalculator, AutoBattleCalculator>();
 
 builder.Services.AddTransient<ICampaignMovementService, CampaignMovementService>();
 
@@ -56,8 +58,7 @@ builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-})
-.AddJwtBearer(options =>
+}).AddJwtBearer(options =>
 {
     options.MapInboundClaims = false;
     options.RequireHttpsMetadata = !builder.Environment.IsDevelopment();

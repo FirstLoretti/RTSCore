@@ -27,13 +27,13 @@ public class AutoBattleCalculatorTests
 
         var result = calculator.Calculate([attackerPeasant, attackerKnight], [defenderPeasant, defenderKnight]);
 
-        result.IsAttackerWinner.Should().Be(true);
-        result.AttackerLog.Should().HaveCount(2);
+        result.IsAttackerWon.Should().Be(true);
+        result.AttackerUnitsLogs.Should().HaveCount(2);
         attackerPeasant.Health.Should().Be(70);
         attackerKnight.Health.Should().Be(140);
 
-        result.DefenderLog.Should().HaveCount(1);
-        result.DefenderLog.Should().NotContain(l => l.UnitId == defenderPeasant.Id);
+        result.DefenderUnitsLogs.Should().HaveCount(1);
+        result.DefenderUnitsLogs.Should().NotContain(l => l.UnitId == defenderPeasant.Id);
 
     }
 

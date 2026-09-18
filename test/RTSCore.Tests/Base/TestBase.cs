@@ -54,6 +54,7 @@ public abstract class TestBase : IDisposable
         services.AddSingleton<ICityBuildingRegistry, CityBuildingRegistry>();
         services.AddSingleton(GameBalance.Buildings.GetAllTemplates);
         services.AddSingleton(GameBalance.Units.GetAllTemplates);
+        services.AddSingleton<IAutoBattleCalculator, AutoBattleCalculator>();
 
         services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
         services.AddSingleton(Options.Create(testJwtSettings));

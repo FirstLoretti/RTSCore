@@ -2,11 +2,12 @@ using System.Collections.Frozen;
 
 using RTSCore.Domain.Entities;
 using RTSCore.Domain.Exeptions;
+using RTSCore.Domain.Interfaces;
 using RTSCore.Domain.ValueObjects;
 
 namespace RTSCore.Domain.Services;
 
-public class AutoBattleCalculator(IReadOnlyCollection<UnitTemplate> units)
+public class AutoBattleCalculator(IReadOnlyCollection<UnitTemplate> units) : IAutoBattleCalculator
 {
     private readonly FrozenDictionary<UnitType, UnitTemplate> _typeToTemplate = units.ToFrozenDictionary(u => u.Type);
 

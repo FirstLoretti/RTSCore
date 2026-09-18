@@ -94,6 +94,15 @@ public class Army
         unit.AssignToArmy(Id);
     }
 
+    public void PurgeDeadUnits()
+    {
+        var deadUnits = _units.Where(u => !u.IsAlive).ToList();
+        foreach (var unit in deadUnits)
+        {
+            _units.Remove(unit);
+        }
+    }
+
     private void AssignGeneral(Unit general)
     {
         if (general.Faction != Faction) throw new GameRuleException("Нельзя нанять генерала, нанятого чужой фракцией.");

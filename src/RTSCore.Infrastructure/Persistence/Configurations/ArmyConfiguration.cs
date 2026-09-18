@@ -18,5 +18,10 @@ public class ArmyConfiguration : IEntityTypeConfiguration<Army>
         builder.Property(a => a.Faction).HasConversion<string>();
 
         builder.ComplexProperty(a => a.Coordinates);
+
+        builder.HasMany(a => a.Units)
+            .WithOne()
+            .HasForeignKey(u => u.ArmyId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }
