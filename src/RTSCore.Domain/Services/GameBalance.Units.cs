@@ -45,7 +45,7 @@ public partial class GameBalance
                 {
                     UnitType.PeasantArcher,
                     new UnitTemplate(
-                        Type: UnitType.Peasant,
+                        Type: UnitType.PeasantArcher,
                         DisplayName: "Peasant Archer",
                         Cost: 150,
                         MaxHealth: 100,
