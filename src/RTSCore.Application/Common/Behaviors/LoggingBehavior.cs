@@ -2,10 +2,13 @@ using System.Diagnostics;
 
 using MediatR;
 
+using Microsoft.Extensions.Logging;
+
 namespace RTSCore.Application.Common.Behaviors;
 
-public class LoggingBehavior<TRequest, TResponse>
-    : IPipelineBehavior<TRequest, TResponse> where TRequest : IRequest<TResponse>
+public partial class LoggingBehavior<TRequest, TResponse>(
+    ILogger<LoggingBehavior<TRequest, TResponse>> logger
+) : IPipelineBehavior<TRequest, TResponse> where TRequest : IRequest<TResponse>
 {
     public async Task<TResponse> Handle(
         TRequest request,
@@ -14,16 +17,15 @@ public class LoggingBehavior<TRequest, TResponse>
     )
     {
         var timer = Stopwatch.StartNew();
+        var requestName = typeof(TRequest).Name;
 
-        Console.WriteLine($"[MEDIATR-START] Запущен процесс {typeof(TRequest).Name}");
+        LoggingExtensions.LogProcessStart(logger, requestName, request);
 
         var response = await next(cancellationToken);
+
         timer.Stop();
 
-        Console.WriteLine(
-            $"[MEDIATR-FINISH] Процесс {typeof(TRequest).Name} " +
-            $"завершился за {timer.ElapsedMilliseconds}"
-        );
+        LoggingExtensions.LogProcessFinish(logger, requestName, timer.ElapsedMilliseconds);
 
         return response;
     }
