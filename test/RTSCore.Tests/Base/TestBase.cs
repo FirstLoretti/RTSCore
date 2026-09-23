@@ -5,8 +5,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
-using RTSCore.Application.Campaign.Services.Diplomacy;
-using RTSCore.Application.Cities.Commands;
+using RTSCore.Application.AI.Infratructure;
+using RTSCore.Application.Campaign.AutoBattle;
+using RTSCore.Application.Campaign.UnitRecruitment;
 using RTSCore.Application.Common.Behaviors;
 using RTSCore.Application.Common.Settings;
 using RTSCore.Domain.Interfaces;

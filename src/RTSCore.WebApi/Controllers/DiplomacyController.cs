@@ -2,7 +2,9 @@ using MediatR;
 
 using Microsoft.AspNetCore.Mvc;
 
-using RTSCore.Application.Campaign.Commands.Diplomacy;
+using RTSCore.Application.Campaign.Diplomacy.PeaceNegotiation;
+using RTSCore.Application.Campaign.Diplomacy.TradeProposal;
+using RTSCore.Application.Campaign.Diplomacy.WarDeclaration;
 
 namespace RTSCore.WebApi.Controllers;
 

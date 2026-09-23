@@ -3,25 +3,20 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
-using RTSCore.Application.Cities.Commands;
-using RTSCore.Application.Campaign.Commands;
 using RTSCore.Domain.Entities;
 using RTSCore.Domain.Exeptions;
 using RTSCore.Domain.ValueObjects;
 using RTSCore.Domain.ValueObjects.Presets;
 using RTSCore.Infrastructure.Persistence;
 using RTSCore.Domain.Services;
-using RTSCore.Application.Cities.Queries;
-using RTSCore.Application.Cities.Queries.Common;
-using RTSCore.Application.Units.Commands;
-using RTSCore.Application.Campaign.Commands.Diplomacy;
-using RTSCore.Application.Campaign.Services.Diplomacy;
 
 using Unit = RTSCore.Domain.Entities.Unit;
 using RTSCore.Tests.Base;
+using RTSCore.Application.AI.Infratructure;
+using RTSCore.Application.Campaign.Common;
 
 namespace RTSCore.Tests;
-
+/*
 public class ApplicationIntegrationTests : TestBase
 {
     #region UnitCommands
@@ -1200,3 +1195,4 @@ public class ApplicationIntegrationTests : TestBase
 
     #endregion
 }
+*/

@@ -2,11 +2,12 @@ namespace RTSCore.Domain.ValueObjects;
 
 public enum UnitType
 {
-    None = 0,
+    None,
     Invulnerable,
     Peasant,
     PeasantArcher,
     Militia,
     MilitiaArcher,
-    Knight
+    Knight,
+    MercenaryKnight
 }

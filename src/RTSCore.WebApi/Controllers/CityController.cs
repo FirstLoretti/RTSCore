@@ -2,9 +2,9 @@ using MediatR;
 
 using Microsoft.AspNetCore.Mvc;
 
-using RTSCore.Application.Cities.Commands;
-using RTSCore.Application.Cities.Queries;
-using RTSCore.Application.Cities.Queries.Common;
+using RTSCore.Application.Campaign.CityConstruction;
+using RTSCore.Application.Campaign.Common;
+using RTSCore.Application.Campaign.UnitRecruitment;
 using RTSCore.Domain.ValueObjects;
 
 namespace RTSCore.WebApi.Controllers;

@@ -5,8 +5,10 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-using RTSCore.Application.Authentication.Commands;
 using RTSCore.Application.Authentication.Common;
+using RTSCore.Application.Authentication.Login;
+using RTSCore.Application.Authentication.Register;
+using RTSCore.Application.Authentication.Tokens;
 
 namespace RTSCore.WebApi.Controllers;
 

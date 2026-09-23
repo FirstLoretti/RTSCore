@@ -2,6 +2,6 @@ namespace RTSCore.Domain.ValueObjects;
 
 public record BattleResult(
     bool IsAttackerWon,
-    List<UnitBattleLog> AttackerUnitsLogs,
-    List<UnitBattleLog> DefenderUnitsLogs
+    List<UnitBattleLog> AttackerBattleLogs,
+    List<UnitBattleLog> DefenderBattleLogs
 );

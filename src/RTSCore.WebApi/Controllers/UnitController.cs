@@ -2,7 +2,7 @@ using MediatR;
 
 using Microsoft.AspNetCore.Mvc;
 
-using RTSCore.Application.Units.Commands;
+using RTSCore.Application.Campaign.DisbandUnit;
 
 namespace RTSCore.WebApi.Controllers;
 

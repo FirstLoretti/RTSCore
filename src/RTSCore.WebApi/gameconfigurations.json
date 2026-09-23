@@ -1,0 +1,77 @@
+{
+  "GameConfigurations": {
+    "Units": {
+      "Templates": [
+        {
+          "Type": "Peasant",
+          "DisplayName": "Крестьяне",
+          "Cost": 150,
+          "MaxHealth": 100,
+          "Damage": 10,
+          "Armor": 0,
+          "Speed": 5,
+          "ExpKillReward": 25,
+          "HealthGrowthRate": 1.1,
+          "DamageGrowthRate": 1.1,
+          "TurnsToRecruit": 1,
+          "Category": "Infantry",
+          "AiUtility": 50,
+          "RequiredBuilding": "ReqruitBarrack"
+        },
+        {
+          "Type": "PeasantArcher",
+          "DisplayName": "Крестьяне Лучники",
+          "Cost": 150,
+          "MaxHealth": 100,
+          "Damage": 5,
+          "Armor": 0,
+          "Speed": 5,
+          "ExpKillReward": 25,
+          "HealthGrowthRate": 1.1,
+          "DamageGrowthRate": 1.1,
+          "TurnsToRecruit": 1,
+          "Category": "RangeInfantry",
+          "AiUtility": 50,
+          "RequiredBuilding": "ReqruitBarrack"
+        },
+        {
+          "Type": "Militia",
+          "DisplayName": "Ополченецы",
+          "Cost": 300,
+          "MaxHealth": 125,
+          "Damage": 12,
+          "Armor": 1,
+          "Speed": 5,
+          "ExpKillReward": 31,
+          "HealthGrowthRate": 1.1,
+          "DamageGrowthRate": 1.1,
+          "TurnsToRecruit": 2,
+          "Category": "Infantry",
+          "AiUtility": 67,
+          "RequiredBuilding": "MilitiaBarrack"
+        },
+        {
+          "Type": "Bodyguard",
+          "DisplayName": "Телохранители Генерала",
+          "Cost": 0,
+          "MaxHealth": 250,
+          "Damage": 25,
+          "Armor": 5,
+          "Speed": 2,
+          "ExpKillReward": 125,
+          "HealthGrowthRate": 1.1,
+          "DamageGrowthRate": 1.1,
+          "TurnsToRecruit": 0,
+          "Category": "Infantry",
+          "AiUtility": 0,
+          "RequiredBuilding": ""
+        }
+      ],
+      "ExpToNextLevel":[100, 200, 400]
+    },
+    "Army": {
+      "MaxSize": 20,
+      "MaxMovementPoints": 100
+    }
+  }
+}

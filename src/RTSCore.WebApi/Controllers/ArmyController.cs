@@ -2,7 +2,7 @@ using MediatR;
 
 using Microsoft.AspNetCore.Mvc;
 
-using RTSCore.Application.Army.Commands;
+using RTSCore.Application.Campaign.ArmyMovement;
 
 namespace RTSCore.WebApi.Controllers;
 

@@ -7,92 +7,55 @@ namespace RTSCore.Domain.Entities;
 
 public class Army
 {
-    public string Id { get; init; }
+    public string Id { get; init; } = string.Empty;
     public FactionType Faction { get; init; }
-
-    public UnitId GeneralId { get; private set; }
+    public UnitId GeneralId { get; private set; } // TODO: Убрать
     public Vector2 Coordinates { get; private set; }
     public int MovementPoints { get; private set; }
-    public int MaxMovementPoints { get; private set; }
-    public int MaxSize { get; private set; }
-    public bool HasGeneral { get; private set; }
 
     private readonly List<Unit> _units = [];
     public IReadOnlyList<Unit> Units => _units.AsReadOnly();
 
-    public bool HasFreeSlots => MaxSize > _units.Count;
-    public int Size => _units.Count;
+    private const int MaxSize = 20;
+    public bool HasFreeSlots => _units.Count < MaxSize;
 
     private Army(
-        string id,
         FactionType faction,
         Vector2 coordinates,
-        int maxMovementPoints,
-        int maxSize,
-        bool hasGeneral)
+        UnitTemplate general
+    )
     {
-        Id = id;
+        Id = $"army_{Guid.NewGuid()}";
         Faction = faction;
         Coordinates = coordinates;
-        MovementPoints = maxMovementPoints;
-        MaxMovementPoints = maxMovementPoints;
-        MaxSize = maxSize;
-        HasGeneral = hasGeneral;
+
+        _units.Add(new Unit(faction, general, Id));
     }
 
-    private Army() : this(null!, default, default, default, default, default) { }
+    private Army() { }
 
-    public static Army Create(
-        FactionType faction,
-        Vector2 coordinates,
-        int maxMovementPoints,
-        int maxSize,
-        Unit general
-    )
-    {
-        var id = $"army_{Guid.NewGuid()}";
-        var army = new Army(id, faction, coordinates, maxMovementPoints, maxSize, hasGeneral: true);
-
-        army.AssignGeneral(general);
-
-        return army;
-    }
-
-    public static Army CreateWithoutGeneral(
-        FactionType faction,
-        Vector2 coordinates,
-        int maxMovementPoints,
-        int maxSize
-    )
-    {
-        var id = $"army_{Guid.NewGuid()}";
-        return new Army(id, faction, coordinates, maxMovementPoints, maxSize, hasGeneral: false);
-    }
+    public static Army Create(FactionType faction, Vector2 coordinates, UnitTemplate general)
+        => new(faction, coordinates, general);
 
     public void MoveTo(Vector2 destination, int movementCost)
     {
-        if (MovementPoints < movementCost) throw new GameRuleException("Недостаточно очков перемещения.");
+        var absCost = int.Abs(movementCost);
+        if (MovementPoints < absCost) throw new GameRuleException("Недостаточно очков перемещения.");
 
-        MovementPoints -= movementCost;
+        MovementPoints -= absCost;
         Coordinates = destination;
     }
 
-    public void RecruitUnit(Unit unit)
+    public void RestoreMovementPoints(int maxPoints) => MovementPoints = int.Max(0, maxPoints);
+
+    public void RecruitUnit(UnitTemplate unit)
     {
         if (!HasFreeSlots) throw new GameRuleException("Нельзя нанять юнита, армия уже укомплектована.");
-        if (unit.Faction != Faction) throw new GameRuleException("Нельзя нанять юнита, нанятого чужой фракцией.");
 
-        unit.AssignToArmy(Id);
-        _units.Add(unit);
+        _units.Add(new Unit(Faction, unit, Id));
     }
 
-    public void AssignUnit(Unit unit)
-    {
-        if (unit.Faction != Faction) throw new GameRuleException("Нельзя нанять юнита, нанятого чужой фракцией.");
-
-        _units.Add(unit);
-        unit.AssignToArmy(Id);
-    }
+    public void DisbandUnit(Unit unit) => _units.Remove(unit);
 
     public void PurgeDeadUnits()
     {
@@ -101,15 +64,5 @@ public class Army
         {
             _units.Remove(unit);
         }
-    }
-
-    private void AssignGeneral(Unit general)
-    {
-        if (general.Faction != Faction) throw new GameRuleException("Нельзя нанять генерала, нанятого чужой фракцией.");
-
-        GeneralId = general.Id;
-        _units.Add(general);
-        general.AssignToArmy(Id);
-        HasGeneral = true;
     }
 }

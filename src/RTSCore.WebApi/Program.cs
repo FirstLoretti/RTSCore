@@ -11,8 +11,6 @@ using RTSCore.WebApi.Common;
 using RTSCore.Domain.ValueObjects.Presets;
 
 using RTSCore.Domain.Services;
-using RTSCore.Application.Campaign.Commands;
-using RTSCore.Application.Campaign.Services.Diplomacy;
 using RTSCore.Application.Common.Settings;
 using RTSCore.Domain.Interfaces.Authentication;
 using RTSCore.Infrastructure.Authentication;
@@ -22,6 +20,10 @@ using Microsoft.IdentityModel.Tokens;
 using RTSCore.Domain.ValueObjects;
 using Serilog;
 using Serilog.Sinks.SystemConsole.Themes;
+using RTSCore.Application.Campaign.Lifecycle;
+using RTSCore.Application.AI.Infratructure;
+using RTSCore.Application.Common.Configurations;
+using RTSCore.Application.Campaign.AutoBattle;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,6 +35,18 @@ Log.Logger = new LoggerConfiguration()
     )
     .CreateLogger();
 builder.Host.UseSerilog();
+
+builder.Configuration.AddJsonFile("gameconfigurations.json");
+builder.Services.Configure<GameConfigurations>(builder.Configuration.GetSection("GameConfigurations"));
+var gameConfigs = builder.Configuration
+    .GetSection("GameConfigurations")
+    .Get<GameConfigurations>();
+
+if (gameConfigs == null || gameConfigs.Units.Templates.Count == 0)
+{
+    throw new InvalidOperationException("Не удалось загрузить конфигурацию");
+}
+builder.Services.AddSingleton(gameConfigs.Units.Templates);
 
 builder.Services.AddControllers();
 
@@ -51,7 +65,6 @@ builder.Services.AddScoped<DiplomacyAi>();
 builder.Services.AddSingleton<ICityBuildingRegistry, CityBuildingRegistry>();
 builder.Services.AddSingleton(Array.Empty<FactionPreset>());
 builder.Services.AddSingleton(GameBalance.Buildings.GetAllTemplates);
-builder.Services.AddSingleton(GameBalance.Units.GetAllTemplates);
 builder.Services.AddSingleton<IRefreshTokenGenerator, RefreshTokenGenerator>();
 builder.Services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
 builder.Services.AddSingleton<IAutoBattleCalculator, AutoBattleCalculator>();
