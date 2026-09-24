@@ -4,11 +4,11 @@ using RTSCore.Domain.ValueObjects;
 
 namespace RTSCore.Application.Campaign.UnitRecruitment;
 
-public class RecruitUnitCommandValidator : AbstractValidator<RecruitUnitCommand>
+public class RecruitRegularUnitCommandValidator : AbstractValidator<RecruitRegularUnitCommand>
 {
-    public RecruitUnitCommandValidator()
+    public RecruitRegularUnitCommandValidator()
     {
-        RuleFor(c => c.ArmyId).MaximumLength(256);
+        RuleFor(c => c.ArmyId.Value).MaximumLength(256);
 
         RuleFor(c => c.Faction).IsInEnum().NotEqual(FactionType.None);
 

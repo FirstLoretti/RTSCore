@@ -23,7 +23,7 @@ public class BuildingUtilityCalculator(
                 $"[{nameof(BuildingUtilityCalculator)}] Получена пустая коллекция городов"
             );
 
-        var isSameFactions = cities.All(c => c.OwnerFaction == firstCity.OwnerFaction);
+        var isSameFactions = cities.All(c => c.Faction == firstCity.Faction);
 
         if (!isSameFactions)
         {
@@ -37,7 +37,7 @@ public class BuildingUtilityCalculator(
         foreach (var city in cities)
         {
             var options = buildingRegistry.GetBuildingOptions(city.Type);
-            var availableOptions = city.GetAvailableConstructOptions(options);
+            var availableOptions = city.GetConstructableBuildings(options);
 
             foreach (var type in availableOptions)
             {

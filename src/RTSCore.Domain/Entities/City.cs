@@ -1,8 +1,7 @@
 using System.Numerics;
 
-using RTSCore.Domain.Services;
+using RTSCore.Domain.Exeptions;
 using RTSCore.Domain.ValueObjects;
-using RTSCore.Domain.ValueObjects.Presets;
 
 namespace RTSCore.Domain.Entities;
 
@@ -10,91 +9,109 @@ public class City
 {
     public CityId Id { get; init; }
     public CityType Type { get; private set; }
-    public FactionType OwnerFaction { get; private set; }
+    public FactionType Faction { get; private set; }
     public int Population { get; private set; }
     public Vector2 Coordinates { get; private set; }
-    public UnitType Governor { get; private set; } = UnitType.Knight;
+    public UnitType? Governor { get; private set; }
 
-    public IReadOnlyCollection<Building> Buildings => _buildings.AsReadOnly();
+    public IReadOnlyList<Building> Buildings => _buildings.AsReadOnly();
     private readonly List<Building> _buildings = [];
 
-    public City(CityPreset cityPreset, FactionType ownerFaction, Vector2? coordinates = null)
+    private City(
+        CityId id,
+        CityType type,
+        Vector2 coordinates,
+        FactionType faction,
+        int population,
+        UnitType? governor
+    )
     {
-        Id = cityPreset.Id;
-        Type = cityPreset.Type;
-        OwnerFaction = ownerFaction;
-        Population = cityPreset.CurrentPopulation;
-        Coordinates = coordinates ?? new Vector2(0f, 0f);
-
-        foreach (var buildingType in cityPreset.BuildingTypes)
-        {
-            var buildingId = new BuildingId($"building_{Id}_{buildingType}");
-
-            _buildings.Add(Building.CreateWithCustomStatus(
-                buildingId, buildingType, ownerFaction, cityPreset.Id,
-                isConstructed: true, turnsToConstruct: 0
-            ));
-        }
+        Id = id;
+        Type = type;
+        Faction = faction;
+        Population = population;
+        Coordinates = coordinates;
+        Governor = governor;
     }
 
-    private City() { }
-
-    public UnitType[] GetAvailableRecruitOptions(IReadOnlyCollection<UnitType> allOptions)
+    public static City Create(
+        CityType type,
+        Vector2 coordinates,
+        FactionType faction,
+        int population,
+        UnitType governor
+    )
     {
-        ArgumentNullException.ThrowIfNull(allOptions);
+        var id = $"city_{Guid.NewGuid():N}";
+        return new(id, type, coordinates, faction, population, governor);
+    }
 
-        if (allOptions.Count == 0) return [];
+    public static City CreateEmpty(
+       CityType type,
+       Vector2 coordinates,
+       FactionType faction
+    )
+    {
+        var id = $"city_{Guid.NewGuid():N}";
+        return new(id, type, coordinates, faction, 0, null);
+    }
+
+    public UnitType[] GetRecruitableUnits(IReadOnlyCollection<UnitTemplate> units)
+    {
+        if (units.Count == 0) throw new ArgumentException("Получена пустая коллекция");
 
         var constructedBuildings = _buildings
             .Where(b => b.IsConstructed)
             .Select(b => b.Type)
             .ToHashSet();
 
-        return [..allOptions.Where(unitType =>
-            {
-                var unit = GameBalance.Units.GetTemplate(unitType);
-                return unit.RequiredBuilding == null || constructedBuildings.Contains(unit.RequiredBuilding.Value);
-            })];
+        return [.. units
+            .Where(u => u.RequiredBuilding != null && constructedBuildings.Contains(u.RequiredBuilding.Value))
+            .Select(u => u.Type)];
     }
 
-    public BuildingType[] GetAvailableConstructOptions(IReadOnlyCollection<BuildingType> options)
+    public BuildingType[] GetConstructableBuildings(IReadOnlyCollection<BuildingType> buildings)
     {
-        ArgumentNullException.ThrowIfNull(options);
+        if (buildings.Count == 0) throw new ArgumentException("Получена пустая коллекция");
 
-        if (options.Count == 0) return [];
-
-        var activeBuildings = _buildings
+        var registredBuildings = _buildings
             .Where(b => b.IsConstructed || b.InConstructProcess)
             .Select(b => b.Type)
             .ToHashSet();
 
-        return [.. options.Where(o => !activeBuildings.Contains(o))];
+        return [.. buildings.Where(b => !registredBuildings.Contains(b))];
     }
 
-    public void GrowPopulation(float growthRate)
+    public Army RaiseArmy(Func<UnitType, UnitTemplate> templateFactory)
     {
-        if (growthRate <= 0) return;
+        if (Governor == null)
+            throw new GameRuleException("Сбор армии неовзможен без губернатора");
 
-        var template = GameBalance.Cities.GetCityTemplate(Type);
-        var growthBonus = (int)(Population * growthRate);
-        Population = Math.Min(Population + growthBonus, template.MaxPopulation);
+        var army = Army.Create(Faction, Coordinates, templateFactory(Governor.Value));
+        Governor = null;
 
-        if (Population < 0) Population = 0;
+        return army;
     }
 
-    public int CalculateTaxIncome(float taxRatePerCitizen)
+    internal void RecruitUnit(Army army, UnitTemplate unit)
     {
-        return (int)(Population * taxRatePerCitizen);
+
+        if (army.Faction != Faction)
+            throw new GameRuleException("Фракция армии отличается от фракции города");
+
+        if (Governor == null)
+            throw new GameRuleException("Найм невозможен без губернатора");
+
+        if (_buildings.Any(b => b.IsConstructed && b.Type == unit.RequiredBuilding))
+            throw new GameRuleException("Нет здания для найма");
+
+        army.RecruitUnit(unit);
     }
 
-    public int CalculateBuildingsIncome()
+    public void GrowPopulation(float growthRate, CityTemplate template)
     {
-        return (int)Buildings
-            .Where(b => b.IsConstructed)
-            .Select(b => GameBalance.Buildings.GetTemplate(b.Type))
-            .SelectMany(t => t.Effects)
-            .Where(e => e.Type == BuildingEffectType.GoldIncome)
-            .Sum(e => e.Value);
+        var growth = (int)(Population * growthRate);
+        Population = int.Clamp(Population + growth, 0, template.MaxPopulation);
     }
 
     public void RegisterBuilding(Building building)
@@ -102,14 +119,16 @@ public class City
         if (!building.IsConstructed)
         {
             building.StartConstruct();
-            building.OnBuildingCompleted += HandleBuildingCompleted;
         }
 
         _buildings.Add(building);
     }
 
-    private void HandleBuildingCompleted(Building building)
+    public void TurnEnd()
     {
-        building.OnBuildingCompleted -= HandleBuildingCompleted;
+        foreach (var building in _buildings)
+        {
+            building.AdvanceConstruction();
+        }
     }
 }

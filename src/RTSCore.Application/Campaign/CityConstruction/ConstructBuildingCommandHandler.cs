@@ -22,10 +22,10 @@ public class ConstructBuildingCommandHandler(
                 $"Поселения {request.CityId} нет на карте кампании"
             );
 
-        var faction = await unitOfWork.FactionRepository.GetFactionAsync(city.OwnerFaction, cancellationToken)
+        var faction = await unitOfWork.FactionRepository.GetFactionAsync(city.Faction, cancellationToken)
             ?? throw new NotFoundException(
                 $"[{nameof(ConstructBuildingCommandHandler)}] " +
-                $"Поселение {city.Id} принадлежит {city.OwnerFaction}, " +
+                $"Поселение {city.Id} принадлежит {city.Faction}, " +
                 $"но эта фракция не зарегистрирована в текущей игре."
             );
 
@@ -53,7 +53,7 @@ public class ConstructBuildingCommandHandler(
         faction.SpendGold(template.Cost);
 
         var buildingId = new BuildingId($"building_{city.Id}_{request.BuildingType}");
-        var building = new Building(buildingId, request.BuildingType, city.OwnerFaction, city.Id);
+        var building = new Building(buildingId, request.BuildingType, city.Faction, city.Id);
 
         unitOfWork.BuildingRepository.Add(building);
 

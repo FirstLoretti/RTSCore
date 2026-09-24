@@ -9,26 +9,21 @@ namespace RTSCore.Application.Campaign.UnitRecruitment;
 
 public class CancelRecruitUnitCommandHandler(
     IUnitOfWork unitOfWork,
-    IReadOnlyCollection<UnitTemplate> unitTemplates
+    IReadOnlyCollection<UnitTemplate> unitTemplates,
+    UnitRecruitmentService recruitmentService
 ) : IRequestHandler<CancelRecruitUnitCommand>
 {
-    public async Task Handle(CancelRecruitUnitCommand request, CancellationToken cancellationToken)
+    public async Task Handle(CancelRecruitUnitCommand request, CancellationToken ct)
     {
-        var unitId = request.UnitId;
-
-        var unit = await unitOfWork.UnitRepository.GetUnitAsync(request.UnitId, cancellationToken)
+        var unit = await unitOfWork.UnitRepository.GetAsync(request.Id, ct)
             ?? throw new NotFoundException(
-                $"[{nameof(CancelRecruitUnitCommandHandler)}] Юнита {unitId} не существует"
+                $"[{nameof(CancelRecruitUnitCommandHandler)}] Юнита {request.Id} не существует"
             );
 
-        if (unit.IsRecruited)
-        {
-            throw new GameRuleException(
-               $"[{nameof(CancelRecruitUnitCommandHandler)}] Нельзя отменить найм. Юнит {unitId} уже нанят"
-           );
-        }
+        var army = await unitOfWork.ArmyRepository.GetAsync(unit.ArmyId, ct)
+            ?? throw new NotFoundException("Армия не найдена");
 
-        var faction = await unitOfWork.FactionRepository.GetFactionAsync(unit.Faction, cancellationToken)
+        var faction = await unitOfWork.FactionRepository.GetFactionAsync(unit.Faction, ct)
             ?? throw new NotFoundException(
                 $"[{nameof(CancelRecruitUnitCommandHandler)}] Фракции {unit.Faction} не существует"
             );
@@ -36,12 +31,11 @@ public class CancelRecruitUnitCommandHandler(
         var template = unitTemplates.FirstOrDefault(t => t.Type == unit.Type)
             ?? throw new NotFoundException(
                 $"[{nameof(CancelRecruitUnitCommandHandler)}] " +
-                $"Шаблон юнита для типа {unit.Type} не содержится в {nameof(GameBalance.Units)}"
+                $"Шаблон юнита для типа {unit.Type} не найден"
             );
 
-        faction.EarnGold(template.Cost);
-        unitOfWork.UnitRepository.Delete(unit);
+        recruitmentService.CancelRecruitUnit(unit, army, faction, template);
 
-        await unitOfWork.SaveChangesAsync(cancellationToken);
+        await unitOfWork.SaveChangesAsync(ct);
     }
 }

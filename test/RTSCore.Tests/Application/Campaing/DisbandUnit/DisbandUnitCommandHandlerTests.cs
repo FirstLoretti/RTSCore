@@ -9,30 +9,29 @@ using FluentAssertions;
 
 namespace RTSCore.Tests.Application.Campaing.DisbandUnit;
 
-public class DisbandUnitCommandHandlerTests : TestBase
+public class DisbandUnitCommandHandlerTests
 {
     [Fact]
     public async Task Handle_WhenValidCommand_ShouldDeleteUnitFromArmyAndDb()
     {
         var unitOfWork = Substitute.For<IUnitOfWork>();
-        var unitRepository = Substitute.For<IUnitRepository>();
-        var armyRepository = Substitute.For<IArmyRepository>();
 
         var army = Army.Create(FactionType.England, Vector2.Zero, new UnitTemplate());
         army.RecruitUnit(new UnitTemplate());
         var unitForDisband = army.Units[1];
 
-        unitRepository.GetUnitAsync(unitForDisband.Id, Arg.Any<CancellationToken>()).Returns(unitForDisband);
-        armyRepository.GetAsync(army.Id, Arg.Any<CancellationToken>()).Returns(army);
+        unitOfWork.UnitRepository.GetAsync(unitForDisband.Id, Arg.Any<CancellationToken>())
+            .Returns(unitForDisband);
+        unitOfWork.ArmyRepository.GetAsync(army.Id, Arg.Any<CancellationToken>())
+            .Returns(army);
 
         var command = new DisbandUnitCommand(unitForDisband.Id);
-        var handler = new DisbandUnitCommandHandler(unitRepository, armyRepository, unitOfWork);
+        var handler = new DisbandUnitCommandHandler(unitOfWork);
 
         await handler.Handle(command, CancellationToken.None);
 
-        army.Received(1).DisbandUnit(unitForDisband);
         army.Units.Should().HaveCount(1);
-        unitRepository.Received(1).Delete(unitForDisband);
+        unitOfWork.UnitRepository.Received(1).Delete(unitForDisband);
         await unitOfWork.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
     }
 }

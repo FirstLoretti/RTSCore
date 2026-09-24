@@ -65,7 +65,7 @@ public class CityControllerTests(WebApplicationFactory<Program> program) : WebTe
             await context.SaveChangesAsync();
         }
 
-        var command = new RecruitUnitCommand(army.Id, template.Type, ownerFaction);
+        var command = new RecruitRegularUnitCommand(army.Id, template.Type, ownerFaction);
 
         var response = await _client.PostAsJsonAsync("api/city/trainUnit", command);
 

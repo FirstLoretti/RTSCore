@@ -9,6 +9,7 @@ using RTSCore.Application.AI.Infratructure;
 using RTSCore.Application.Campaign.AutoBattle;
 using RTSCore.Application.Campaign.UnitRecruitment;
 using RTSCore.Application.Common.Behaviors;
+using RTSCore.Application.Common.Configurations;
 using RTSCore.Application.Common.Settings;
 using RTSCore.Domain.Interfaces;
 using RTSCore.Domain.Interfaces.Authentication;
@@ -17,7 +18,7 @@ using RTSCore.Domain.ValueObjects;
 using RTSCore.Infrastructure.Authentication;
 using RTSCore.Infrastructure.Persistence;
 
-namespace RTSCore.Tests.Base;
+namespace TWCore.IntegrationTests;
 
 public abstract class TestBase : IDisposable
 {
@@ -54,17 +55,15 @@ public abstract class TestBase : IDisposable
 
         services.AddSingleton<ICityBuildingRegistry, CityBuildingRegistry>();
         services.AddSingleton(GameBalance.Buildings.GetAllTemplates);
-        services.AddSingleton(GameBalance.Units.GetAllTemplates);
         services.AddSingleton<IAutoBattleCalculator, AutoBattleCalculator>();
 
         services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
         services.AddSingleton(Options.Create(testJwtSettings));
 
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(LoggingBehavior<,>));
-        services.AddTransient<ICampaignMovementService, CampaignMovementService>();
 
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(
-            typeof(RecruitUnitCommand).Assembly
+            typeof(RecruitRegularUnitCommand).Assembly
         ));
 
         configure?.Invoke(services);

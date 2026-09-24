@@ -1,8 +1,10 @@
 namespace RTSCore.Domain.ValueObjects;
 
 public record CityTemplate(
-    string DisplayName,
     CityType Type,
+    string DisplayName,
     int MaxPopulation,
-    List<BuildingType> BuildingOptions
+    float GrowthRate,
+    float TaxRatePerCitizen,
+    List<BuildingType> AvailableBuildings
 );

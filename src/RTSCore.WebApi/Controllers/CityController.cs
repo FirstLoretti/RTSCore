@@ -21,7 +21,7 @@ public class CityController(IMediator mediator) : ControllerBase
     }
 
     [HttpPost("trainUnit")]
-    public async Task<IActionResult> TrainUnit(RecruitUnitCommand command)
+    public async Task<IActionResult> TrainUnit(RecruitRegularUnitCommand command)
     {
         await mediator.Send(command);
         return NoContent();

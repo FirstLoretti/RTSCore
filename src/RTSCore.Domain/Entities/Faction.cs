@@ -1,25 +1,33 @@
 using RTSCore.Domain.Exeptions;
 using RTSCore.Domain.ValueObjects;
+using RTSCore.Domain.ValueObjects.Configurations;
 
 namespace RTSCore.Domain.Entities;
 
 public class Faction
 {
-    public PlayerType PlayerType { get; init; }
+    public PlayerType Player { get; init; }
     public FactionType Type { get; init; }
     public int Gold { get; private set; }
     public bool IsEliminated { get; private set; }
 
-    public Faction(FactionType type, int gold, PlayerType playerType)
+    private Faction(FactionType type, PlayerType player, int gold)
     {
-        ArgumentOutOfRangeException.ThrowIfNegative(gold);
-
         Type = type;
+        Player = player;
         Gold = gold;
-        PlayerType = playerType;
     }
 
-    protected Faction() { }
+    public static Faction Create(
+        FactionType type,
+        PlayerType player,
+        FactionConfiguration configuration
+    ) => new(type, player, configuration.InitialGold);
+
+    public static Faction CreateWithEmptyTreasury(
+        FactionType type,
+        PlayerType player
+    ) => new(type, player, gold: 0);
 
     public void SpendGold(int amount)
     {

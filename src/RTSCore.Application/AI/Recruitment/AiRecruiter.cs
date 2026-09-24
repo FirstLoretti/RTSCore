@@ -21,7 +21,7 @@ public class AiRecruiter(IUnitOfWork unitOfWork, RecruitOptionCache recruitOptio
             {
                 try
                 {
-                    await mediator.Send(new RecruitUnitCommand(army.Id, option.Unit, faction), cancellationToken);
+                    await mediator.Send(new RecruitRegularUnitCommand(army.Id, option.Unit, faction), cancellationToken);
                 }
                 catch (GameRuleException) { continue; }
             }

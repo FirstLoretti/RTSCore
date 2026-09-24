@@ -44,6 +44,7 @@ public class AutoBattleCommandHandler(
         await unitOfWork.SaveChangesAsync(ct);
 
         return new BattleResult(
-            response.IsAttackerWon, response.AttackerBattleLogs, response.DefenderBattleLogs);
+            response.IsAttackerWon, response.AttackerBattleLogs, response.DefenderBattleLogs
+        );
     }
 }

@@ -31,7 +31,7 @@ public class SqlBuildingRepository(AppDbContext context) : IBuildingRepository
     public async Task<IReadOnlyList<Building>> GetUnderConstructionAsync(FactionType faction, CancellationToken cancellationToken)
     {
         return await context.Buildings
-            .Where(b => b.OwnerFaction == faction && !b.IsConstructed)
+            .Where(b => b.Faction == faction && !b.IsConstructed)
             .ToArrayAsync(cancellationToken);
     }
 }

@@ -43,7 +43,7 @@ public class SqlCityRepository(AppDbContext context) : ICityRepository
     public async Task<IReadOnlyList<City>> GetWithBuildingsAsync(FactionType faction, CancellationToken cancellationToken)
     {
         return await context.Cities
-            .Where(c => c.OwnerFaction == faction)
+            .Where(c => c.Faction == faction)
             .Include(c => c.Buildings)
             .ToListAsync(cancellationToken);
     }
@@ -59,14 +59,14 @@ public class SqlCityRepository(AppDbContext context) : ICityRepository
     )
     {
         return await context.Cities
-            .Where(c => factions.Contains(c.OwnerFaction))
-            .GroupBy(c => c.OwnerFaction)
+            .Where(c => factions.Contains(c.Faction))
+            .GroupBy(c => c.Faction)
             .Select(g => new { Faction = g.Key, Count = g.Count() })
             .ToDictionaryAsync(x => x.Faction, x => x.Count, cancellationToken);
     }
 
     public async Task<IReadOnlyCollection<City>> GetCitiesAsync(FactionType faction, CancellationToken cancellationToken)
     {
-        return await context.Cities.Where(c => c.OwnerFaction == faction).ToListAsync(cancellationToken);
+        return await context.Cities.Where(c => c.Faction == faction).ToListAsync(cancellationToken);
     }
 }

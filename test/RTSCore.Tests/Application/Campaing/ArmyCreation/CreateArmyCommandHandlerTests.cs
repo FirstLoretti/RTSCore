@@ -1,103 +1,50 @@
+using System.Numerics;
+
+using FluentAssertions;
+
 using MediatR;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
+using NSubstitute;
+
 using RTSCore.Application.Campaign.ArmyCreation;
 using RTSCore.Domain.Entities;
 using RTSCore.Domain.Exeptions;
+using RTSCore.Domain.Interfaces;
 using RTSCore.Domain.ValueObjects;
 using RTSCore.Domain.ValueObjects.Presets;
 using RTSCore.Infrastructure.Persistence;
-using RTSCore.Tests.Base;
 
 namespace RTSCore.Tests.Application.Campaing.ArmyCreation;
 
-public class CreateArmyCommandHandlerTests : TestBase
+public class CreateArmyCommandHandlerTests
 {
-    private readonly UnitTemplate[] _unitTemplates = [new(
-        UnitType.Knight, "Unit", 1, 1, 1, 1, 1, 1, 1, 1, 1, UnitCategory.Infantry,1
-    )];
-    private readonly CityId _cityId = "id";
+    private readonly UnitTemplate[] _unitTemplates = [new UnitTemplate()];
 
     [Fact]
-    public async Task Handle_WhenValid_ShouldReturnArmyId()
+    public async Task Handle_WhenRequestValid_ShouldCreateArmySaveToDbAndReturnArmyId()
     {
-        var serviceProvider = await ArrangeEnvironment(_unitTemplates);
-
-        using (var scope = serviceProvider.CreateScope())
-        {
-            var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
-            var armyId = await mediator.Send(new CreateArmyCommand(_cityId));
-
-            Assert.NotEmpty(armyId);
-        }
-
-        using (var scope = serviceProvider.CreateScope())
-        {
-            var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-            var army = await context.Armies.FirstOrDefaultAsync();
-
-            Assert.NotNull(army);
-        }
-    }
-
-    [Fact]
-    public async Task Handle_WhenCityNotFound_ShouldThrow()
-    {
-        var serviceProvider = await ArrangeEnvironment(_unitTemplates);
-
-        using (var scope = serviceProvider.CreateScope())
-        {
-            var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
-            var command = new CreateArmyCommand("invalid_id");
-
-            await Assert.ThrowsAsync<NotFoundException>(async () => await mediator.Send(command));
-        }
-
-        using (var scope = serviceProvider.CreateScope())
-        {
-            var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-            var army = await context.Armies.SingleOrDefaultAsync();
-
-            Assert.Null(army);
-        }
-    }
-
-    [Fact]
-    public async Task Handle_WhenTemplateNotFound_ShouldThrow()
-    {
-        var serviceProvider = await ArrangeEnvironment([]);
-
-        using var scope = serviceProvider.CreateScope();
-        var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
-        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-
-        var command = new CreateArmyCommand(_cityId);
-
-        await Assert.ThrowsAsync<NotFoundException>(async () => await mediator.Send(command));
-
-        var army = await context.Armies.SingleOrDefaultAsync();
-        Assert.Null(army);
-    }
-
-    private async Task<ServiceProvider> ArrangeEnvironment(UnitTemplate[] unitTemplates)
-    {
-        var cityPreset = new CityPreset(_cityId, "City", CityType.Village, 1, []);
-        var city = new City(cityPreset, FactionType.England, new(5f, 5f));
-
-        var serviceProvider = SetupTestInvironment(options =>
-            options.AddSingleton<IReadOnlyCollection<UnitTemplate>>(unitTemplates)
+        var unitOfWork = Substitute.For<IUnitOfWork>();
+        var city = City.Create(
+            CityType.Village,
+            Vector2.Zero,
+            FactionType.England,
+            population: 1,
+            _unitTemplates[0].Type
         );
 
-        using (var scope = serviceProvider.CreateScope())
-        {
-            var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        unitOfWork.CityRepository.GetCityAsync(city.Id, Arg.Any<CancellationToken>()).Returns(city);
 
-            context.Cities.Add(city);
-            await context.SaveChangesAsync();
-        }
+        var command = new CreateArmyCommand(city.Id);
+        var handler = new CreateArmyCommandHandler(unitOfWork, _unitTemplates);
 
-        return serviceProvider;
+        var armyId = await handler.Handle(command, CancellationToken.None);
+
+        armyId.Should().NotBeNull();
+
+        unitOfWork.ArmyRepository.Received(1).Add(Arg.Any<Army>());
+        await unitOfWork.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
     }
 }

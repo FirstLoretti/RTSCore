@@ -8,7 +8,7 @@ public class Unit
     public UnitType Type { get; init; }
     public FactionType Faction { get; init; }
 
-    public string ArmyId { get; private set; } = string.Empty;
+    public ArmyId ArmyId { get; private set; }
     public int Health { get; private set; }
     public int Level { get; private set; }
     public int Experience { get; private set; }
@@ -16,24 +16,46 @@ public class Unit
     public bool IsAlive => IsRecruited && Health > 0;
     public bool IsRecruited => TurnsToRecruit <= 0;
 
-    internal Unit(FactionType faction, UnitTemplate template, string armyId)
+    private Unit(
+        UnitId id,
+        FactionType faction,
+        UnitTemplate template,
+        ArmyId armyId,
+        int turnsToRecruit)
     {
-        Id = $"unit_{Guid.NewGuid()}";
+        Id = id;
         Faction = faction;
         ArmyId = armyId;
-
         Type = template.Type;
         Health = template.MaxHealth;
-        TurnsToRecruit = template.TurnsToRecruit;
+        TurnsToRecruit = turnsToRecruit;
     }
 
-    private Unit() { }
+    internal static Unit CreateReady(FactionType faction, UnitTemplate template, ArmyId armyId)
+    {
+        var id = $"unit_{Guid.NewGuid():N}";
+        return new Unit(id, faction, template, armyId, turnsToRecruit: 0);
+    }
+
+    internal static Unit CreateTraining(FactionType faction, UnitTemplate template, ArmyId armyId)
+    {
+        var id = $"unit_{Guid.NewGuid():N}";
+        return new Unit(id, faction, template, armyId, template.TurnsToRecruit);
+    }
 
     public void TakeDamage(int amount)
     {
         if (!IsAlive) return;
 
         Health = int.Max(0, Health - int.Max(0, amount));
+    }
+
+    public void AdvanceRecruitment()
+    {
+        if (IsRecruited || !IsAlive)
+            throw new ArgumentException("Невозможно продвинуть найм нанятого или мёртвого отряда");
+
+        TurnsToRecruit--;
     }
 
     public void AddExperience(int amount, IReadOnlyList<int> expToNextLevel)
@@ -49,8 +71,6 @@ public class Unit
         }
 
         if (Level == expToNextLevel.Count)
-        {
             Experience = 0;
-        }
     }
 }

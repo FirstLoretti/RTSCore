@@ -22,6 +22,7 @@ public class ArmyConfiguration : IEntityTypeConfiguration<Army>
         builder.HasMany(a => a.Units)
             .WithOne()
             .HasForeignKey(u => u.ArmyId)
+            .IsRequired()
             .OnDelete(DeleteBehavior.Cascade);
     }
 }

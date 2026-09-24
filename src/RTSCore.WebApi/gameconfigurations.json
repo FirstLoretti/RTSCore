@@ -67,11 +67,135 @@
           "RequiredBuilding": ""
         }
       ],
-      "ExpToNextLevel":[100, 200, 400]
+      "ExpToNextLevel":[100, 200, 400],
+      "PowerWeights":{
+        "HealthWeight": 1.0,
+        "ArmorWeight": 1.0,
+        "DamageWeight": 1.5
+      }
     },
     "Army": {
       "MaxSize": 20,
       "MaxMovementPoints": 100
+    },
+    "Cities":{
+      "Templates":[
+        {
+          "Type": "Village",
+          "DisplayName": "Деревня",
+          "MaxPopulation": 1000,
+          "GrowthRate": 0.03,
+          "TaxRatePerCitizen": 1,
+          "ConstructableBuildings" :[
+            "CultivatedField", 
+            "ReqruitBarrack", 
+            "Market"
+          ]
+        },
+        {
+          "Type": "Settlement",
+          "DisplayName" : "Посёлок",
+          "MaxPopulation": 3000,
+          "GrowthRate": 0.04,
+          "TaxRatePerCitizen": 1.1,
+          "ConstructableBuildings":[
+            "CultivatedField", 
+            "ReqruitBarrack", 
+            "Market",
+            "CultivatedFieldComplex", 
+            "MilitiaBarrack"
+          ]
+        }
+      ]
+    },
+    "Buildings":{
+      "Templates":[
+        {
+          "Type": "ReqruitBarrack",
+          "DisplayName": "Сборное место",
+          "Cost": 1000,
+          "TurnsToConstruct": 2,
+          "AllowedCityTypes": [
+            "Settlement",
+            "Village"
+          ],
+          "Category": "Military",
+          "AiUtility": 50,
+          "Garrison": {
+            "Peasant": 2,
+            "PeasantArcher": 2
+          }
+        },
+        {
+          "Type": "MilitiaBarrack",
+          "DisplayName": "Казарма Ополчения",
+          "Cost": 3000,
+          "TurnsToConstruct": 4,
+          "AllowedCityTypes": ["Settlement"],
+          "Category": "Military",
+          "AiUtility": 50,
+          "RequiredPreviousTier": "ReqruitBarrack"
+        },
+        {
+          "Type": "Market",
+          "DisplayName": "Рынок",
+          "Cost": 1500,
+          "TurnsToConstruct": 2,
+          "AllowedCityTypes": [
+            "Settlement",
+            "Village"
+          ],
+          "Category": "Economic",
+          "AiUtility": 50,
+          "Effects": [
+            {
+              "Type": "GoldIncome",
+              "Value": 150
+            }
+          ]
+        },
+        {
+          "Type": "CultivatedField",
+          "DisplayName": "Обрабатываемое Поле",
+          "Cost": 500,
+          "TurnsToConstruct": 2,
+          "AllowedCityTypes": [
+            "Settlement",
+            "Village"
+          ],
+          "Category": "Economic",
+          "AiUtility": 50,
+          "Effects": [
+            {
+              "Type": "PopulationGrowth",
+              "Value": 0.05
+            },
+            {
+              "Type": "GoldIncome",
+              "Value": 25
+            }
+          ]
+        },
+        {
+          "Type": "CultivatedFieldsComplex",
+          "DisplayName": "Комплекс Обрабатываемых Полей",
+          "Cost": 1500,
+          "TurnsToConstruct": 4,
+          "AllowedCityTypes": ["Settlement"],
+          "Category": "Economic",
+          "AiUtility": 50,
+          "Effects": [
+              {
+                "Type": "PopulationGrowth",
+                "Value": 0.1
+              },
+              {
+                "Type": "GoldIncome",
+                "Value": 100
+              }
+            ]
+          }
+        ]
     }
   }
 }

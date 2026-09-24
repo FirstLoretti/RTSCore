@@ -7,5 +7,6 @@
   </Folder>
   <Folder Name="/test/">
     <Project Path="test/RTSCore.Tests/RTSCore.Tests.csproj" />
+    <Project Path="test/TWCore.IntegrationTests/TWCore.IntegrationTests.csproj" />
   </Folder>
 </Solution>

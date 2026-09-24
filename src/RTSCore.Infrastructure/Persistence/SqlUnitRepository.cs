@@ -11,7 +11,7 @@ public class SqlUnitRepository(AppDbContext context) : IUnitRepository
     public void Add(Unit unit) => context.Units.Add(unit);
     public void Delete(Unit unit) => context.Units.Remove(unit);
 
-    public async Task<Unit?> GetUnitAsync(UnitId id, CancellationToken cancellationToken)
+    public async Task<Unit?> GetAsync(UnitId id, CancellationToken cancellationToken)
     {
         return await context.Units.FindAsync([id], cancellationToken);
     }

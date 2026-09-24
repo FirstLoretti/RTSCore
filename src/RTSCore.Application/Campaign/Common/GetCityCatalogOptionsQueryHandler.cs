@@ -23,8 +23,8 @@ public abstract class GetCityCatalogOptionsQueryHandler<Query, T, Template>(
         var city = await unitOfWork.CityRepository.GetWithBuildingsAsync(cityId, cancellationToken)
             ?? throw new NotFoundException($"[{nameof(GetCityCatalogOptionsQueryHandler<,,>)}] Поселения {cityId} нет на карте");
 
-        var faction = await unitOfWork.FactionRepository.GetFactionAsync(city.OwnerFaction, cancellationToken)
-            ?? throw new NotFoundException($"[{nameof(GetCityCatalogOptionsQueryHandler<,,>)}] Фракции {city.OwnerFaction} нет на карте");
+        var faction = await unitOfWork.FactionRepository.GetFactionAsync(city.Faction, cancellationToken)
+            ?? throw new NotFoundException($"[{nameof(GetCityCatalogOptionsQueryHandler<,,>)}] Фракции {city.Faction} нет на карте");
 
         var catalogOptions = new List<CityCatalogOptionDto<T>>();
 

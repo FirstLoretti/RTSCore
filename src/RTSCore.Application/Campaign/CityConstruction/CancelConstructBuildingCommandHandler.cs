@@ -26,10 +26,10 @@ public class CancelConstructBuildingCommandHandler(
                 $"Нельзя отменить строительство, здание {building.Id} уже построено"
             );
 
-        var faction = await unitOfWork.FactionRepository.GetFactionAsync(building.OwnerFaction, cancellationToken)
+        var faction = await unitOfWork.FactionRepository.GetFactionAsync(building.Faction, cancellationToken)
             ?? throw new NotFoundException(
                 $"[{nameof(CancelConstructBuildingCommandHandler)}] " +
-                $"Фракции {building.OwnerFaction} нет на карте кампании"
+                $"Фракции {building.Faction} нет на карте кампании"
             );
 
         var template = buildingTemplates.FirstOrDefault(b => b.Type == building.Type)

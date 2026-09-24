@@ -1,5 +1,3 @@
-using System.Collections.ObjectModel;
-
 using Microsoft.EntityFrameworkCore;
 
 using RTSCore.Domain.Entities;

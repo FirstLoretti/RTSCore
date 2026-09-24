@@ -6,6 +6,6 @@ public class DisbandUnitCommandValidator : AbstractValidator<DisbandUnitCommand>
 {
     public DisbandUnitCommandValidator()
     {
-        RuleFor(e => e.Id.Value).NotEmpty().MaximumLength(256);
+        RuleFor(u => u.Id.Value).NotEmpty().MaximumLength(256);
     }
 }
