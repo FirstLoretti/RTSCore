@@ -9,7 +9,7 @@ namespace RTSCore.Application.Campaign.UnitRecruitment;
 
 public class CancelRecruitUnitCommandHandler(
     IUnitOfWork unitOfWork,
-    IReadOnlyCollection<UnitTemplate> unitTemplates,
+    IReadOnlyCollection<UnitTemplate> templates,
     UnitRecruitmentService recruitmentService
 ) : IRequestHandler<CancelRecruitUnitCommand>
 {
@@ -20,6 +20,12 @@ public class CancelRecruitUnitCommandHandler(
                 $"[{nameof(CancelRecruitUnitCommandHandler)}] Юнита {request.Id} не существует"
             );
 
+        var template = templates.FirstOrDefault(t => t.Type == unit.Type)
+          ?? throw new NotFoundException(
+              $"[{nameof(CancelRecruitUnitCommandHandler)}] " +
+              $"Шаблон юнита для типа {unit.Type} не найден"
+            );
+
         var army = await unitOfWork.ArmyRepository.GetAsync(unit.ArmyId, ct)
             ?? throw new NotFoundException("Армия не найдена");
 
@@ -28,11 +34,6 @@ public class CancelRecruitUnitCommandHandler(
                 $"[{nameof(CancelRecruitUnitCommandHandler)}] Фракции {unit.Faction} не существует"
             );
 
-        var template = unitTemplates.FirstOrDefault(t => t.Type == unit.Type)
-            ?? throw new NotFoundException(
-                $"[{nameof(CancelRecruitUnitCommandHandler)}] " +
-                $"Шаблон юнита для типа {unit.Type} не найден"
-            );
 
         recruitmentService.CancelRecruitUnit(unit, army, faction, template);
 

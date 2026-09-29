@@ -82,12 +82,12 @@ public class City
         return [.. buildings.Where(b => !registredBuildings.Contains(b))];
     }
 
-    public Army RaiseArmy(Func<UnitType, UnitTemplate> templateFactory)
+    public Army RaiseArmy(Func<UnitType, UnitTemplate> getTemplate)
     {
         if (Governor == null)
             throw new GameRuleException("Сбор армии неовзможен без губернатора");
 
-        var army = Army.Create(Faction, Coordinates, templateFactory(Governor.Value));
+        var army = Army.Create(Faction, Coordinates, getTemplate(Governor.Value));
         Governor = null;
 
         return army;

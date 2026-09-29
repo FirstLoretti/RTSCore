@@ -4,13 +4,16 @@ namespace RTSCore.Domain.Entities;
 
 public class Building
 {
-    public BuildingId Id { get; init; }
-    public BuildingType Type { get; init; }
-    public FactionType Faction { get; init; }
-    public CityId CityId { get; init; }
+    public BuildingId Id { get; }
+    public BuildingType Type { get; }
+    public FactionType Faction { get; }
+    public CityId CityId { get; }
+
     public bool IsConstructed { get; private set; }
     public bool InConstructProcess { get; private set; }
     public int TurnsToConstruct { get; private set; }
+
+    private static BuildingId GenerateId() => $"building_{Guid.NewGuid():N}";
 
     private Building(
         BuildingId id,
@@ -29,26 +32,18 @@ public class Building
 
     private Building() { }
 
-    internal static Building Create(
+    internal static Building CreateUnderConstruction(
         BuildingTemplate template,
         BuildingType type,
         FactionType faction,
         CityId cityId
-    )
-    {
-        var id = $"building_{Guid.NewGuid():N}";
-        return new(id, type, faction, cityId, template.TurnsToConstruct);
-    }
+    ) => new(GenerateId(), type, faction, cityId, template.TurnsToConstruct);
 
     internal static Building CreateConstructed(
         BuildingType type,
         FactionType faction,
         CityId cityId
-    )
-    {
-        var id = $"building_{Guid.NewGuid():N}";
-        return new(id, type, faction, cityId, turnsToConstruct: 0);
-    }
+    ) => new(GenerateId(), type, faction, cityId, turnsToConstruct: 0);
 
     public void StartConstruct() => InConstructProcess = true;
 

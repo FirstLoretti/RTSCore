@@ -2,6 +2,7 @@ using MediatR;
 
 using RTSCore.Application.Common.Settings;
 using RTSCore.Domain.Common;
+using RTSCore.Domain.Entities;
 using RTSCore.Domain.Interfaces;
 using RTSCore.Domain.Services;
 
@@ -28,13 +29,7 @@ public class EndTurnCommandHandler(IUnitOfWork unitOfWork) : IRequestHandler<End
         int cityIncome = 0;
         for (int i = 0; i < cities.Count; i++)
         {
-            var taxIncome = cities[i].CalculateTaxIncome(GameBalance.Economy.TaxRatePerCitizen);
-            var buildingsIncome = cities[i].CalculateBuildingsIncome();
-
-            cityIncome += taxIncome + buildingsIncome;
-
-            var growthRate = GameBalance.Population.CalculateGrowthRate(cities[i]);
-            cities[i].GrowPopulation(growthRate);
+            cities[i].TurnEnd();
         }
 
         var tradeAgreements = await unitOfWork.DiplomacyRelationRepository.GetActiveTradeAgreementsForFaction(

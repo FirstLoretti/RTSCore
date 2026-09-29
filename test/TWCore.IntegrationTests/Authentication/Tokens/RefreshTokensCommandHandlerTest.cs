@@ -9,9 +9,8 @@ using RTSCore.Domain.Entities;
 using RTSCore.Domain.Exeptions;
 using RTSCore.Domain.Interfaces.Authentication;
 using RTSCore.Infrastructure.Persistence;
-using RTSCore.Tests.Base;
 
-namespace RTSCore.Tests.Application.Authentication.Tokens;
+namespace TWCore.IntegrationTests.Authentication.Tokens;
 
 public class RefreshTokensCommanHandlerTest : TestBase
 {

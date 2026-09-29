@@ -3,6 +3,7 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 using RTSCore.Application.Campaign.ArmyMovement;
+using RTSCore.Domain.ValueObjects;
 
 namespace RTSCore.WebApi.Controllers;
 
@@ -10,7 +11,7 @@ namespace RTSCore.WebApi.Controllers;
 [Route("api/[controller]")]
 public class ArmyController(IMediator mediator) : ControllerBase
 {
-    [ProducesResponseType(typeof(MoveArmyCommandResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ArmyMovementResult), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [HttpPost("move")]

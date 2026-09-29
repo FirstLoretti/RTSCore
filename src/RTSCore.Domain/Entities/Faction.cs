@@ -32,7 +32,7 @@ public class Faction
     public void SpendGold(int amount)
     {
         ArgumentOutOfRangeException.ThrowIfNegative(amount);
-        if (Gold - amount < 0)
+        if (Gold < amount)
             throw new GameRuleException("В казне недостаточно средств");
 
         Gold -= amount;

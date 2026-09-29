@@ -13,7 +13,7 @@ public record UnitTemplate(
     int ExpKillReward = 50,
     float HealthGrowthRate = 1.1f,
     float DamageGrowthRate = 1.1f,
-    int TurnsToRecruit = 1,
+    int TurnsToRecruit = 0,
     UnitCategory Category = UnitCategory.Infantry,
     int AiUtility = 50,
     BuildingType? RequiredBuilding = null

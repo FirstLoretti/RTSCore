@@ -38,6 +38,6 @@ public class ArmyControllerTests(WebApplicationFactory<Program> factory) : WebTe
         Assert.NotNull(content);
         Assert.Equal(destination.X, content.X);
         Assert.Equal(destination.Y, content.Y);
-        Assert.Equal(army.Id, content.ArmyId);
+        Assert.Equal(army.Id, content.Id);
     }
 }

@@ -1,9 +1,10 @@
 using RTSCore.Domain.Entities;
+using RTSCore.Domain.Interfaces;
 using RTSCore.Domain.ValueObjects;
 
 namespace RTSCore.Domain.Services;
 
-public class UnitRecruitmentService
+public class UnitRecruitmentService : IUnitRecruitmentService
 {
     public void RecruitUnit(UnitTemplate unit, Army army, Faction faction, City? city)
     {

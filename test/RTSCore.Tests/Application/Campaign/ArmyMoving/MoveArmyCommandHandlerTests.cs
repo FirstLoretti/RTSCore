@@ -3,6 +3,7 @@ using System.Numerics;
 using FluentAssertions;
 
 using NSubstitute;
+using NSubstitute.ReceivedExtensions;
 
 using RTSCore.Application.Campaign.ArmyMovement;
 using RTSCore.Domain.Entities;
@@ -11,39 +12,32 @@ using RTSCore.Domain.Interfaces;
 using RTSCore.Domain.ValueObjects;
 using RTSCore.Domain.ValueObjects.Configurations;
 
-namespace RTSCore.Tests.Application.Campaing.ArmyMoving;
+namespace RTSCore.Tests.Application.Campaign.ArmyMoving;
 
 public class MoveArmyCommandHandlerTests
 {
     [Fact]
-    public async Task Handle_WithValidRequest_ShouldMoveArmySpendPointsAndSaveToDb()
+    public async Task Handle_WithValidRequest_ShouldСallServiceAndSaveChanges()
     {
         var unitOfWork = Substitute.For<IUnitOfWork>();
-        var configuration = new ArmyConfiguration();
+        var movementService = Substitute.For<IArmyMovementService>();
 
         var army = Army.CreateWithMovementPoints(
             FactionType.England,
             Vector2.Zero,
             new UnitTemplate(),
-            configuration
+            new ArmyConfiguration()
         );
-        var destination = new Vector2(1f, 1f);
+        var destination = Vector2.One;
 
         unitOfWork.ArmyRepository.GetAsync(army.Id, Arg.Any<CancellationToken>()).Returns(army);
 
         var command = new MoveArmyCommand(army.Id, destination.X, destination.Y);
-        var handler = new MoveArmyCommandHandler(unitOfWork, configuration);
+        var handler = new MoveArmyCommandHandler(unitOfWork, movementService);
 
-        var response = await handler.Handle(command, CancellationToken.None);
+        await handler.Handle(command, CancellationToken.None);
 
-        army.Coordinates.Should().Be(destination);
-        army.MovementPoints.Should().BeLessThan(configuration.MaxMovementPoints);
-
-        response.ArmyId.Should().Be(army.Id);
-        response.X.Should().Be(destination.X);
-        response.Y.Should().Be(destination.Y);
-        response.MovementPoints.Should().BeLessThan(configuration.MaxMovementPoints);
-
+        movementService.Received(1).MoveTo(army, destination);
         await unitOfWork.Received(1).SaveChangesAsync(Arg.Any<CancellationToken>());
     }
 

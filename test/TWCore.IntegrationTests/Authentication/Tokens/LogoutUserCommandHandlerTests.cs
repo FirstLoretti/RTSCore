@@ -6,9 +6,8 @@ using Microsoft.Extensions.DependencyInjection;
 using RTSCore.Application.Authentication.Tokens;
 using RTSCore.Domain.Entities;
 using RTSCore.Infrastructure.Persistence;
-using RTSCore.Tests.Base;
 
-namespace RTSCore.Tests.Application.Authentication.Tokens;
+namespace TWCore.IntegrationTests.Authentication.Tokens;
 
 public class LogoutUserCommandHandlerTests : TestBase
 {

@@ -10,9 +10,10 @@ using RTSCore.Application.Authentication.Login;
 using RTSCore.Domain.Entities;
 using RTSCore.Domain.Exeptions;
 using RTSCore.Infrastructure.Persistence;
-using RTSCore.Tests.Base;
 
-namespace RTSCore.Tests.Application.Authentication.Login;
+using TWCore.IntegrationTests;
+
+namespace TWCore.IntegrationTests.Authentication.Login;
 
 public class LoginUserCommandHandlerTests : TestBase
 {

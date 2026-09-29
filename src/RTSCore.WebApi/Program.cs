@@ -8,7 +8,6 @@ using Scalar.AspNetCore;
 
 using FluentValidation;
 using RTSCore.WebApi.Common;
-using RTSCore.Domain.ValueObjects.Presets;
 
 using RTSCore.Domain.Services;
 using RTSCore.Application.Common.Settings;
@@ -23,7 +22,6 @@ using Serilog.Sinks.SystemConsole.Themes;
 using RTSCore.Application.Campaign.Lifecycle;
 using RTSCore.Application.AI.Infratructure;
 using RTSCore.Application.Common.Configurations;
-using RTSCore.Application.Campaign.AutoBattle;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -63,8 +61,8 @@ builder.Services.AddScoped<IArmyRepository, SqlArmyRepository>();
 builder.Services.AddScoped<DiplomacyAi>();
 
 builder.Services.AddSingleton<ICityBuildingRegistry, CityBuildingRegistry>();
-builder.Services.AddSingleton(Array.Empty<FactionPreset>());
-builder.Services.AddSingleton(GameBalance.Buildings.GetAllTemplates);
+//builder.Services.AddSingleton(Array.Empty<FactionPreset>());
+//builder.Services.AddSingleton(GameBalance.Buildings.GetAllTemplates);
 builder.Services.AddSingleton<IRefreshTokenGenerator, RefreshTokenGenerator>();
 builder.Services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
 builder.Services.AddSingleton<IAutoBattleCalculator, AutoBattleCalculator>();

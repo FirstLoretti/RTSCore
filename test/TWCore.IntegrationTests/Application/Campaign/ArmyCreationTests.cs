@@ -7,7 +7,6 @@ using RTSCore.Application.Campaign.ArmyCreation;
 using RTSCore.Domain.Entities;
 using RTSCore.Domain.Exeptions;
 using RTSCore.Domain.ValueObjects;
-using RTSCore.Domain.ValueObjects.Presets;
 using RTSCore.Infrastructure.Persistence;
 
 namespace TWCore.IntegrationTests.Application.Campaign;

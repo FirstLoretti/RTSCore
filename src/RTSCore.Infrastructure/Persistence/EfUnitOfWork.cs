@@ -14,8 +14,5 @@ public class EfUnitOfWork(AppDbContext context) : IUnitOfWork
     public IRefreshTokenRepository RefreshTokenRepository { get; } = new SqlRefreshTokenRepository(context);
     public IArmyRepository ArmyRepository { get; } = new SqlArmyRepository(context);
 
-    public async Task SaveChangesAsync(CancellationToken cancellationToken)
-    {
-        await context.SaveChangesAsync(cancellationToken);
-    }
+    public Task SaveChangesAsync(CancellationToken ct) => context.SaveChangesAsync(ct);
 }

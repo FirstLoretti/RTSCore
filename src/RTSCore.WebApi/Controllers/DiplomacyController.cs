@@ -2,6 +2,7 @@ using MediatR;
 
 using Microsoft.AspNetCore.Mvc;
 
+using RTSCore.Application.Campaign.Diplomacy.OfferResponses;
 using RTSCore.Application.Campaign.Diplomacy.PeaceNegotiation;
 using RTSCore.Application.Campaign.Diplomacy.TradeProposal;
 using RTSCore.Application.Campaign.Diplomacy.WarDeclaration;

@@ -4,15 +4,16 @@ namespace RTSCore.Domain.Entities;
 
 public class Unit
 {
-    public UnitId Id { get; init; }
-    public UnitType Type { get; init; }
-    public FactionType Faction { get; init; }
-
+    public UnitId Id { get; }
+    public UnitType Type { get; }
+    public FactionType Faction { get; }
     public ArmyId ArmyId { get; private set; }
+
     public int Health { get; private set; }
     public int Level { get; private set; }
     public int Experience { get; private set; }
     public int TurnsToRecruit { get; private set; }
+
     public bool IsAlive => IsRecruited && Health > 0;
     public bool IsRecruited => TurnsToRecruit <= 0;
 
@@ -43,14 +44,14 @@ public class Unit
         return new Unit(id, faction, template, armyId, template.TurnsToRecruit);
     }
 
-    public void TakeDamage(int amount)
+    internal void TakeDamage(int amount)
     {
         if (!IsAlive) return;
 
         Health = int.Max(0, Health - int.Max(0, amount));
     }
 
-    public void AdvanceRecruitment()
+    internal void AdvanceRecruitment()
     {
         if (IsRecruited || !IsAlive)
             throw new ArgumentException("Невозможно продвинуть найм нанятого или мёртвого отряда");
@@ -58,7 +59,7 @@ public class Unit
         TurnsToRecruit--;
     }
 
-    public void AddExperience(int amount, IReadOnlyList<int> expToNextLevel)
+    internal void AddExperience(int amount, IReadOnlyList<int> expToNextLevel)
     {
         if (!IsAlive || Level == expToNextLevel.Count) return;
 

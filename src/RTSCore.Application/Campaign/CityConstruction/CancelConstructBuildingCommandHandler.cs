@@ -35,7 +35,7 @@ public class CancelConstructBuildingCommandHandler(
         var template = buildingTemplates.FirstOrDefault(b => b.Type == building.Type)
             ?? throw new NotFoundException(
                 $"[{nameof(ConstructBuildingCommandHandler)}] " +
-                $"Шаблон здания для типа {building.Type} не содержится в {nameof(GameBalance.Buildings)}"
+                $"Шаблон здания для типа {building.Type} не содержится"
             );
 
         faction.RefundGold(template.Cost);

@@ -23,10 +23,6 @@ public class UnitConfigurations : IEntityTypeConfiguration<Unit>
             dbValue => new CityId(dbValue)
         );
 
-        builder.Property(u => u.CurrentCityId)
-            .HasConversion(cityIdConverter)
-            .IsRequired(false);
-
         builder.Property(u => u.Type).HasConversion<string>();
         builder.Property(u => u.Faction).HasConversion<string>();
     }

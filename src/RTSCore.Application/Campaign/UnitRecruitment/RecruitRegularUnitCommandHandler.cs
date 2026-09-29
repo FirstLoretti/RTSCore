@@ -9,13 +9,13 @@ namespace RTSCore.Application.Campaign.UnitRecruitment;
 
 public class RecruitRegularUnitCommandHandler(
     IUnitOfWork unitOfWork,
-    IReadOnlyCollection<UnitTemplate> units,
-    UnitRecruitmentService recruitmentService
+    IReadOnlyCollection<UnitTemplate> templates,
+    IUnitRecruitmentService recruitmentService
 ) : IRequestHandler<RecruitRegularUnitCommand>
 {
     public async Task Handle(RecruitRegularUnitCommand request, CancellationToken ct)
     {
-        var unit = units.FirstOrDefault(u => u.Type == request.Type)
+        var template = templates.FirstOrDefault(u => u.Type == request.Type)
             ?? throw new NotFoundException(
                 $"[{nameof(RecruitRegularUnitCommandHandler)}] " +
                 $"Нет шаблона для юнита типа {request.Type}"
@@ -36,7 +36,7 @@ public class RecruitRegularUnitCommandHandler(
                 $"Фракции {army.Faction} нет в текущей игре"
             );
 
-        recruitmentService.RecruitUnit(unit, army, faction, city);
+        recruitmentService.RecruitUnit(template, army, faction, city);
 
         await unitOfWork.SaveChangesAsync(ct);
     }

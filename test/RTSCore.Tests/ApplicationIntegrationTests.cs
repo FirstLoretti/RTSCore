@@ -6,7 +6,6 @@ using Microsoft.Extensions.DependencyInjection;
 using RTSCore.Domain.Entities;
 using RTSCore.Domain.Exeptions;
 using RTSCore.Domain.ValueObjects;
-using RTSCore.Domain.ValueObjects.Presets;
 using RTSCore.Infrastructure.Persistence;
 using RTSCore.Domain.Services;
 

@@ -6,7 +6,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
 using RTSCore.Application.AI.Infratructure;
-using RTSCore.Application.Campaign.AutoBattle;
 using RTSCore.Application.Campaign.UnitRecruitment;
 using RTSCore.Application.Common.Behaviors;
 using RTSCore.Application.Common.Configurations;
@@ -54,7 +53,7 @@ public abstract class TestBase : IDisposable
         services.AddScoped<DiplomacyAi>();
 
         services.AddSingleton<ICityBuildingRegistry, CityBuildingRegistry>();
-        services.AddSingleton(GameBalance.Buildings.GetAllTemplates);
+        //services.AddSingleton(GameBalance.Buildings.GetAllTemplates);
         services.AddSingleton<IAutoBattleCalculator, AutoBattleCalculator>();
 
         services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
