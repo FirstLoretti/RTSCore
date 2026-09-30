@@ -7,7 +7,7 @@ using RTSCore.Domain.ValueObjects.AI;
 
 public class UnitUtilityCalculator
 {
-    public IReadOnlyCollection<RecruitOption> CalculateFor(
+    public IReadOnlyCollection<AiRecruitOption> CalculateFor(
         IReadOnlyCollection<UnitTemplate> units,
         AiPersonality personality)
     {
@@ -21,7 +21,7 @@ public class UnitUtilityCalculator
                 .OrderByDescending(o => o.Utility)];
     }
 
-    private static RecruitOption GetRecruitOption(UnitTemplate unit, AiPersonality personality)
+    private static AiRecruitOption GetRecruitOption(UnitTemplate unit, AiPersonality personality)
     {
         float multiplier = unit.Category switch
         {
@@ -32,6 +32,6 @@ public class UnitUtilityCalculator
 
         var utility = (int)(unit.AiUtility * multiplier);
 
-        return new RecruitOption(unit.Type, unit.Cost, utility);
+        return new AiRecruitOption(unit.Type, unit.Cost, utility);
     }
 }

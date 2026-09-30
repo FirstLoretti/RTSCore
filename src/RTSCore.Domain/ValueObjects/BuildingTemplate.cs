@@ -10,7 +10,10 @@ public record BuildingTemplate(
     CityType[] AllowedCityTypes,
     BuildingCategory Category,
     int AiUtility,
-    BuildingType? RequiredPreviousTier = null,
+    BuildingType[]? RequiredBuildings = null,
     BuildingEffect[]? Effects = null,
     Dictionary<UnitType, int>? Garrison = null
-) : ICatalogOption<BuildingType>;
+) : ICatalogOption<BuildingType>
+{
+    public BuildingType[] RequiredBuildings { get; init; } = RequiredBuildings ?? [];
+}

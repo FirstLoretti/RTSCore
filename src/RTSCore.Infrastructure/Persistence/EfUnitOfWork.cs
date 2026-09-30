@@ -1,8 +1,12 @@
+using MediatR;
+
+using RTSCore.Application.Common;
+using RTSCore.Domain.Entities;
 using RTSCore.Domain.Interfaces;
 
 namespace RTSCore.Infrastructure.Persistence;
 
-public class EfUnitOfWork(AppDbContext context) : IUnitOfWork
+public class EfUnitOfWork(AppDbContext context, IMediator mediator) : IUnitOfWork
 {
     public IBuildingRepository BuildingRepository { get; } = new SqlBuildingRepository(context);
     public IUnitRepository UnitRepository { get; } = new SqlUnitRepository(context);
@@ -14,5 +18,30 @@ public class EfUnitOfWork(AppDbContext context) : IUnitOfWork
     public IRefreshTokenRepository RefreshTokenRepository { get; } = new SqlRefreshTokenRepository(context);
     public IArmyRepository ArmyRepository { get; } = new SqlArmyRepository(context);
 
-    public Task SaveChangesAsync(CancellationToken ct) => context.SaveChangesAsync(ct);
+    public async Task SaveChangesAsync(CancellationToken ct)
+    {
+        var domainEntities = context.ChangeTracker
+            .Entries<AggregateRoot>()
+            .Where(e => e.Entity.DomainEvents.Count != 0)
+            .Select(e => e.Entity)
+            .ToList();
+
+        var domainEvents = domainEntities
+            .SelectMany(e => e.DomainEvents)
+            .ToList();
+
+        domainEntities.ForEach(e => e.ClearDomainEvents());
+
+        foreach (var domainEvent in domainEvents)
+        {
+            var notificationType = typeof(DomainEventNotification<>).MakeGenericType(domainEvent.GetType());
+            var notification = Activator.CreateInstance(notificationType, domainEvent);
+            if (notification != null)
+            {
+                await mediator.Publish(notification, ct);
+            }
+        }
+
+        await context.SaveChangesAsync(ct);
+    }
 }

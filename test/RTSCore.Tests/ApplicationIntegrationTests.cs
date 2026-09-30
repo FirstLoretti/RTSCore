@@ -12,7 +12,6 @@ using RTSCore.Domain.Services;
 using Unit = RTSCore.Domain.Entities.Unit;
 using RTSCore.Tests.Base;
 using RTSCore.Application.AI.Infratructure;
-using RTSCore.Application.Campaign.Common;
 
 namespace RTSCore.Tests;
 /*

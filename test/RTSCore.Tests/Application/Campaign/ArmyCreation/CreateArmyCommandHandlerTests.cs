@@ -28,7 +28,7 @@ public class CreateArmyCommandHandlerTests
         var city = City.CreateEmpty(CityType.Village, Vector2.Zero, FactionType.England);
         var army = Army.Create(FactionType.England, Vector2.Zero, new UnitTemplate());
 
-        unitOfWork.CityRepository.GetCityAsync(city.Id, Arg.Any<CancellationToken>()).Returns(city);
+        unitOfWork.CityRepository.GetAsync(city.Id, Arg.Any<CancellationToken>()).Returns(city);
         service.CreateArmy(city).Returns(army);
 
         var command = new CreateArmyCommand(city.Id);

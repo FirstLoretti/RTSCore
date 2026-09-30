@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 
 using RTSCore.Application.Campaign.CityConstruction;
-using RTSCore.Application.Campaign.Common;
 using RTSCore.Application.Campaign.UnitRecruitment;
 using RTSCore.Domain.Entities;
 using RTSCore.Domain.Services;

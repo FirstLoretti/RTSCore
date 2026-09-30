@@ -2,9 +2,9 @@ using MediatR;
 
 using RTSCore.Domain.ValueObjects;
 
-namespace RTSCore.Application.Campaign.CityConstruction;
+namespace RTSCore.Application.Campaign.CityConstruction.StartConstruction;
 
 public record struct ConstructBuildingCommand(
-    string CityId,
+    CityId CityId,
     BuildingType BuildingType
 ) : IRequest;

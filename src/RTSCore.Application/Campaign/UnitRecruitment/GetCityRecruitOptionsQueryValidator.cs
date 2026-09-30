@@ -6,6 +6,6 @@ public class GetCityRecruitOptionsQueryValidator : AbstractValidator<GetCityRecr
 {
     public GetCityRecruitOptionsQueryValidator()
     {
-        RuleFor(q => q.CityId.Value).NotEmpty().Length(3, 30);
+        RuleFor(q => q.CityId.Value).NotEmpty().MaximumLength(256);
     }
 }

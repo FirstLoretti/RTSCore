@@ -11,9 +11,10 @@ public interface ICityRepository
     void Remove(City city);
     void AddRange(IEnumerable<City> cities);
 
-    Task<City?> GetCityAsync(CityId id, CancellationToken cancellationToken);
-    Task<City?> GetCityByCoordAsync(Vector2 coordinates, CancellationToken cancellationToken);
-    Task<City?> GetWithBuildingsAsync(CityId id, CancellationToken cancellationToken);
+    Task<City?> GetAsync(CityId id, CancellationToken ct);
+    Task<City?> GetReadOnlyAsync(CityId id, CancellationToken ct);
+    Task<City?> GetCityByCoordAsync(Vector2 coordinates, CancellationToken ct);
+    Task<City?> GetWithBuildingsAsync(CityId id, CancellationToken ct);
 
     Task<IReadOnlyList<City>> GetWithBuildingsAsync(CancellationToken cancellationToken);
     Task<IReadOnlyList<City>> GetWithBuildingsAsync(FactionType faction, CancellationToken cancellationToken);

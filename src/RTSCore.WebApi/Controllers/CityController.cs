@@ -2,8 +2,9 @@ using MediatR;
 
 using Microsoft.AspNetCore.Mvc;
 
-using RTSCore.Application.Campaign.CityConstruction;
-using RTSCore.Application.Campaign.Common;
+using RTSCore.Application.Campaign.CityConstruction.CancelConstruction;
+using RTSCore.Application.Campaign.CityConstruction.ConstructionOptions;
+using RTSCore.Application.Campaign.CityConstruction.StartConstruction;
 using RTSCore.Application.Campaign.UnitRecruitment;
 using RTSCore.Domain.ValueObjects;
 
@@ -27,10 +28,10 @@ public class CityController(IMediator mediator) : ControllerBase
         return NoContent();
     }
 
-    [HttpDelete("cancelBuildingConstruction_{buildingId}")]
-    public async Task<IActionResult> CancelBuildingConstruction(string buildingId)
+    [HttpDelete("cancelBuildingConstruction_{cityId}_{buildingId}")]
+    public async Task<IActionResult> CancelBuildingConstruction(string cityId, string buildingId)
     {
-        await mediator.Send(new CancelConstructBuildingCommand(buildingId));
+        await mediator.Send(new CancelConstructBuildingCommand(cityId, buildingId));
         return NoContent();
     }
 
@@ -42,14 +43,14 @@ public class CityController(IMediator mediator) : ControllerBase
     }
 
     [HttpGet("{cityId}/getConstructionOptions")]
-    public async Task<ActionResult<IEnumerable<CityCatalogOptionDto<BuildingType>>>> GetConstructionOptionsAsync(string cityId)
+    public async Task<ActionResult<IEnumerable<ProductionOption>>> GetConstructionOptionsAsync(string cityId)
     {
         var result = await mediator.Send(new GetCityConstructionOptionsQuery(cityId));
         return Ok(result);
     }
 
     [HttpGet("{cityId}/getRecruitOptions")]
-    public async Task<ActionResult<IEnumerable<CityCatalogOptionDto<UnitType>>>> GetRecruitOptionsAsync(string cityId)
+    public async Task<ActionResult<IEnumerable<ProductionOption>>> GetRecruitOptionsAsync(string cityId)
     {
         var result = await mediator.Send(new GetCityRecruitOptionsQuery(cityId));
         return Ok(result);

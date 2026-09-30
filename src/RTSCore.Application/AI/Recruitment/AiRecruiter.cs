@@ -8,7 +8,7 @@ using RTSCore.Domain.ValueObjects.AI;
 
 namespace RTSCore.Application.AI.Recruitment;
 
-public class AiRecruiter(IUnitOfWork unitOfWork, RecruitOptionCache recruitOptions, IMediator mediator)
+public class AiRecruiter(IUnitOfWork unitOfWork, AiRecruitOptionCache recruitOptions, IMediator mediator)
 {
     public async Task Recruit(FactionType faction, AiPersonality personality, CancellationToken cancellationToken)
     {

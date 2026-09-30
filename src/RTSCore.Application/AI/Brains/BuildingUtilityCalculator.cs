@@ -5,14 +5,16 @@ using RTSCore.Domain.ValueObjects.AI;
 
 namespace RTSCore.Application.AI.Brains;
 
+
 public class BuildingUtilityCalculator(
-    IReadOnlyCollection<BuildingTemplate> buildingTemplates,
-    AiPersonality personality,
-    ICityBuildingRegistry buildingRegistry
+//IReadOnlyCollection<BuildingTemplate> buildingTemplates,
+//AiPersonality personality,
+//ICityBuildingRegistry buildingRegistry
 )
 {
     public List<BuildingOptionScore> GetOrderedOptions(IReadOnlyCollection<City> cities)
     {
+
         if (cities == null)
         {
             throw new ArgumentNullException(nameof(cities), "Коллекция городов не может быть null");
@@ -33,7 +35,7 @@ public class BuildingUtilityCalculator(
         }
 
         var bildingOptions = new List<BuildingOptionScore>();
-
+        /*
         foreach (var city in cities)
         {
             var options = buildingRegistry.GetBuildingOptions(city.Type);
@@ -59,6 +61,7 @@ public class BuildingUtilityCalculator(
                 }
             }
         }
+        */
 
         return [.. bildingOptions.OrderByDescending(o => o.Score)];
     }

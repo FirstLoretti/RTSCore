@@ -6,11 +6,11 @@ using RTSCore.Domain.ValueObjects.AI;
 
 namespace RTSCore.Application.AI.Recruitment;
 
-public class RecruitOptionCache
+public class AiRecruitOptionCache
 {
-    private readonly Dictionary<AiPersonality, ImmutableArray<RecruitOption>> _cache = [];
+    private readonly Dictionary<AiPersonality, ImmutableArray<AiRecruitOption>> _cache = [];
 
-    public RecruitOptionCache(
+    public AiRecruitOptionCache(
         IReadOnlyCollection<AiPersonality> personalities,
         IReadOnlyCollection<UnitTemplate> templates,
         UnitUtilityCalculator utilityCalculator
@@ -23,7 +23,7 @@ public class RecruitOptionCache
         }
     }
 
-    public ImmutableArray<RecruitOption> GetOptionFor(AiPersonality aiPersonality)
+    public ImmutableArray<AiRecruitOption> GetOptionFor(AiPersonality aiPersonality)
     {
         return _cache.TryGetValue(aiPersonality, out var options)
             ? options

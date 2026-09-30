@@ -2,10 +2,11 @@ using System.Numerics;
 
 using RTSCore.Domain.Exeptions;
 using RTSCore.Domain.ValueObjects;
+using RTSCore.Domain.ValueObjects.Events;
 
 namespace RTSCore.Domain.Entities;
 
-public class City
+public class City : AggregateRoot
 {
     public CityId Id { get; init; }
     public CityType Type { get; private set; }
@@ -56,36 +57,57 @@ public class City
         return new(id, type, coordinates, faction, 0, null);
     }
 
-    public UnitType[] GetRecruitableUnits(IReadOnlyCollection<UnitTemplate> units)
+    public IReadOnlyCollection<ProductionOption> GetRecruitableUnits(IReadOnlyCollection<UnitTemplate> templates)
     {
-        if (units.Count == 0) throw new ArgumentException("Получена пустая коллекция");
+        if (templates.Count == 0) throw new ArgumentException("Получена пустая коллекция");
 
         var constructedBuildings = _buildings
             .Where(b => b.IsConstructed)
             .Select(b => b.Type)
-            .ToHashSet();
+            .ToList();
 
-        return [.. units
-            .Where(u => u.RequiredBuilding != null && constructedBuildings.Contains(u.RequiredBuilding.Value))
-            .Select(u => u.Type)];
+        return [.. templates
+            .Where(t => t.RequiredBuilding == null || constructedBuildings.Contains(t.RequiredBuilding.Value))
+            .Select(t => new ProductionOption(
+                Name: t.DisplayName,
+                Cost: t.Cost,
+                TurnsToConstruct: t.TurnsToRecruit
+            ))];
     }
 
-    public BuildingType[] GetConstructableBuildings(IReadOnlyCollection<BuildingType> buildings)
+    public IReadOnlyCollection<ProductionOption> GetConstructableBuildings(
+        IReadOnlyCollection<BuildingTemplate> templates
+    )
     {
-        if (buildings.Count == 0) throw new ArgumentException("Получена пустая коллекция");
+        if (templates.Count == 0) throw new ArgumentException("Получена пустая коллекция");
+
+        var constructedBuildings = _buildings
+            .Where(b => b.IsConstructed)
+            .Select(b => b.Type)
+            .ToList();
 
         var registredBuildings = _buildings
             .Where(b => b.IsConstructed || b.InConstructProcess)
             .Select(b => b.Type)
-            .ToHashSet();
+            .ToList();
 
-        return [.. buildings.Where(b => !registredBuildings.Contains(b))];
+        var availableTemplates = templates
+            .Where(t => !registredBuildings.Contains(t.Type))
+            .Where(t => t.RequiredBuildings.All(reqType => constructedBuildings.Contains(reqType)))
+            .ToList();
+
+        return [.. availableTemplates
+            .Select(t => new ProductionOption(
+                Name: t.DisplayName,
+                Cost: t.Cost,
+                TurnsToConstruct: t.TurnsToConstruct
+            ))];
     }
 
     public Army RaiseArmy(Func<UnitType, UnitTemplate> getTemplate)
     {
         if (Governor == null)
-            throw new GameRuleException("Сбор армии неовзможен без губернатора");
+            throw new GameRuleException("Сбор армии невозможен без губернатора");
 
         var army = Army.Create(Faction, Coordinates, getTemplate(Governor.Value));
         Governor = null;
@@ -114,14 +136,36 @@ public class City
         Population = int.Clamp(Population + growth, 0, template.MaxPopulation);
     }
 
-    public void RegisterBuilding(Building building)
+    public void StartConstruction(BuildingTemplate template)
     {
-        if (!building.IsConstructed)
+        if (!template.AllowedCityTypes.Any(t => t == Type))
+            throw new GameRuleException("Здание недоступно для этого типа города");
+
+        if (_buildings.Any(b => b.Type == template.Type))
+            throw new GameRuleException("Здание такого типа уже построено");
+
+        if (template.RequiredBuildings != null)
         {
-            building.StartConstruct();
+            var hasRequiredBuildings = template.RequiredBuildings.All(reqType =>
+                _buildings.Any(b => b.Type == reqType));
+
+            if (!hasRequiredBuildings)
+                throw new GameRuleException("Не все требуемые здания построены");
         }
 
-        _buildings.Add(building);
+        _buildings.Add(Building.CreateUnderConstruction(template, Faction, Id));
+    }
+
+    public void CancelConstruction(BuildingId id)
+    {
+        var building = _buildings.FirstOrDefault(b => b.Id == id)
+            ?? throw new NotFoundException("Здание не существует");
+
+        if (!building.InConstructProcess)
+            throw new GameRuleException("Нельзя отменить не строящееся здание");
+
+        _buildings.Remove(building);
+        AddDomainEvent(new BuildingConstructionCanceledEvent(building.Cost, Faction));
     }
 
     public void TurnEnd()

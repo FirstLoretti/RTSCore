@@ -12,9 +12,9 @@ public class SqlFactionRepository(AppDbContext context) : IFactionRepository
     public void Add(Faction faction) => context.Factions.Add(faction);
     public void Remove(Faction faction) => context.Factions.Remove(faction);
 
-    public async Task<Faction?> GetFactionAsync(FactionType faction, CancellationToken cancellationToken)
+    public async Task<Faction?> GetFactionAsync(FactionType type, CancellationToken ct)
     {
-        return await context.Factions.FindAsync([faction], cancellationToken);
+        return await context.Factions.FindAsync([type], ct);
     }
 
     public void AddRange(IEnumerable<Faction> factions)

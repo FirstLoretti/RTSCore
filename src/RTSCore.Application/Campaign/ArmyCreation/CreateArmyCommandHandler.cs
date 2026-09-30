@@ -15,7 +15,7 @@ public class CreateArmyCommandHandler(
 {
     public async Task<ArmyId> Handle(CreateArmyCommand request, CancellationToken cancellationToken)
     {
-        var city = await unitOfWork.CityRepository.GetCityAsync(request.CityId, cancellationToken);
+        var city = await unitOfWork.CityRepository.GetAsync(request.CityId, cancellationToken);
         Guard.Against.NotFound(city, request.CityId);
 
         var army = armyCreationService.CreateArmy(city);

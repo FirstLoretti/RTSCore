@@ -6,21 +6,21 @@ using RTSCore.Domain.Common;
 using RTSCore.Domain.Interfaces;
 using RTSCore.Domain.ValueObjects;
 
-namespace RTSCore.Application.Campaign.UnitRecruitment;
+namespace RTSCore.Application.Campaign.CityConstruction.ConstructionOptions;
 
-public class GetCityRecruitOptionsQueryHandler(
+public class GetCityConstructionOptionsQueryHandler(
     ICityRepository repository,
-    UnitConfiguration unitConfiguration
-) : IRequestHandler<GetCityRecruitOptionsQuery, IReadOnlyCollection<ProductionOption>>
+    BuildingConfiguration configuration
+) : IRequestHandler<GetCityConstructionOptionsQuery, IReadOnlyCollection<ProductionOption>>
 {
     public async Task<IReadOnlyCollection<ProductionOption>> Handle(
-        GetCityRecruitOptionsQuery request,
+        GetCityConstructionOptionsQuery request,
         CancellationToken ct
     )
     {
         var city = await repository.GetReadOnlyAsync(request.CityId, ct);
         Guard.Against.NotFound(city, request.CityId);
 
-        return city.GetRecruitableUnits(unitConfiguration.Templates);
+        return city.GetConstructableBuildings(configuration.Templates);
     }
 }

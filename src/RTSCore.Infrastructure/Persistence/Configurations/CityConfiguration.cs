@@ -23,5 +23,11 @@ public class CityConfiguration : IEntityTypeConfiguration<City>
         builder.Property(c => c.Faction).HasConversion<string>();
         builder.Property(c => c.Population).HasConversion<int>();
         builder.Property(c => c.Governor).HasConversion<string>();
+
+        builder.HasMany(c => c.Buildings)
+            .WithOne()
+            .HasForeignKey(b => b.CityId)
+            .IsRequired()
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

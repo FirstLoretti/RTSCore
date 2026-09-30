@@ -134,7 +134,7 @@
           "AllowedCityTypes": ["Settlement"],
           "Category": "Military",
           "AiUtility": 50,
-          "RequiredPreviousTier": "ReqruitBarrack"
+          "RequiredBuildings": ["ReqruitBarrack"]
         },
         {
           "Type": "Market",
@@ -193,9 +193,10 @@
                 "Type": "GoldIncome",
                 "Value": 100
               }
-            ]
-          }
-        ]
+            ],
+          "RequiredBuildings":["CultivatedField"]
+        }
+      ]
     }
   }
 }

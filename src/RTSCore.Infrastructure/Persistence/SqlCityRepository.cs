@@ -13,10 +13,16 @@ public class SqlCityRepository(AppDbContext context) : ICityRepository
     public void Add(City city) => context.Cities.Add(city);
     public void Remove(City city) => context.Cities.Remove(city);
 
-    public async Task<City?> GetCityAsync(CityId id, CancellationToken cancellationToken)
-    {
-        return await context.Cities.FindAsync([id], cancellationToken);
-    }
+    public async Task<City?> GetAsync(CityId id, CancellationToken ct)
+        => await context.Cities
+            .Include(c => c.Buildings)
+            .FirstOrDefaultAsync(c => c.Id == id, ct);
+
+    public async Task<City?> GetReadOnlyAsync(CityId id, CancellationToken ct)
+       => await context.Cities
+           .AsNoTracking()
+           .Include(c => c.Buildings)
+           .FirstOrDefaultAsync(c => c.Id == id, ct);
 
     public async Task<City?> GetCityByCoordAsync(Vector2 coordinates, CancellationToken cancellationToken)
     {
