@@ -16,7 +16,7 @@ public class SqlDiplomacyRelationRepository(AppDbContext context) : IDiplomacyRe
     public async Task<DiplomacyRelation?> GetAsync(
         FactionType factionA,
         FactionType factionB,
-        CancellationToken cancellationToken
+        CancellationToken ct
     )
     {
         if (factionA == factionB) return null;
@@ -26,10 +26,10 @@ public class SqlDiplomacyRelationRepository(AppDbContext context) : IDiplomacyRe
             : (factionB, factionA);
 
         return await context.DiplomacyRelations
-            .FirstOrDefaultAsync(r => r.FactionA == first && r.FactionB == second, cancellationToken);
+            .FirstOrDefaultAsync(r => r.FactionA == first && r.FactionB == second, ct);
     }
 
-    public async Task<IReadOnlyList<DiplomacyRelation>> GetActiveTradeAgreementsForFaction(
+    public async Task<IReadOnlyList<DiplomacyRelation>> GetDiplomacyRelations(
         FactionType faction,
         CancellationToken cancellationToken
     )

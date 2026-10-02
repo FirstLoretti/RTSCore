@@ -13,7 +13,7 @@ public interface IDiplomacyRelationRepository
         CancellationToken cancellationToken
     );
 
-    Task<IReadOnlyList<DiplomacyRelation>> GetActiveTradeAgreementsForFaction(
+    Task<IReadOnlyList<DiplomacyRelation>> GetDiplomacyRelations(
         FactionType faction,
         CancellationToken cancellationToken
     );

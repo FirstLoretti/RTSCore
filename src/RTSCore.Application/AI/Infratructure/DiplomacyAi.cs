@@ -20,7 +20,7 @@ public class DiplomacyAi(IUnitOfWork unitOfWork, IMediator mediator)
         var otherFactions = await unitOfWork.FactionRepository.GetAnotherFactionsAsync(aiFaction, cancellationToken);
         var allFactions = otherFactions.Concat([aiFaction]);
 
-        var factionToCitiesCount = await unitOfWork.CityRepository.GetFactionToCityCount(otherFactions, cancellationToken);
+        var factionToCitiesCount = await unitOfWork.CityRepository.GetFactionCityCounts(otherFactions, cancellationToken);
         var factionToMilitaryPower =
             await unitOfWork.FactionRepository.GetFactionToMilitaryPower(allFactions, cancellationToken
         );

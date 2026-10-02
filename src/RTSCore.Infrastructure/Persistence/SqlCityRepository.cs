@@ -39,27 +39,12 @@ public class SqlCityRepository(AppDbContext context) : ICityRepository
             .FirstOrDefaultAsync(c => c.Id == id, cancellationToken);
     }
 
-    public async Task<IReadOnlyList<City>> GetWithBuildingsAsync(CancellationToken cancellationToken)
-    {
-        return await context.Cities
-            .Include(c => c.Buildings)
-            .ToArrayAsync(cancellationToken);
-    }
-
-    public async Task<IReadOnlyList<City>> GetWithBuildingsAsync(FactionType faction, CancellationToken cancellationToken)
-    {
-        return await context.Cities
-            .Where(c => c.Faction == faction)
-            .Include(c => c.Buildings)
-            .ToListAsync(cancellationToken);
-    }
-
     public void AddRange(IEnumerable<City> cities)
     {
         context.Cities.AddRange(cities);
     }
 
-    public async Task<Dictionary<FactionType, int>> GetFactionToCityCount(
+    public async Task<Dictionary<FactionType, int>> GetFactionCityCounts(
         IEnumerable<FactionType> factions,
         CancellationToken cancellationToken
     )
@@ -71,8 +56,10 @@ public class SqlCityRepository(AppDbContext context) : ICityRepository
             .ToDictionaryAsync(x => x.Faction, x => x.Count, cancellationToken);
     }
 
-    public async Task<IReadOnlyCollection<City>> GetCitiesAsync(FactionType faction, CancellationToken cancellationToken)
+    public async Task<IReadOnlyList<City>> GetCitiesAsync(FactionType faction, CancellationToken ct)
     {
-        return await context.Cities.Where(c => c.Faction == faction).ToListAsync(cancellationToken);
+        return await context.Cities
+            .Where(c => c.Faction == faction)
+            .ToListAsync(ct);
     }
 }

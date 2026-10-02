@@ -1,6 +1,4 @@
-using RTSCore.Domain.ValueObjects;
-
-namespace RTSCore.Application.Common.Configurations;
+namespace RTSCore.Domain.ValueObjects.Configurations;
 
 public record UnitConfiguration(
     IReadOnlyList<UnitTemplate> Templates,

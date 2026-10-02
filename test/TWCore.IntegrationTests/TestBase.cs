@@ -8,7 +8,6 @@ using Microsoft.Extensions.Options;
 using RTSCore.Application.AI.Infratructure;
 using RTSCore.Application.Campaign.UnitRecruitment;
 using RTSCore.Application.Common.Behaviors;
-using RTSCore.Application.Common.Configurations;
 using RTSCore.Application.Common.Settings;
 using RTSCore.Domain.Interfaces;
 using RTSCore.Domain.Interfaces.Authentication;

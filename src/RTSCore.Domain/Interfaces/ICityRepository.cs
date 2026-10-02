@@ -14,14 +14,11 @@ public interface ICityRepository
     Task<City?> GetAsync(CityId id, CancellationToken ct);
     Task<City?> GetReadOnlyAsync(CityId id, CancellationToken ct);
     Task<City?> GetCityByCoordAsync(Vector2 coordinates, CancellationToken ct);
-    Task<City?> GetWithBuildingsAsync(CityId id, CancellationToken ct);
 
-    Task<IReadOnlyList<City>> GetWithBuildingsAsync(CancellationToken cancellationToken);
-    Task<IReadOnlyList<City>> GetWithBuildingsAsync(FactionType faction, CancellationToken cancellationToken);
-    Task<IReadOnlyCollection<City>> GetCitiesAsync(FactionType faction, CancellationToken cancellationToken);
+    Task<IReadOnlyList<City>> GetCitiesAsync(FactionType faction, CancellationToken ct);
 
-    Task<Dictionary<FactionType, int>> GetFactionToCityCount(
+    Task<Dictionary<FactionType, int>> GetFactionCityCounts(
         IEnumerable<FactionType> factions,
-        CancellationToken cancellationToken
+        CancellationToken ct
     );
 }

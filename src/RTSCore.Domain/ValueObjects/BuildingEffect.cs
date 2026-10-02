@@ -1,3 +1,3 @@
 namespace RTSCore.Domain.ValueObjects;
 
-public readonly record struct BuildingEffect(BuildingEffectType Type, float Value);
+public readonly record struct BuildingEffect(BuildingEffectType Type, int Value);

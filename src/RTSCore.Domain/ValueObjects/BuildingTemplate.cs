@@ -16,4 +16,5 @@ public record BuildingTemplate(
 ) : ICatalogOption<BuildingType>
 {
     public BuildingType[] RequiredBuildings { get; init; } = RequiredBuildings ?? [];
+    public BuildingEffect[] Effects { get; init; } = Effects ?? [];
 }

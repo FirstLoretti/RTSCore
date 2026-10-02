@@ -8,6 +8,6 @@ public class EndTurnCommandValidator : AbstractValidator<EndTurnCommand>
 {
     public EndTurnCommandValidator()
     {
-        RuleFor(c => c.Faction).IsInEnum().NotEqual(FactionType.None);
+        RuleFor(c => c.FactionType).IsInEnum().NotEqual(FactionType.None);
     }
 }

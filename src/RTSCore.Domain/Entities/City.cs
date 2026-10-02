@@ -1,7 +1,9 @@
 using System.Numerics;
 
 using RTSCore.Domain.Exeptions;
+using RTSCore.Domain.Services;
 using RTSCore.Domain.ValueObjects;
+using RTSCore.Domain.ValueObjects.Configurations;
 using RTSCore.Domain.ValueObjects.Events;
 
 namespace RTSCore.Domain.Entities;
@@ -57,7 +59,9 @@ public class City : AggregateRoot
         return new(id, type, coordinates, faction, 0, null);
     }
 
-    public IReadOnlyCollection<ProductionOption> GetRecruitableUnits(IReadOnlyCollection<UnitTemplate> templates)
+    public IReadOnlyCollection<ProductionOption> GetRecruitableUnits(
+        IReadOnlyCollection<UnitTemplate> templates
+    )
     {
         if (templates.Count == 0) throw new ArgumentException("Получена пустая коллекция");
 
@@ -168,11 +172,30 @@ public class City : AggregateRoot
         AddDomainEvent(new BuildingConstructionCanceledEvent(building.Cost, Faction));
     }
 
-    public void TurnEnd()
+    public void TurnEnd(
+        IReadOnlyCollection<CityTemplate> cityTemplates,
+        IReadOnlyCollection<BuildingTemplate> buildingTemplates,
+        out int income
+    )
     {
         foreach (var building in _buildings)
         {
             building.AdvanceConstruction();
         }
+
+        var cityTemplate = cityTemplates.FirstOrDefault(t => t.Type == Type)
+            ?? throw new NotFoundException("Шаблон грода не найден");
+
+        var constructedTemplates = _buildings
+            .Where(b => b.IsConstructed)
+            .Select(b => buildingTemplates.FirstOrDefault(t => t.Type == b.Type)
+                ?? throw new NotFoundException("Шаблон здания не найден"))
+            .ToList();
+
+        income = CityEconomyCalculator.CalculateTurnEndIncome(
+            cityTemplate,
+            Population,
+            constructedTemplates
+        );
     }
 }

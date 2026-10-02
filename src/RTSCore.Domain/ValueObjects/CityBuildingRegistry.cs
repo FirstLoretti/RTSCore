@@ -7,7 +7,7 @@ public class CityBuildingRegistry(BuildingConfiguration configuration) : ICityBu
 {
     public IReadOnlyCollection<BuildingType> GetBuildingOptions(CityType type)
     {
-        return [.. configuration.Buildings
+        return [.. configuration.Templates
             .Where(b => b.AllowedCityTypes.Contains(type))
             .Select(b => b.Type)];
     }

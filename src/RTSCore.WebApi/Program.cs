@@ -21,7 +21,7 @@ using Serilog;
 using Serilog.Sinks.SystemConsole.Themes;
 using RTSCore.Application.Campaign.Lifecycle;
 using RTSCore.Application.AI.Infratructure;
-using RTSCore.Application.Common.Configurations;
+using RTSCore.Domain.ValueObjects.Configurations;
 
 var builder = WebApplication.CreateBuilder(args);
 
