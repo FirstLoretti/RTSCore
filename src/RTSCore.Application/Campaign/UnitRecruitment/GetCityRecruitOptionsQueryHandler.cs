@@ -1,9 +1,9 @@
 using MediatR;
 
-using RTSCore.Application.Common.Settings;
+using RTSCore.Application.Common.Validation;
 using RTSCore.Domain.Common;
-using RTSCore.Domain.Interfaces;
-using RTSCore.Domain.ValueObjects;
+using RTSCore.Domain.Entities.Campaign;
+using RTSCore.Domain.ValueObjects.Common;
 using RTSCore.Domain.ValueObjects.Configurations;
 
 namespace RTSCore.Application.Campaign.UnitRecruitment;

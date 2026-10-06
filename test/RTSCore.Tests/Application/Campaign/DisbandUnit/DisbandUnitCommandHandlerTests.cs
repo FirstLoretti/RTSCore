@@ -1,11 +1,12 @@
 using RTSCore.Domain.ValueObjects;
 using RTSCore.Tests.Base;
 using RTSCore.Application.Campaign.DisbandUnit;
-using RTSCore.Domain.Entities;
 using System.Numerics;
 using NSubstitute;
-using RTSCore.Domain.Interfaces;
 using FluentAssertions;
+using RTSCore.Domain.ValueObjects.Enums;
+using RTSCore.Domain.Entities.Campaign;
+using RTSCore.Domain.Entities.Common;
 
 namespace RTSCore.Tests.Application.Campaign.DisbandUnit;
 

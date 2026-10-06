@@ -5,11 +5,13 @@ using FluentAssertions;
 using NSubstitute;
 
 using RTSCore.Application.Campaign.UnitRecruitment;
-using RTSCore.Domain.Entities;
-using RTSCore.Domain.Interfaces;
+using RTSCore.Domain.Entities.Campaign;
+using RTSCore.Domain.Entities.Common;
 using RTSCore.Domain.Services;
-using RTSCore.Domain.ValueObjects;
+using RTSCore.Domain.Services.Units;
 using RTSCore.Domain.ValueObjects.Configurations;
+using RTSCore.Domain.ValueObjects.Enums;
+using RTSCore.Domain.ValueObjects.Templates;
 
 namespace RTSCore.Tests.Application.Campaign.UnitRecruitment;
 

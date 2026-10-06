@@ -1,5 +1,7 @@
+using RTSCore.Domain.ValueObjects.Templates;
+
 namespace RTSCore.Domain.ValueObjects.Configurations;
 
-public readonly record struct FactionConfiguration(
-    int InitialGold = 5000
+public record FactionConfiguration(
+    IReadOnlyCollection<FactionTemplate> Templates
 );

@@ -1,8 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 
-using RTSCore.Domain.Entities;
-using RTSCore.Domain.Interfaces;
-using RTSCore.Domain.ValueObjects;
+using RTSCore.Domain.Entities.Campaign;
+using RTSCore.Domain.ValueObjects.Enums;
+using RTSCore.Domain.ValueObjects.Identifiers;
 
 namespace RTSCore.Infrastructure.Persistence;
 
@@ -10,17 +10,17 @@ public class SqlArmyRepository(AppDbContext context) : IArmyRepository
 {
     public void Add(Army army) => context.Armies.Add(army);
 
-    public async Task<Army?> GetAsync(string armyId, CancellationToken cancellationToken)
+    public async Task<Army?> GetAsync(ArmyId armyId, CancellationToken ct)
     {
         return await context.Armies
             .Include(a => a.Units)
-            .FirstOrDefaultAsync(a => a.Id == armyId, cancellationToken);
+            .FirstOrDefaultAsync(a => a.Id == armyId, ct);
     }
 
-    public async Task<IReadOnlyCollection<Army>> GetArmiesAsync(FactionType faction, CancellationToken cancellationToken)
+    public async Task<IReadOnlyCollection<Army>> GetFactionArmiesAsync(FactionType faction, CancellationToken ct)
     {
         return await context.Armies
             .Where(a => a.Faction == faction)
-            .ToArrayAsync(cancellationToken);
+            .ToListAsync(ct);
     }
 }

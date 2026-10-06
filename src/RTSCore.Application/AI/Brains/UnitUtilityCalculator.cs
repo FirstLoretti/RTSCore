@@ -2,8 +2,9 @@ namespace RTSCore.Application.AI.Brains;
 
 using RTSCore.Application.AI.Recruitment;
 using RTSCore.Domain.Common;
-using RTSCore.Domain.ValueObjects;
 using RTSCore.Domain.ValueObjects.AI;
+using RTSCore.Domain.ValueObjects.Enums;
+using RTSCore.Domain.ValueObjects.Templates;
 
 public class UnitUtilityCalculator
 {

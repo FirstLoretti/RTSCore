@@ -6,6 +6,6 @@ public class CreateArmyCommandValidator : AbstractValidator<CreateArmyCommand>
 {
     public CreateArmyCommandValidator()
     {
-        RuleFor(c => c.CityId.Value).MaximumLength(256);
+        RuleFor(c => c.CityId.Value).NotEmpty();
     }
 }

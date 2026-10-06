@@ -5,13 +5,13 @@ using System.Net.Http.Json;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
-
-using RTSCore.Domain.Entities;
 using RTSCore.Domain.ValueObjects;
 using RTSCore.Infrastructure.Persistence;
 using RTSCore.Tests.Base;
 using RTSCore.Application.Campaign.DisbandUnit;
 using System.Numerics;
+using RTSCore.Domain.ValueObjects.Enums;
+using RTSCore.Domain.Entities.Campaign;
 
 namespace RTSCore.Tests.WebApi.Controllers;
 

@@ -1,6 +1,6 @@
 using MediatR;
 
-using RTSCore.Domain.Interfaces;
+using RTSCore.Domain.Entities.Common;
 
 namespace RTSCore.Application.Common;
 

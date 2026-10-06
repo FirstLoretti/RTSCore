@@ -6,11 +6,13 @@ using NSubstitute;
 using NSubstitute.ReceivedExtensions;
 
 using RTSCore.Application.Campaign.ArmyMovement;
-using RTSCore.Domain.Entities;
+using RTSCore.Domain.Entities.Campaign;
+using RTSCore.Domain.Entities.Common;
 using RTSCore.Domain.Exeptions;
 using RTSCore.Domain.Interfaces;
 using RTSCore.Domain.ValueObjects;
 using RTSCore.Domain.ValueObjects.Configurations;
+using RTSCore.Domain.ValueObjects.Enums;
 
 namespace RTSCore.Tests.Application.Campaign.ArmyMoving;
 
@@ -26,7 +28,7 @@ public class MoveArmyCommandHandlerTests
             FactionType.England,
             Vector2.Zero,
             new UnitTemplate(),
-            new ArmyConfiguration()
+            new MovementConfiguration()
         );
         var destination = Vector2.One;
 

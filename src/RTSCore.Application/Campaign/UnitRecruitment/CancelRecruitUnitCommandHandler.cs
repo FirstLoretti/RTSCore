@@ -1,9 +1,9 @@
 using MediatR;
 
+using RTSCore.Domain.Entities.Common;
 using RTSCore.Domain.Exeptions;
-using RTSCore.Domain.Interfaces;
-using RTSCore.Domain.Services;
-using RTSCore.Domain.ValueObjects;
+using RTSCore.Domain.Services.Units;
+using RTSCore.Domain.ValueObjects.Templates;
 
 namespace RTSCore.Application.Campaign.UnitRecruitment;
 

@@ -3,13 +3,12 @@ using System.Numerics;
 using FluentAssertions;
 
 using RTSCore.Application.Campaign.AutoBattle;
-using RTSCore.Domain.Entities;
 using RTSCore.Domain.Exeptions;
 using RTSCore.Domain.Services;
 using RTSCore.Domain.ValueObjects;
 using RTSCore.Domain.ValueObjects.Configurations;
 
-using Unit = RTSCore.Domain.Entities.Unit;
+using Unit = RTSCore.Domain.Entities.Campaign.Unit;
 
 namespace RTSCore.Tests.Application.Campaign.AutoBattle;
 

@@ -5,9 +5,8 @@ using Microsoft.Extensions.DependencyInjection;
 
 using RTSCore.Application.Authentication.Common;
 using RTSCore.Application.Authentication.Tokens;
-using RTSCore.Domain.Entities;
+using RTSCore.Domain.Entities.Identity;
 using RTSCore.Domain.Exeptions;
-using RTSCore.Domain.Interfaces.Authentication;
 using RTSCore.Infrastructure.Persistence;
 
 namespace TWCore.IntegrationTests.Authentication.Tokens;

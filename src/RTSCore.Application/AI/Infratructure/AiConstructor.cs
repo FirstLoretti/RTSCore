@@ -3,9 +3,9 @@ using MediatR;
 using RTSCore.Application.AI.Brains;
 using RTSCore.Application.Campaign.CityConstruction;
 using RTSCore.Application.Campaign.CityConstruction.StartConstruction;
+using RTSCore.Domain.Entities.Common;
 using RTSCore.Domain.Exeptions;
-using RTSCore.Domain.Interfaces;
-using RTSCore.Domain.ValueObjects;
+using RTSCore.Domain.ValueObjects.Enums;
 
 namespace RTSCore.Application.AI.Infratructure;
 

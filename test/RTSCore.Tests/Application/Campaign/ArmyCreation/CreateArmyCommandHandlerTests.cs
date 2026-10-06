@@ -10,10 +10,12 @@ using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
 
 using RTSCore.Application.Campaign.ArmyCreation;
-using RTSCore.Domain.Entities;
+using RTSCore.Domain.Entities.Campaign;
+using RTSCore.Domain.Entities.Common;
 using RTSCore.Domain.Exeptions;
 using RTSCore.Domain.Interfaces;
 using RTSCore.Domain.ValueObjects;
+using RTSCore.Domain.ValueObjects.Enums;
 using RTSCore.Infrastructure.Persistence;
 
 namespace RTSCore.Tests.Application.Campaign.ArmyCreation;

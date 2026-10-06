@@ -5,12 +5,12 @@ using MediatR;
 using Microsoft.IdentityModel.JsonWebTokens;
 
 using RTSCore.Application.Authentication.Common;
-using RTSCore.Application.Common.Settings;
+using RTSCore.Application.Common.Validation;
 using RTSCore.Domain.Common;
 using RTSCore.Domain.Entities;
+using RTSCore.Domain.Entities.Common;
+using RTSCore.Domain.Entities.Identity;
 using RTSCore.Domain.Exeptions;
-using RTSCore.Domain.Interfaces;
-using RTSCore.Domain.Interfaces.Authentication;
 
 namespace RTSCore.Application.Authentication.Tokens;
 

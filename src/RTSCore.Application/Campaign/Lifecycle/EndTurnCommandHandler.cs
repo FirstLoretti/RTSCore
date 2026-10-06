@@ -1,10 +1,9 @@
 using MediatR;
 
-using RTSCore.Application.Common.Settings;
+using RTSCore.Application.Common.Validation;
 using RTSCore.Domain.Common;
-using RTSCore.Domain.Interfaces;
-using RTSCore.Domain.Services;
-using RTSCore.Domain.ValueObjects;
+using RTSCore.Domain.Entities.Common;
+using RTSCore.Domain.Services.Lifecycle;
 
 namespace RTSCore.Application.Campaign.Lifecycle;
 
@@ -25,11 +24,7 @@ public class EndTurnCommandHandler(
             .Select(r => r.FactionA == faction.Type ? r.FactionB : r.FactionA)
             .ToList();
 
-        var partnerCityCounts = new Dictionary<FactionType, int>();
-        if (partners.Count > 0)
-        {
-            partnerCityCounts = await unitOfWork.CityRepository.GetFactionCityCounts(partners, ct);
-        }
+        var partnerCityCounts = await unitOfWork.CityRepository.GetFactionCityCounts(partners, ct);
 
         turnEndService.TurnEnd(faction, cities, relations, partnerCityCounts);
 

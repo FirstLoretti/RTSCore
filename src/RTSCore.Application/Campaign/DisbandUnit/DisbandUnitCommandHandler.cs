@@ -1,7 +1,7 @@
 using MediatR;
 
+using RTSCore.Domain.Entities.Common;
 using RTSCore.Domain.Exeptions;
-using RTSCore.Domain.Interfaces;
 
 namespace RTSCore.Application.Campaign.DisbandUnit;
 

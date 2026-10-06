@@ -1,6 +1,6 @@
 using RTSCore.Domain.Exeptions;
-using RTSCore.Domain.ValueObjects;
 using RTSCore.Domain.ValueObjects.AI;
+using RTSCore.Domain.ValueObjects.Enums;
 
 namespace RTSCore.Domain.Services;
 

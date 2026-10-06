@@ -4,12 +4,12 @@ using RTSCore.Application.Campaign.Diplomacy.OfferResponses;
 using RTSCore.Application.Campaign.Diplomacy.PeaceNegotiation;
 using RTSCore.Application.Campaign.Diplomacy.TradeProposal;
 using RTSCore.Application.Campaign.Diplomacy.WarDeclaration;
-using RTSCore.Application.Common.Settings;
+using RTSCore.Application.Common.Validation;
 using RTSCore.Domain.Common;
-using RTSCore.Domain.Entities;
-using RTSCore.Domain.Interfaces;
+using RTSCore.Domain.Entities.Campaign.Diplomacy;
+using RTSCore.Domain.Entities.Common;
 using RTSCore.Domain.Services;
-using RTSCore.Domain.ValueObjects;
+using RTSCore.Domain.ValueObjects.Enums;
 
 namespace RTSCore.Application.AI.Infratructure;
 

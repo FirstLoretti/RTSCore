@@ -1,9 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
-using RTSCore.Domain.Entities;
-using RTSCore.Domain.ValueObjects;
+using RTSCore.Domain.Entities.Campaign;
+using RTSCore.Domain.ValueObjects.Identifiers;
 
 namespace RTSCore.Infrastructure.Persistence.Configurations;
 
@@ -16,11 +15,6 @@ public class UnitConfigurations : IEntityTypeConfiguration<Unit>
         builder.Property(u => u.Id).HasConversion(
             id => id.Value,
             dbValue => new UnitId(dbValue)
-        );
-
-        var cityIdConverter = new ValueConverter<CityId, string>(
-            id => id.Value,
-            dbValue => new CityId(dbValue)
         );
 
         builder.Property(u => u.Type).HasConversion<string>();

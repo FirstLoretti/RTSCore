@@ -1,6 +1,6 @@
 using FluentValidation;
 
-using RTSCore.Domain.ValueObjects;
+using RTSCore.Domain.ValueObjects.Enums;
 
 namespace RTSCore.Application.Campaign.Diplomacy.TradeProposal;
 

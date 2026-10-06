@@ -5,9 +5,8 @@ using System.Text;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
-using RTSCore.Application.Common.Settings;
-using RTSCore.Domain.Entities;
-using RTSCore.Domain.Interfaces.Authentication;
+using RTSCore.Application.Common;
+using RTSCore.Domain.Entities.Identity;
 
 namespace RTSCore.Infrastructure.Authentication;
 

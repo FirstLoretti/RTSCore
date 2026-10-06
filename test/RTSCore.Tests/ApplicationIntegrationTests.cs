@@ -2,14 +2,12 @@ using MediatR;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-
-using RTSCore.Domain.Entities;
 using RTSCore.Domain.Exeptions;
 using RTSCore.Domain.ValueObjects;
 using RTSCore.Infrastructure.Persistence;
 using RTSCore.Domain.Services;
 
-using Unit = RTSCore.Domain.Entities.Unit;
+using Unit = RTSCore.Domain.Entities.Campaign.Unit;
 using RTSCore.Tests.Base;
 using RTSCore.Application.AI.Infratructure;
 

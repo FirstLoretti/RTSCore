@@ -1,17 +1,12 @@
 using Microsoft.EntityFrameworkCore;
 
 using RTSCore.Application.Common.Behaviors;
-using RTSCore.Domain.Interfaces;
 using RTSCore.Infrastructure.Persistence;
 
 using Scalar.AspNetCore;
 
 using FluentValidation;
 using RTSCore.WebApi.Common;
-
-using RTSCore.Domain.Services;
-using RTSCore.Application.Common.Settings;
-using RTSCore.Domain.Interfaces.Authentication;
 using RTSCore.Infrastructure.Authentication;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -22,6 +17,14 @@ using Serilog.Sinks.SystemConsole.Themes;
 using RTSCore.Application.Campaign.Lifecycle;
 using RTSCore.Application.AI.Infratructure;
 using RTSCore.Domain.ValueObjects.Configurations;
+using RTSCore.Domain.Services.Combat;
+using RTSCore.Domain.Entities.Campaign;
+using RTSCore.Domain.Entities.Common;
+using RTSCore.Domain.Entities.Identity;
+using RTSCore.Application.Common;
+using RTSCore.Application.Common.Validation;
+using Microsoft.Extensions.Options;
+using RTSCore.WebApi.Configurations;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -35,16 +38,21 @@ Log.Logger = new LoggerConfiguration()
 builder.Host.UseSerilog();
 
 builder.Configuration.AddJsonFile("gameconfigurations.json");
-builder.Services.Configure<GameConfigurations>(builder.Configuration.GetSection("GameConfigurations"));
-var gameConfigs = builder.Configuration
-    .GetSection("GameConfigurations")
-    .Get<GameConfigurations>();
 
-if (gameConfigs == null || gameConfigs.Units.Templates.Count == 0)
-{
-    throw new InvalidOperationException("Не удалось загрузить конфигурацию");
-}
-builder.Services.AddSingleton(gameConfigs.Units.Templates);
+builder.Services.AddSingleton<IValidator<GameConfigurations>, GameConfigurationsValidator>();
+builder.Services.AddSingleton<IValidateOptions<GameConfigurations>, FluentOptionsValidator<GameConfigurations>>();
+
+builder.Services.AddOptions<GameConfigurations>()
+    .Bind(builder.Configuration.GetSection("GameConfigurations"))
+    .ValidateOnStart();
+
+builder.Services.AddSingleton(sp => sp.GetRequiredService<IOptions<GameConfigurations>>().Value.Units);
+builder.Services.AddSingleton(sp => sp.GetRequiredService<IOptions<GameConfigurations>>().Value.AutoBattle);
+builder.Services.AddSingleton(sp => sp.GetRequiredService<IOptions<GameConfigurations>>().Value.Buildings);
+builder.Services.AddSingleton(sp => sp.GetRequiredService<IOptions<GameConfigurations>>().Value.Cities);
+builder.Services.AddSingleton(sp => sp.GetRequiredService<IOptions<GameConfigurations>>().Value.Diplomacy);
+builder.Services.AddSingleton(sp => sp.GetRequiredService<IOptions<GameConfigurations>>().Value.Factions);
+builder.Services.AddSingleton(sp => sp.GetRequiredService<IOptions<GameConfigurations>>().Value.Movement);
 
 builder.Services.AddControllers();
 
@@ -60,7 +68,6 @@ builder.Services.AddScoped<IRefreshTokenRepository, SqlRefreshTokenRepository>()
 builder.Services.AddScoped<IArmyRepository, SqlArmyRepository>();
 builder.Services.AddScoped<DiplomacyAi>();
 
-builder.Services.AddSingleton<ICityBuildingRegistry, CityBuildingRegistry>();
 //builder.Services.AddSingleton(Array.Empty<FactionPreset>());
 //builder.Services.AddSingleton(GameBalance.Buildings.GetAllTemplates);
 builder.Services.AddSingleton<IRefreshTokenGenerator, RefreshTokenGenerator>();

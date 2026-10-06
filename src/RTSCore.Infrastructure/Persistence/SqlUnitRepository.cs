@@ -1,8 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 
-using RTSCore.Domain.Entities;
-using RTSCore.Domain.Interfaces;
-using RTSCore.Domain.ValueObjects;
+using RTSCore.Domain.Entities.Campaign;
+using RTSCore.Domain.ValueObjects.Enums;
+using RTSCore.Domain.ValueObjects.Identifiers;
 
 namespace RTSCore.Infrastructure.Persistence;
 

@@ -1,42 +1,28 @@
 using MediatR;
 
-using RTSCore.Domain.Entities;
-using RTSCore.Domain.Interfaces;
-using RTSCore.Domain.ValueObjects;
+using RTSCore.Domain.Entities.Common;
+using RTSCore.Domain.Services.Lifecycle;
 
 namespace RTSCore.Application.Campaign.Lifecycle;
 
-// public class StartCampaignCommanHandler(
-//     IUnitOfWork unitOfWork,
-//     FactionPreset[] factionPresets
-// ) : IRequestHandler<StartCampaignCommand>
-// {
-//     public async Task Handle(StartCampaignCommand request, CancellationToken cancellationToken)
-//     {
-//         if (await unitOfWork.FactionRepository.HasAnyAsync(cancellationToken))
-//         {
-//             throw new InvalidOperationException("Кампания уже запущена");
-//         }
+public class StartCampaignCommanHandler(
+    IUnitOfWork unitOfWork,
+    StartCampaignService startCampaignService
+) : IRequestHandler<StartCampaignCommand>
+{
+    public async Task Handle(StartCampaignCommand request, CancellationToken ct)
+    {
+        if (await unitOfWork.FactionRepository.HasAnyAsync(ct))
+            throw new InvalidOperationException("Кампания уже запущена");
 
-//         var factions = new List<Faction>();
-//         var cities = new List<City>();
+        var (factions, cities) = startCampaignService.InitializeNewWorld(
+            request.CampaignId,
+            request.SelectedFactions
+        );
 
-//         foreach (var faction in factionPresets)
-//         {
-//             var isHuman = request.SelectedFactions.Contains(faction.Type);
-//             var playerType = isHuman ? PlayerType.Human : PlayerType.Ai;
+        unitOfWork.FactionRepository.AddRange(factions);
+        unitOfWork.CityRepository.AddRange(cities);
 
-//             factions.Add(new Faction(faction.Type, faction.Gold, playerType));
-
-//             foreach (var city in faction.Cities)
-//             {
-//                 cities.Add(new City(city, faction.Type));
-//             }
-//         }
-
-//         unitOfWork.FactionRepository.AddRange(factions);
-//         unitOfWork.CityRepository.AddRange(cities);
-
-//         await unitOfWork.SaveChangesAsync(cancellationToken);
-//     }
-// }
+        await unitOfWork.SaveChangesAsync(ct);
+    }
+}

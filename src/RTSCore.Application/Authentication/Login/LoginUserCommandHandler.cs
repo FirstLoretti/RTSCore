@@ -1,10 +1,9 @@
 using MediatR;
 
 using RTSCore.Application.Authentication.Common;
-using RTSCore.Domain.Entities;
+using RTSCore.Domain.Entities.Common;
+using RTSCore.Domain.Entities.Identity;
 using RTSCore.Domain.Exeptions;
-using RTSCore.Domain.Interfaces;
-using RTSCore.Domain.Interfaces.Authentication;
 
 namespace RTSCore.Application.Authentication.Login;
 

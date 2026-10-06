@@ -1,4 +1,4 @@
-using RTSCore.Domain.Entities;
+using RTSCore.Domain.Entities.Campaign;
 using RTSCore.Domain.Interfaces;
 using RTSCore.Domain.ValueObjects;
 using RTSCore.Domain.ValueObjects.AI;

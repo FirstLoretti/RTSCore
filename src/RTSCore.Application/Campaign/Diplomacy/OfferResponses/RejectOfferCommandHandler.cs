@@ -1,8 +1,8 @@
 using MediatR;
 
-using RTSCore.Application.Common.Settings;
+using RTSCore.Application.Common.Validation;
 using RTSCore.Domain.Common;
-using RTSCore.Domain.Interfaces;
+using RTSCore.Domain.Entities.Common;
 using RTSCore.Domain.Services;
 
 namespace RTSCore.Application.Campaign.Diplomacy.OfferResponses;

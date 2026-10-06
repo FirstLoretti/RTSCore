@@ -90,7 +90,8 @@
             "CultivatedField", 
             "ReqruitBarrack", 
             "Market"
-          ]
+          ],
+          "Governor": "Peasant"
         },
         {
           "Type": "Settlement",
@@ -104,7 +105,8 @@
             "Market",
             "CultivatedFieldComplex", 
             "MilitiaBarrack"
-          ]
+          ],
+          "Governor": "Militia"
         }
       ]
     },
@@ -197,6 +199,50 @@
           "RequiredBuildings":["CultivatedField"]
         }
       ]
+    },
+    "Factions":{
+      "Templates":[
+        {
+          "Type": "England",
+          "Name": "Англия",
+          "Gold": 5000,
+          "Cities": [
+            { "TemplateType": "Settlement", "Name": "Лондон", "Position": {"X": 10, "Y": 10} },
+            { "TemplateType": "Village", "Name": "Кланганфорд", "Position": {"X": 20, "Y": 20} }
+          ]
+        },
+        {
+          "Type": "France",
+          "Name": "Франция",
+          "Gold": 5000,
+          "Cities": [
+            { "TemplateType": "Settlement", "Name": "Париж", "Position": {"X": -10, "Y": -10} },
+            { "TemplateType": "Village", "Name": "Эгисхайм","Position": {"X": -20, "Y": -20} }
+          ]
+        }
+      ]
+    },
+    "AutoBattle":{
+      "WinnerCasualties": 0.3,
+      "LoserCasualties": 1.0,
+      "DrawCasualties": 0.5
+    },
+    "Movement":{
+      "MaxMovementPoints": 100,
+      "BaseUnitDistanceCost": 10
+    },
+    "Diplomacy":{
+      "InitialStanding": 0,
+
+      "AcceptPeaceOfferBonus": 25,
+      "RejectOfferPenalty": -5,
+
+      "MinStandingForTrade": -80,
+      "AcceptTradeOfferBonus": 10,
+      "TradeIncomePerPartnerCity": 25,
+      "CancelTradePenalty": -15,
+
+      "DeclareWarPenalty": -50
     }
   }
 }

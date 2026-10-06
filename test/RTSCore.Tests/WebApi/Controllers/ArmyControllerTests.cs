@@ -6,8 +6,9 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 
 using RTSCore.Application.Campaign.ArmyMovement;
-using RTSCore.Domain.Entities;
+using RTSCore.Domain.Entities.Campaign;
 using RTSCore.Domain.ValueObjects;
+using RTSCore.Domain.ValueObjects.Enums;
 using RTSCore.Infrastructure.Persistence;
 using RTSCore.Tests.Base;
 

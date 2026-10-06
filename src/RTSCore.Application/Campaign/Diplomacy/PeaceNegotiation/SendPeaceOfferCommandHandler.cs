@@ -1,9 +1,10 @@
 using MediatR;
 
-using RTSCore.Application.Common.Settings;
+using RTSCore.Application.Common.Validation;
 using RTSCore.Domain.Common;
 using RTSCore.Domain.Entities;
-using RTSCore.Domain.Interfaces;
+using RTSCore.Domain.Entities.Common;
+using RTSCore.Domain.ValueObjects.Enums;
 
 namespace RTSCore.Application.Campaign.Diplomacy.PeaceNegotiation;
 

@@ -1,6 +1,7 @@
 using RTSCore.Application.AI.Brains;
-using RTSCore.Domain.ValueObjects;
 using RTSCore.Domain.ValueObjects.AI;
+using RTSCore.Domain.ValueObjects.Enums;
+using RTSCore.Domain.ValueObjects.Templates;
 
 namespace RTSCore.Tests.Application.AI.Brain;
 

@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-using RTSCore.Domain.Entities;
+using RTSCore.Domain.Entities.Campaign.Diplomacy;
 
 namespace RTSCore.Infrastructure.Persistence.Configurations;
 

@@ -1,6 +1,6 @@
 using System.Security.Cryptography;
 
-using RTSCore.Domain.Interfaces.Authentication;
+using RTSCore.Domain.Entities.Identity;
 
 namespace RTSCore.Infrastructure.Authentication;
 
