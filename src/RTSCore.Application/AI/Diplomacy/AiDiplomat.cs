@@ -11,9 +11,9 @@ using RTSCore.Domain.Entities.Common;
 using RTSCore.Domain.Services;
 using RTSCore.Domain.ValueObjects.Enums;
 
-namespace RTSCore.Application.AI.Infratructure;
+namespace RTSCore.Application.AI.Diplomacy;
 
-public class DiplomacyAi(IUnitOfWork unitOfWork, IMediator mediator)
+public class AiDiplomat(IUnitOfWork unitOfWork, IMediator mediator)
 {
     public async Task ProcessTurnAsync(FactionType aiFaction, CancellationToken cancellationToken)
     {

@@ -1,9 +1,9 @@
 using MediatR;
 
 using RTSCore.Application.Campaign.UnitRecruitment;
+using RTSCore.Domain.AI.ValueObjects;
 using RTSCore.Domain.Entities.Common;
 using RTSCore.Domain.Exeptions;
-using RTSCore.Domain.ValueObjects.AI;
 using RTSCore.Domain.ValueObjects.Enums;
 
 namespace RTSCore.Application.AI.Recruitment;

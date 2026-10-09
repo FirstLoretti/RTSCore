@@ -1,3 +1,4 @@
+using RTSCore.Domain.AI.ValueObjects;
 using RTSCore.Domain.Exeptions;
 using RTSCore.Domain.ValueObjects.AI;
 using RTSCore.Domain.ValueObjects.Enums;

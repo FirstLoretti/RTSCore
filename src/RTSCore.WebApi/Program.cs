@@ -15,7 +15,6 @@ using RTSCore.Domain.ValueObjects;
 using Serilog;
 using Serilog.Sinks.SystemConsole.Themes;
 using RTSCore.Application.Campaign.Lifecycle;
-using RTSCore.Application.AI.Infratructure;
 using RTSCore.Domain.ValueObjects.Configurations;
 using RTSCore.Domain.Services.Combat;
 using RTSCore.Domain.Entities.Campaign;
@@ -25,6 +24,7 @@ using RTSCore.Application.Common;
 using RTSCore.Application.Common.Validation;
 using Microsoft.Extensions.Options;
 using RTSCore.WebApi.Configurations;
+using RTSCore.Application.AI.Diplomacy;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -66,7 +66,7 @@ builder.Services.AddScoped<ICityRepository, SqlCityRepository>();
 builder.Services.AddScoped<IUserRepository, SqlUserRepository>();
 builder.Services.AddScoped<IRefreshTokenRepository, SqlRefreshTokenRepository>();
 builder.Services.AddScoped<IArmyRepository, SqlArmyRepository>();
-builder.Services.AddScoped<DiplomacyAi>();
+builder.Services.AddScoped<AiDiplomat>();
 
 //builder.Services.AddSingleton(Array.Empty<FactionPreset>());
 //builder.Services.AddSingleton(GameBalance.Buildings.GetAllTemplates);

@@ -53,50 +53,35 @@ public sealed class City : AggregateRoot
         IReadOnlyCollection<UnitTemplate> templates
     )
     {
-        if (templates.Count == 0)
-            throw new ArgumentException("Получена пустая коллекция");
-
         var constructedBuildings = _buildings
             .Where(b => b.IsConstructed)
             .Select(b => b.Type)
             .ToList();
 
         return [.. templates
-            .Where(t => t.RequiredBuilding == null || constructedBuildings.Contains(t.RequiredBuilding.Value))
+            .Where(t => t.RequiredBuilding != null && constructedBuildings.Contains(t.RequiredBuilding.Value))
             .Select(t => new ProductionOption(
                 Name: t.DisplayName,
                 Cost: t.Cost,
-                TurnsToConstruct: t.TurnsToRecruit
+                TurnsToConstruct: t.TurnsToRecruit,
+                Category: t.ProductionCategory
             ))];
     }
 
-    public IReadOnlyCollection<ProductionOption> GetConstructableBuildings(
+    public IReadOnlyCollection<BuildingTemplate> GetConstructableBuildings(
         IReadOnlyCollection<BuildingTemplate> templates
     )
     {
-        if (templates.Count == 0)
-            throw new ArgumentException("Получена пустая коллекция");
-
         var constructedBuildings = _buildings
             .Where(b => b.IsConstructed)
             .Select(b => b.Type)
             .ToList();
 
-        var registredBuildings = _buildings
-            .Select(b => b.Type)
-            .ToList();
-
-        var availableTemplates = templates
-            .Where(t => !registredBuildings.Contains(t.Type))
-            .Where(t => t.RequiredBuildings.All(reqType => constructedBuildings.Contains(reqType)))
-            .ToList();
-
-        return [.. availableTemplates
-            .Select(t => new ProductionOption(
-                Name: t.DisplayName,
-                Cost: t.Cost,
-                TurnsToConstruct: t.TurnsToConstruct
-            ))];
+        return [.. templates
+            .Where(t =>
+                !_buildings.Any(b => t.Type == t.Type)
+                && t.RequiredBuildings.All(reqType => constructedBuildings.Contains(reqType))
+            )];
     }
 
     public Army CreateArmy(IReadOnlyCollection<UnitTemplate> templates)

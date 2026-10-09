@@ -1,6 +1,6 @@
 namespace RTSCore.Domain.ValueObjects.Enums;
 
-public enum BuildingCategory
+public enum ProductionCategory
 {
     Military,
     Economic

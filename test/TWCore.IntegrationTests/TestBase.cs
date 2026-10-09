@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
-using RTSCore.Application.AI.Infratructure;
+using RTSCore.Application.AI.Diplomacy;
 using RTSCore.Application.Campaign.UnitRecruitment;
 using RTSCore.Application.Common.Behaviors;
 using RTSCore.Application.Common.Settings;
@@ -50,7 +50,7 @@ public abstract class TestBase : IDisposable
         services.AddScoped<IRefreshTokenRepository, SqlRefreshTokenRepository>();
         services.AddScoped<IRefreshTokenGenerator, RefreshTokenGenerator>();
         services.AddScoped<IArmyRepository, SqlArmyRepository>();
-        services.AddScoped<DiplomacyAi>();
+        services.AddScoped<AiDiplomat>();
 
         services.AddSingleton<ICityBuildingRegistry, CityBuildingRegistry>();
         //services.AddSingleton(GameBalance.Buildings.GetAllTemplates);

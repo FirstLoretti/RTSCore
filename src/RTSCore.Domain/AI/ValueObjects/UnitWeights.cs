@@ -1,3 +1,3 @@
-namespace RTSCore.Domain.ValueObjects.AI;
+namespace RTSCore.Domain.AI.ValueObjects;
 
 public readonly record struct UnitWeights(float InfantryMultiplier, float RangeInfantryMultiplier);

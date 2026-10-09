@@ -1,5 +1,5 @@
-using RTSCore.Domain.ValueObjects.Configurations.Presets;
 using RTSCore.Domain.ValueObjects.Enums;
+using RTSCore.Domain.ValueObjects.Presets;
 
 namespace RTSCore.Domain.ValueObjects.Templates;
 

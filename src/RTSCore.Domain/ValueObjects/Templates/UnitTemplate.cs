@@ -1,4 +1,3 @@
-using RTSCore.Domain.Entities.Campaign;
 using RTSCore.Domain.ValueObjects.Enums;
 
 namespace RTSCore.Domain.ValueObjects.Templates;
@@ -17,5 +16,6 @@ public record UnitTemplate(
     int TurnsToRecruit = 0,
     UnitCategory Category = UnitCategory.Infantry,
     int AiUtility = 50,
+    ProductionCategory ProductionCategory = ProductionCategory.Military,
     BuildingType? RequiredBuilding = null
-) : ICatalogOption<UnitType>;
+);

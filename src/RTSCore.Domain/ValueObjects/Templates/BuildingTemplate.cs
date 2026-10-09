@@ -1,4 +1,3 @@
-using RTSCore.Domain.Entities.Campaign;
 using RTSCore.Domain.ValueObjects.Common;
 using RTSCore.Domain.ValueObjects.Enums;
 
@@ -10,12 +9,12 @@ public record BuildingTemplate(
     int Cost,
     int TurnsToConstruct,
     CityType[] AllowedCityTypes,
-    BuildingCategory Category,
+    ProductionCategory ProductionCategory,
     int AiUtility,
     BuildingType[]? RequiredBuildings = null,
     BuildingEffect[]? Effects = null,
     Dictionary<UnitType, int>? Garrison = null
-) : ICatalogOption<BuildingType>
+)
 {
     public BuildingType[] RequiredBuildings { get; init; } = RequiredBuildings ?? [];
     public BuildingEffect[] Effects { get; init; } = Effects ?? [];

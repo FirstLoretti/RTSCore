@@ -2,7 +2,7 @@ using System.Numerics;
 
 using RTSCore.Domain.ValueObjects.Enums;
 
-namespace RTSCore.Domain.ValueObjects.Configurations.Presets;
+namespace RTSCore.Domain.ValueObjects.Presets;
 
 public record CityPreset(
     CityType CityType,
