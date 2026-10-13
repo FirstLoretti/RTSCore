@@ -7,8 +7,8 @@ using Microsoft.Extensions.DependencyInjection;
 
 using RTSCore.Application.Campaign.AutoBattle;
 using RTSCore.Domain.Entities.Campaign;
-using RTSCore.Domain.ValueObjects.Enums;
-using RTSCore.Domain.ValueObjects.Results;
+using RTSCore.Domain.Enums;
+using RTSCore.Domain.ValueObjects;
 using RTSCore.Infrastructure.Persistence;
 using RTSCore.Tests.Base;
 

@@ -1,11 +1,7 @@
 using MediatR;
 
-using RTSCore.Domain.ValueObjects.Enums;
-using RTSCore.Domain.ValueObjects.Identifiers;
+using RTSCore.Domain.Enums;
 
 namespace RTSCore.Application.Campaign.Lifecycle;
 
-public record StartCampaignCommand(
-    CampaignId CampaignId,
-    FactionType[] SelectedFactions
-) : IRequest;
+public record StartCampaignCommand(FactionType[] PlayersFactions) : IRequest;

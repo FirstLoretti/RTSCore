@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 using RTSCore.Application.Authentication.Common;
 using RTSCore.Application.Authentication.Tokens;
+using RTSCore.Domain.Common;
 using RTSCore.Domain.Entities;
 using RTSCore.Domain.Entities.Identity;
 using RTSCore.Infrastructure.Persistence;

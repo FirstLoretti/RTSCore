@@ -1,16 +1,15 @@
 using MediatR;
 
-using RTSCore.Application.Common.Validation;
-using RTSCore.Domain.Common;
-using RTSCore.Domain.Entities.Campaign;
-using RTSCore.Domain.ValueObjects.Common;
-using RTSCore.Domain.ValueObjects.Configurations;
+using RTSCore.Domain.Common.Exceptions;
+using RTSCore.Domain.Common.Repositories;
+using RTSCore.Domain.Configurations.Buldings;
+using RTSCore.Domain.ValueObjects;
 
 namespace RTSCore.Application.Campaign.CityConstruction.ConstructionOptions;
 
 public class GetCityConstructionOptionsQueryHandler(
     ICityRepository repository,
-    BuildingConfiguration configuration
+    BuildingCatalog configuration
 ) : IRequestHandler<GetCityConstructionOptionsQuery, IReadOnlyCollection<ProductionOption>>
 {
     public async Task<IReadOnlyCollection<ProductionOption>> Handle(

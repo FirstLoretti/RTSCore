@@ -6,7 +6,7 @@ using RTSCore.Application.Campaign.CityConstruction.CancelConstruction;
 using RTSCore.Application.Campaign.CityConstruction.ConstructionOptions;
 using RTSCore.Application.Campaign.CityConstruction.StartConstruction;
 using RTSCore.Application.Campaign.UnitRecruitment;
-using RTSCore.Domain.ValueObjects.Common;
+using RTSCore.Domain.ValueObjects;
 
 namespace RTSCore.WebApi.Controllers;
 

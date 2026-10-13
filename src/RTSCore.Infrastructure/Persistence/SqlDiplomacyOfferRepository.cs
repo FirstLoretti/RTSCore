@@ -1,21 +1,18 @@
 using Microsoft.EntityFrameworkCore;
 
-using RTSCore.Domain.Entities.Campaign.Diplomacy;
-using RTSCore.Domain.ValueObjects.Enums;
+using RTSCore.Domain.Common.Repositories;
+using RTSCore.Domain.Entities.Campaign;
+using RTSCore.Domain.Enums;
 
 namespace RTSCore.Infrastructure.Persistence;
 
 public class SqlDiplomacyOfferRepository(AppDbContext context) : IDiplomacyOfferRepository
 {
-    public void Add(DiplomacyOffer offer)
-    {
-        context.DiplomacyOffers.Add(offer);
-    }
+    public void Add(DiplomacyOffer offer) => context.DiplomacyOffers.Add(offer);
 
-    public async Task<DiplomacyOffer?> GetOfferAsync(Guid id, CancellationToken cancellationToken)
-    {
-        return await context.DiplomacyOffers.FindAsync([id], cancellationToken);
-    }
+    public async Task<DiplomacyOffer?> GetAsync(Guid id, CancellationToken ct)
+        => await context.DiplomacyOffers.FindAsync([id], ct);
+
 
     public async Task<HashSet<FactionType>> GetFactionsUnderNegotiationAsync(
         FactionType initiator,

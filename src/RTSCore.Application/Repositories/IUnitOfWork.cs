@@ -1,0 +1,16 @@
+namespace RTSCore.Domain.Common.Repositories;
+
+public interface IUnitOfWork
+{
+    IBuildingRepository BuildingRepository { get; }
+    IUnitRepository UnitRepository { get; }
+    IFactionRepository FactionRepository { get; }
+    ICityRepository CityRepository { get; }
+    IDiplomacyRelationRepository DiplomacyRelationRepository { get; }
+    IDiplomacyOfferRepository DiplomacyOfferRepository { get; }
+    IUserRepository UserRepository { get; }
+    IRefreshTokenRepository RefreshTokenRepository { get; }
+    IArmyRepository ArmyRepository { get; }
+
+    Task SaveChangesAsync(CancellationToken cancellationToken);
+}

@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 
-using RTSCore.Domain.Entities.Identity;
+using RTSCore.Domain.Common.Repositories;
+using RTSCore.Domain.Entities;
 
 namespace RTSCore.Infrastructure.Persistence;
 

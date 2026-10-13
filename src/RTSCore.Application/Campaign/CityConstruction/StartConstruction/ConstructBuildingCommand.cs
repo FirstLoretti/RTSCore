@@ -1,6 +1,6 @@
 using MediatR;
 
-using RTSCore.Domain.ValueObjects.Enums;
+using RTSCore.Domain.Enums;
 using RTSCore.Domain.ValueObjects.Identifiers;
 
 namespace RTSCore.Application.Campaign.CityConstruction.StartConstruction;

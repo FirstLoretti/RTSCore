@@ -1,8 +1,7 @@
 using MediatR;
 
-using RTSCore.Application.Common.Validation;
-using RTSCore.Domain.Common;
-using RTSCore.Domain.Entities.Common;
+using RTSCore.Domain.Common.Exceptions;
+using RTSCore.Domain.Common.Repositories;
 using RTSCore.Domain.Services;
 
 namespace RTSCore.Application.Campaign.Diplomacy.OfferResponses;
@@ -11,7 +10,7 @@ public class RejectOfferCommandHandler(IUnitOfWork unitOfWork) : IRequestHandler
 {
     public async Task Handle(RejectOfferCommand request, CancellationToken cancellationToken)
     {
-        var offer = await unitOfWork.DiplomacyOfferRepository.GetOfferAsync(request.OfferId, cancellationToken);
+        var offer = await unitOfWork.DiplomacyOfferRepository.GetAsync(request.OfferId, cancellationToken);
         Guard.Against.NotFound(offer, request.OfferId);
 
         offer.Reject();

@@ -1,61 +1,24 @@
 using Microsoft.EntityFrameworkCore;
 
+using RTSCore.Domain.Common.Repositories;
 using RTSCore.Domain.Entities.Campaign;
-using RTSCore.Domain.Services;
-using RTSCore.Domain.ValueObjects.Enums;
+using RTSCore.Domain.Enums;
 
 namespace RTSCore.Infrastructure.Persistence;
 
 public class SqlFactionRepository(AppDbContext context) : IFactionRepository
 {
     public void Add(Faction faction) => context.Factions.Add(faction);
+    public void AddRange(IEnumerable<Faction> factions)
+        => context.Factions.AddRange(factions);
     public void Remove(Faction faction) => context.Factions.Remove(faction);
 
-    public async Task<Faction?> GetFactionAsync(FactionType type, CancellationToken ct)
-    {
-        return await context.Factions.FindAsync([type], ct);
-    }
+    public async Task<Faction?> GetAsync(FactionType type, CancellationToken ct)
+        => await context.Factions.FindAsync([type], ct);
 
-    public void AddRange(IEnumerable<Faction> factions)
-    {
-        context.Factions.AddRange(factions);
-    }
+    public async Task<IReadOnlyCollection<Faction>> GetAsync(CancellationToken ct)
+        => await context.Factions.ToListAsync(ct);
 
-    public async Task<bool> HasAnyAsync(CancellationToken cancellationToken)
-    {
-        return await context.Factions.AnyAsync(cancellationToken);
-    }
-
-    public async Task<IReadOnlyCollection<FactionType>> GetAnotherFactionsAsync(
-        FactionType currentFaction,
-        CancellationToken cancellationToken
-    )
-    {
-        return await context.Factions
-            .Where(f => f.Type != currentFaction && !f.IsEliminated)
-            .Select(f => f.Type)
-            .ToListAsync(cancellationToken);
-    }
-
-    public async Task<Dictionary<FactionType, int>> GetFactionToMilitaryPower(
-    IEnumerable<FactionType> factions, CancellationToken cancellationToken
-    )
-    {
-        //     var militaryPower = await context.Units
-        //         .AsNoTracking()
-        //         .Where(u => u.TurnsToRecruit <= 0 && u.Health > 0)
-        //         .GroupBy(u => u.Faction)
-        //         .Select(g => new
-        //         {
-        //             Faction = g.Key,
-        //             Power = (int)g.Sum(u =>
-        //                         (u.Health * GameBalance.Units.HealthWeight) +
-        //                         (u.Damage * GameBalance.Units.DamageWeight) +
-        //                         (u.Armor * GameBalance.Units.ArmorWeight))
-        //         })
-        //         .ToListAsync(cancellationToken);
-
-        //     return militaryPower.ToDictionary(l => l.Faction, l => l.Power);
-        return [];
-    }
+    public async Task<bool> HasAnyAsync(CancellationToken ct)
+        => await context.Factions.AnyAsync(ct);
 }

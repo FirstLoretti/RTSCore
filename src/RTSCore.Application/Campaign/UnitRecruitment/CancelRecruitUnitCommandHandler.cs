@@ -1,9 +1,9 @@
 using MediatR;
 
-using RTSCore.Domain.Entities.Common;
+using RTSCore.Domain.Common.Repositories;
+using RTSCore.Domain.Configurations.Units;
 using RTSCore.Domain.Exeptions;
 using RTSCore.Domain.Services.Units;
-using RTSCore.Domain.ValueObjects.Templates;
 
 namespace RTSCore.Application.Campaign.UnitRecruitment;
 
@@ -29,7 +29,7 @@ public class CancelRecruitUnitCommandHandler(
         var army = await unitOfWork.ArmyRepository.GetAsync(unit.ArmyId, ct)
             ?? throw new NotFoundException("Армия не найдена");
 
-        var faction = await unitOfWork.FactionRepository.GetFactionAsync(unit.Faction, ct)
+        var faction = await unitOfWork.FactionRepository.GetAsync(unit.Faction, ct)
             ?? throw new NotFoundException(
                 $"[{nameof(CancelRecruitUnitCommandHandler)}] Фракции {unit.Faction} не существует"
             );

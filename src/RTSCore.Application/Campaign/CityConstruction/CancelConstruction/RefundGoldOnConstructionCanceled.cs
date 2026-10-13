@@ -1,10 +1,9 @@
 using MediatR;
 
 using RTSCore.Application.Common;
-using RTSCore.Application.Common.Validation;
-using RTSCore.Domain.Common;
-using RTSCore.Domain.Entities.Common;
-using RTSCore.Domain.ValueObjects.Events;
+using RTSCore.Domain.Common.Exceptions;
+using RTSCore.Domain.Common.Repositories;
+using RTSCore.Domain.Events;
 
 namespace RTSCore.Application.Campaign.CityConstruction.CancelConstruction;
 
@@ -19,7 +18,7 @@ public class RefundGoldOnConstructionCanceled(
     {
         var (cost, factionType) = notification.DomainEvent;
 
-        var faction = await unitOfWork.FactionRepository.GetFactionAsync(factionType, ct);
+        var faction = await unitOfWork.FactionRepository.GetAsync(factionType, ct);
         Guard.Against.NotFound(faction, factionType);
 
         faction.RefundGold(cost);

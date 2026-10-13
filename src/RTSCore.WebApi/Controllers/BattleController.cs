@@ -3,7 +3,7 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 using RTSCore.Application.Campaign.AutoBattle;
-using RTSCore.Domain.ValueObjects.Results;
+using RTSCore.Domain.ValueObjects;
 
 namespace RTSCore.WebApi.Controllers;
 

@@ -5,13 +5,13 @@ using FluentAssertions;
 using NSubstitute;
 
 using RTSCore.Application.Campaign.UnitRecruitment;
+using RTSCore.Domain.Common.Repositories;
+using RTSCore.Domain.Configurations.Units;
 using RTSCore.Domain.Entities.Campaign;
-using RTSCore.Domain.Entities.Common;
+using RTSCore.Domain.Enums;
 using RTSCore.Domain.Services;
 using RTSCore.Domain.Services.Units;
 using RTSCore.Domain.ValueObjects.Configurations;
-using RTSCore.Domain.ValueObjects.Enums;
-using RTSCore.Domain.ValueObjects.Templates;
 
 namespace RTSCore.Tests.Application.Campaign.UnitRecruitment;
 
@@ -60,11 +60,11 @@ public sealed class RecruitmentTestContext
         City = City.CreateEmpty(CityType.Village, Army.Coordinates, Army.Faction);
         Faction = Faction.Create(Army.Faction, PlayerType.Human, new FactionConfiguration());
 
-        UnitOfWork.FactionRepository.GetFactionAsync(Faction.Type, Arg.Any<CancellationToken>())
+        UnitOfWork.FactionRepository.GetAsync(Faction.Type, Arg.Any<CancellationToken>())
             .Returns(Faction);
         UnitOfWork.ArmyRepository.GetAsync(Army.Id, Arg.Any<CancellationToken>())
             .Returns(Army);
-        UnitOfWork.CityRepository.GetCityByCoordAsync(Army.Coordinates, Arg.Any<CancellationToken>())
+        UnitOfWork.CityRepository.GetByCoordAsync(Army.Coordinates, Arg.Any<CancellationToken>())
             .Returns(City);
     }
 }

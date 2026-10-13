@@ -1,8 +1,8 @@
 using MediatR;
 
-using RTSCore.Domain.Entities.Common;
+using RTSCore.Domain.Common.Repositories;
+using RTSCore.Domain.Configurations.Buldings;
 using RTSCore.Domain.Exeptions;
-using RTSCore.Domain.ValueObjects.Templates;
 
 namespace RTSCore.Application.Campaign.CityConstruction.StartConstruction;
 
@@ -19,7 +19,7 @@ public class ConstructBuildingCommandHandler(
                 $"Поселения {request.CityId} нет на карте кампании"
             );
 
-        var faction = await unitOfWork.FactionRepository.GetFactionAsync(city.Faction, ct)
+        var faction = await unitOfWork.FactionRepository.GetAsync(city.Faction, ct)
             ?? throw new NotFoundException(
                 $"[{nameof(ConstructBuildingCommandHandler)}] " +
                 $"Поселение {city.Id} принадлежит {city.Faction}, " +

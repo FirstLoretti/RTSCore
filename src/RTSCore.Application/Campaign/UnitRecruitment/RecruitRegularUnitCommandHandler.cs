@@ -1,10 +1,10 @@
 using MediatR;
 
-using RTSCore.Domain.Entities.Common;
+using RTSCore.Domain.Common.Repositories;
+using RTSCore.Domain.Configurations.Units;
 using RTSCore.Domain.Exeptions;
 using RTSCore.Domain.Services;
 using RTSCore.Domain.Services.Units;
-using RTSCore.Domain.ValueObjects.Templates;
 
 namespace RTSCore.Application.Campaign.UnitRecruitment;
 
@@ -28,10 +28,10 @@ public class RecruitRegularUnitCommandHandler(
                 $"Армии {request.ArmyId} нет на карте кампании"
             );
 
-        var city = await unitOfWork.CityRepository.GetCityByCoordAsync(army.Coordinates, ct)
+        var city = await unitOfWork.CityRepository.GetByCoordAsync(army.Coordinates, ct)
             ?? throw new NotFoundException("Армия не в городе. Найм невозможен");
 
-        var faction = await unitOfWork.FactionRepository.GetFactionAsync(army.Faction, ct)
+        var faction = await unitOfWork.FactionRepository.GetAsync(army.Faction, ct)
             ?? throw new NotFoundException(
                 $"[{nameof(RecruitRegularUnitCommandHandler)}] " +
                 $"Фракции {army.Faction} нет в текущей игре"

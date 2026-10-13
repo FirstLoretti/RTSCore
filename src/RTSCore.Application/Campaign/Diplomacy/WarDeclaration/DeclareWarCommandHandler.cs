@@ -1,8 +1,7 @@
 using MediatR;
 
-using RTSCore.Application.Common.Validation;
-using RTSCore.Domain.Common;
-using RTSCore.Domain.Entities.Common;
+using RTSCore.Domain.Common.Exceptions;
+using RTSCore.Domain.Common.Repositories;
 
 namespace RTSCore.Application.Campaign.Diplomacy.WarDeclaration;
 

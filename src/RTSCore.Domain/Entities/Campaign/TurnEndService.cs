@@ -1,0 +1,73 @@
+using RTSCore.Domain.Configurations;
+using RTSCore.Domain.Configurations.Buldings;
+using RTSCore.Domain.Configurations.Cities;
+using RTSCore.Domain.Entities.Campaign;
+using RTSCore.Domain.Enums;
+
+namespace RTSCore.Domain.Services.Lifecycle;
+
+public class TurnEndService(
+    CityCatalog cityConfiguration,
+    BuildingCatalog buildingConfiguration,
+    DiplomacyConfiguration diplomacyConfiguration
+)
+{
+    public void TurnEnd(
+        Faction faction,
+        IReadOnlyList<City> cities,
+        IReadOnlyList<DiplomacyRelation> relations,
+        IReadOnlyDictionary<FactionType, int> partnerToCityCount
+    )
+    {
+        var citiesIncome = CitiesIncome(cities);
+        var tradeIncome = TradeIncome(faction.Type, relations, partnerToCityCount);
+
+        faction.EarnGold(citiesIncome + tradeIncome);
+    }
+
+    private int CitiesIncome(IReadOnlyList<City> cities)
+    {
+        int income = 0;
+        for (int i = 0; i < cities.Count; i++)
+        {
+            cities[i].TurnEnd(
+                cityConfiguration.Templates,
+                buildingConfiguration.Templates,
+                out int cityIncome
+            );
+
+            income += cityIncome;
+        }
+
+        return income;
+    }
+
+    private int TradeIncome(
+        FactionType faction,
+        IReadOnlyList<DiplomacyRelation> relations,
+        IReadOnlyDictionary<FactionType, int> partnerToCityCount
+    )
+    {
+        if (relations.Count != 0)
+        {
+            var relationsWithTrade = relations
+                .Where(r => r.HasTradeAgreement)
+                .ToList();
+
+            int totalCities = 0;
+            foreach (var relation in relationsWithTrade)
+            {
+                var partner = relation.FactionA == faction ? relation.FactionB : relation.FactionA;
+
+                if (partnerToCityCount.TryGetValue(partner, out var amount))
+                {
+                    totalCities += amount;
+                }
+            }
+
+            return totalCities * diplomacyConfiguration.TradeIncomePerPartnerCity;
+        }
+
+        return 0;
+    }
+}

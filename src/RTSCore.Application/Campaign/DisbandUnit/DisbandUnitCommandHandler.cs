@@ -1,6 +1,6 @@
 using MediatR;
 
-using RTSCore.Domain.Entities.Common;
+using RTSCore.Domain.Common.Repositories;
 using RTSCore.Domain.Exeptions;
 
 namespace RTSCore.Application.Campaign.DisbandUnit;

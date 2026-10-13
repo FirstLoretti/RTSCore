@@ -1,11 +1,10 @@
 using MediatR;
 
-using RTSCore.Application.Common.Validation;
-using RTSCore.Domain.Common;
-using RTSCore.Domain.Entities.Common;
+using RTSCore.Domain.Common.Exceptions;
+using RTSCore.Domain.Common.Repositories;
 using RTSCore.Domain.Services;
 using RTSCore.Domain.Services.Combat;
-using RTSCore.Domain.ValueObjects.Results;
+using RTSCore.Domain.ValueObjects;
 
 namespace RTSCore.Application.Campaign.AutoBattle;
 

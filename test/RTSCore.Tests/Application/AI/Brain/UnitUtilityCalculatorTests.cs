@@ -1,8 +1,8 @@
 using RTSCore.Application.AI.Brains;
-using RTSCore.Domain.AI.ValueObjects;
+using RTSCore.Domain.AI.Personality;
+using RTSCore.Domain.Configurations.Units;
+using RTSCore.Domain.Enums;
 using RTSCore.Domain.ValueObjects.AI;
-using RTSCore.Domain.ValueObjects.Enums;
-using RTSCore.Domain.ValueObjects.Templates;
 
 namespace RTSCore.Tests.Application.AI.Brain;
 
@@ -41,11 +41,11 @@ public class UnitUtilityCalculatorTests
                 new(UnitType.Peasant, "Melee", 1, 1, 1, 1, 1, 1, 1, 1, 1, UnitCategory.Infantry, 50)};
 
         var aiPersonality = new AiPersonality(
-            AiStrategicType.Aggressive,
-            new BudgetWeights(1, 1),
-            new UnitWeights(1.25f, 0.75f),
-            new BuildingWeights(EconomicMultiplier: 1, MilitaryMultiplier: 1),
-            new DiplomacyWeights(1, 1, 1, 1, 1, 1, 1, 1, 1)
+            AiPersonalityType.Defender,
+            new AiBudgetWeights(1, 1),
+            new AiUnitWeights(1.25f, 0.75f),
+            new AiBuildingWeights(EconomicMultiplier: 1, MilitaryMultiplier: 1),
+            new AiDiplomacyWeights(1, 1, 1, 1, 1, 1, 1, 1, 1)
         );
 
         return (templates, aiPersonality);

@@ -9,9 +9,8 @@ using RTSCore.Application.AI.Diplomacy;
 using RTSCore.Application.Campaign.UnitRecruitment;
 using RTSCore.Application.Common.Behaviors;
 using RTSCore.Application.Common.Settings;
-using RTSCore.Domain.Entities.Campaign;
-using RTSCore.Domain.Entities.Common;
-using RTSCore.Domain.Entities.Identity;
+using RTSCore.Domain.Common;
+using RTSCore.Domain.Common.Repositories;
 using RTSCore.Domain.Services.Combat;
 using RTSCore.Domain.ValueObjects;
 using RTSCore.Infrastructure.Authentication;
@@ -50,7 +49,7 @@ public abstract class TestBase : IDisposable
         services.AddScoped<IRefreshTokenRepository, SqlRefreshTokenRepository>();
         services.AddScoped<IRefreshTokenGenerator, RefreshTokenGenerator>();
         services.AddScoped<IArmyRepository, SqlArmyRepository>();
-        services.AddScoped<AiDiplomat>();
+        services.AddScoped<AiDiplomacy>();
 
         services.AddSingleton<ICityBuildingRegistry, CityBuildingRegistry>();
         //services.AddSingleton(GameBalance.Buildings.GetAllTemplates);

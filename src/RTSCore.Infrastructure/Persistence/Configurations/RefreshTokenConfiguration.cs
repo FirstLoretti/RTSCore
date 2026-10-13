@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-using RTSCore.Domain.Entities.Identity;
+using RTSCore.Domain.Entities;
 
 namespace RTSCore.Infrastructure.Persistence.Configurations;
 

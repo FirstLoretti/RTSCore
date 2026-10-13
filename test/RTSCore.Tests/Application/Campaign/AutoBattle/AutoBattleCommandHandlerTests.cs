@@ -5,13 +5,13 @@ using FluentAssertions;
 using NSubstitute;
 
 using RTSCore.Application.Campaign.AutoBattle;
+using RTSCore.Domain.Common.Repositories;
 using RTSCore.Domain.Entities.Campaign;
-using RTSCore.Domain.Entities.Common;
+using RTSCore.Domain.Enums;
 using RTSCore.Domain.Exeptions;
 using RTSCore.Domain.Services;
 using RTSCore.Domain.Services.Combat;
 using RTSCore.Domain.ValueObjects;
-using RTSCore.Domain.ValueObjects.Enums;
 
 namespace RTSCore.Tests.Application.Campaign.AutoBattle;
 

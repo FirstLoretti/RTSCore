@@ -1,10 +1,9 @@
 using MediatR;
 
-using RTSCore.Application.Common.Validation;
-using RTSCore.Domain.Common;
+using RTSCore.Domain.Common.Exceptions;
+using RTSCore.Domain.Common.Repositories;
 using RTSCore.Domain.Entities;
-using RTSCore.Domain.Entities.Common;
-using RTSCore.Domain.ValueObjects.Enums;
+using RTSCore.Domain.Enums;
 
 namespace RTSCore.Application.Campaign.Diplomacy.TradeProposal;
 

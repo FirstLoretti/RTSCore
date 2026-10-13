@@ -1,10 +1,10 @@
 using FluentValidation;
 
-using RTSCore.Domain.ValueObjects.Configurations;
+using RTSCore.Domain.Configurations;
 
 namespace RTSCore.Application.Common.Validation;
 
-public class GameConfigurationsValidator : AbstractValidator<GameConfigurations>
+public class GameConfigurationsValidator : AbstractValidator<GameConfiguations>
 {
     public GameConfigurationsValidator()
     {

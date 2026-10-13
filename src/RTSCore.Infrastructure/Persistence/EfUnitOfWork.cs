@@ -1,10 +1,8 @@
 using MediatR;
 
 using RTSCore.Application.Common;
-using RTSCore.Domain.Entities.Campaign;
-using RTSCore.Domain.Entities.Campaign.Diplomacy;
-using RTSCore.Domain.Entities.Common;
-using RTSCore.Domain.Entities.Identity;
+using RTSCore.Domain.Common.Repositories;
+using RTSCore.Domain.Entities;
 
 namespace RTSCore.Infrastructure.Persistence;
 

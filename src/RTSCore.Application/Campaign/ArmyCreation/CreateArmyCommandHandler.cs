@@ -1,16 +1,15 @@
 using MediatR;
 
-using RTSCore.Domain.Common;
 using RTSCore.Domain.ValueObjects.Identifiers;
-using RTSCore.Domain.Entities.Common;
-using RTSCore.Application.Common.Validation;
-using RTSCore.Domain.ValueObjects.Configurations;
+using RTSCore.Domain.Configurations;
+using RTSCore.Domain.Common.Repositories;
+using RTSCore.Domain.Common.Exceptions;
 
 namespace RTSCore.Application.Campaign.ArmyCreation;
 
 public class CreateArmyCommandHandler(
     IUnitOfWork unitOfWork,
-    UnitConfiguration unitConfiguration
+    UnitConfig unitConfiguration
 ) : IRequestHandler<CreateArmyCommand, ArmyId>
 {
     public async Task<ArmyId> Handle(CreateArmyCommand request, CancellationToken ct)

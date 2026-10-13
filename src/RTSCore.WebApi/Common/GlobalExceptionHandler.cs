@@ -3,7 +3,7 @@ using FluentValidation;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 
-using RTSCore.Domain.Exeptions;
+using RTSCore.Domain.ValueObjects.Exeptions;
 
 namespace RTSCore.WebApi.Common;
 
