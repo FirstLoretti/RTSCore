@@ -1,28 +1,27 @@
-using RTSCore.Domain;
-using RTSCore.Domain.AI.Economy;
 using RTSCore.Domain.AI.Personality;
 using RTSCore.Domain.Configurations.Cities;
 using RTSCore.Domain.Entities.Cities;
 using RTSCore.Domain.Entities.Factions;
 
-namespace RTSCore.Application.AI.Construction;
+namespace RTSCore.Domain.AI.Economy;
 
-public sealed class AiConstructor(BuildingCatalog buildingCatalog)
+public sealed class AiConstructor(BuildingCatalog catalog)
 {
-
     private void StartConstruction(
         Faction faction,
-        IReadOnlyCollection<City> cities,
-        IReadOnlyCollection<AiConstructionOption> buildingsToConstruct
+        AiPersonality personality,
+        IReadOnlyCollection<City> cities
     )
     {
+        var buildingsToConstruct = AiConstructionPlanner.PlaneConstruction(catalog, personality, cities, faction.Gold);
+
         foreach (var building in buildingsToConstruct)
         {
             var city = cities.First(c => c.Id == building.CityId);
-            var buildingTemplate = buildingCatalog.Get(building.BuildingType);
+            var buildingTemplate = catalog.Get(building.BuildingType);
 
-            city.StartConstruction(buildingTemplate);
             faction.SpendGold(building.Cost);
+            city.StartConstruction(buildingTemplate);
         }
     }
 }

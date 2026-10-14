@@ -4,10 +4,33 @@ using RTSCore.Domain.Entities.Cities;
 
 namespace RTSCore.Domain.AI.Economy;
 
-public static class AiBuildingUtilityCalculator
+public static class AiConstructionPlanner
 {
-    public static List<AiConstructionOption> OrderConstructionOptions(
-        BuildingCatalog buildingCatalog,
+    public static IReadOnlyCollection<AiConstructionOption> PlaneConstruction(
+        BuildingCatalog catalog,
+        AiPersonality personality,
+        IReadOnlyCollection<City> cities,
+        int gold
+    )
+    {
+
+        var buildings = EvaluateAvailableBuildings(catalog, personality, cities);
+        var buildingsToConstruct = new List<AiConstructionOption>();
+
+        foreach (var building in buildings)
+        {
+            if (gold >= building.Cost)
+            {
+                buildingsToConstruct.Add(building);
+                gold -= building.Cost;
+            }
+        }
+
+        return buildingsToConstruct;
+    }
+
+    private static List<AiConstructionOption> EvaluateAvailableBuildings(
+        BuildingCatalog catalog,
         AiPersonality personality,
         IReadOnlyCollection<City> cities
     )
@@ -16,7 +39,7 @@ public static class AiBuildingUtilityCalculator
 
         foreach (var city in cities)
         {
-            var buildings = city.GetConstructableBuildings(buildingCatalog.Templates);
+            var buildings = city.GetConstructableBuildings(catalog.Templates);
 
             foreach (var building in buildings)
             {
