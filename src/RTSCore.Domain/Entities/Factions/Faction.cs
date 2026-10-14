@@ -3,10 +3,10 @@ using System.Numerics;
 using RTSCore.Domain.AI.Personality;
 using RTSCore.Domain.Configurations.Cities;
 using RTSCore.Domain.Configurations.Factions;
-using RTSCore.Domain.Enums;
-using RTSCore.Domain.ValueObjects.Identifiers;
+using RTSCore.Domain.Entities.Campaign;
+using RTSCore.Domain.Entities.Cities;
 
-namespace RTSCore.Domain.Entities.Campaign;
+namespace RTSCore.Domain.Entities.Factions;
 
 public class Faction : AggregateRoot
 {
@@ -16,8 +16,6 @@ public class Faction : AggregateRoot
 
     public AiPersonalityType? AiPersonalityType { get; private set; }
     public int Gold { get; private set; }
-    public bool IsEliminated { get; private set; }
-    public int CitiesCount { get; private set; }
 
     private Faction(
         CampaignId campaignId,
@@ -48,7 +46,6 @@ public class Faction : AggregateRoot
 
     public City FoundCity(CityTemplate template, Vector2 coordinates)
     {
-        CitiesCount++;
         return City.Create(CampaignId, template, Type, coordinates);
     }
 
@@ -56,7 +53,7 @@ public class Faction : AggregateRoot
     {
         ArgumentOutOfRangeException.ThrowIfNegative(amount);
         if (Gold < amount)
-            throw new GameRuleException("В казне недостаточно средств");
+            throw new NotImplementedException("В казне недостаточно средств");
 
         Gold -= amount;
     }

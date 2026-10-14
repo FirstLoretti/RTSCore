@@ -1,3 +1,3 @@
-namespace RTSCore.Domain.Events;
+namespace RTSCore.Domain.Common;
 
 public interface IDomainEvent { }

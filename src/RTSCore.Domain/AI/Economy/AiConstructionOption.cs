@@ -1,5 +1,4 @@
-using RTSCore.Domain.Enums;
-using RTSCore.Domain.ValueObjects.Identifiers;
+using RTSCore.Domain.Entities.Cities;
 
 namespace RTSCore.Domain.AI.Economy;
 

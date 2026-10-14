@@ -2,9 +2,8 @@ using MediatR;
 
 using RTSCore.Domain.Common.Exceptions;
 using RTSCore.Domain.Common.Repositories;
+using RTSCore.Domain.Entities.Armies.Combat;
 using RTSCore.Domain.Services;
-using RTSCore.Domain.Services.Combat;
-using RTSCore.Domain.ValueObjects;
 
 namespace RTSCore.Application.Campaign.AutoBattle;
 

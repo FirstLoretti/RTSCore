@@ -1,6 +1,6 @@
 using FluentValidation;
 
-using RTSCore.Domain.Enums;
+using RTSCore.Domain.Entities.Cities;
 
 namespace RTSCore.Application.Campaign.CityConstruction.StartConstruction;
 

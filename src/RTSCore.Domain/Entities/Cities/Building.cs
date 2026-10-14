@@ -1,8 +1,7 @@
-using RTSCore.Domain.Configurations.Buldings;
-using RTSCore.Domain.Enums;
-using RTSCore.Domain.ValueObjects.Identifiers;
+using RTSCore.Domain.Configurations.Cities;
+using RTSCore.Domain.Entities.Campaign;
 
-namespace RTSCore.Domain.Entities.Campaign;
+namespace RTSCore.Domain.Entities.Cities;
 
 public sealed class Building
 {

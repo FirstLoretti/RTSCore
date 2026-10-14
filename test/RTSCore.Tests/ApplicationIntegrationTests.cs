@@ -7,7 +7,7 @@ using RTSCore.Domain.ValueObjects;
 using RTSCore.Infrastructure.Persistence;
 using RTSCore.Domain.Services;
 
-using Unit = RTSCore.Domain.Entities.Campaign.Unit;
+using Unit = RTSCore.Domain.Entities.Armies.Unit;
 using RTSCore.Tests.Base;
 using RTSCore.Application.AI.Infratructure;
 

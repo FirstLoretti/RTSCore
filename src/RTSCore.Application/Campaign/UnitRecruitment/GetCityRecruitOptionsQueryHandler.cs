@@ -3,7 +3,7 @@ using MediatR;
 using RTSCore.Domain.Common.Exceptions;
 using RTSCore.Domain.Common.Repositories;
 using RTSCore.Domain.Configurations;
-using RTSCore.Domain.ValueObjects;
+using RTSCore.Domain.Entities.Cities;
 
 namespace RTSCore.Application.Campaign.UnitRecruitment;
 

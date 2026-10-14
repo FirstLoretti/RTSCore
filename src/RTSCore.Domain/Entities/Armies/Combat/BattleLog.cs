@@ -1,6 +1,4 @@
-using RTSCore.Domain.ValueObjects.Identifiers;
-
-namespace RTSCore.Domain.ValueObjects;
+namespace RTSCore.Domain.Entities.Armies.Combat;
 
 public readonly record struct BattleLog(
     UnitId UnitId,

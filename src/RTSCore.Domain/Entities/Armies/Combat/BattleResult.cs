@@ -1,4 +1,4 @@
-namespace RTSCore.Domain.ValueObjects;
+namespace RTSCore.Domain.Entities.Armies.Combat;
 
 public record BattleResult(
     bool IsAttackerWon,

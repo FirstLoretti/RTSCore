@@ -2,9 +2,9 @@ using System.Collections.Immutable;
 
 using RTSCore.Application.AI.Brains;
 using RTSCore.Domain.AI.Personality;
-using RTSCore.Domain.Configurations.Units;
+using RTSCore.Domain.Configurations.Armies;
 
-namespace RTSCore.Application.AI.Recruitment;
+namespace RTSCore.Domain.AI.Military;
 
 public class AiRecruitOptionCache
 {

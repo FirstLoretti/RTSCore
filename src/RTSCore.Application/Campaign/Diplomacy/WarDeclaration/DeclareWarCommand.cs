@@ -1,6 +1,6 @@
 using MediatR;
 
-using RTSCore.Domain.Enums;
+using RTSCore.Domain;
 
 namespace RTSCore.Application.Campaign.Diplomacy.WarDeclaration;
 

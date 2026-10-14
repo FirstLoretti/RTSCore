@@ -1,7 +1,8 @@
-using RTSCore.Domain.Configurations.Units;
-using RTSCore.Domain.Entities.Campaign;
+using RTSCore.Domain.Configurations.Armies;
+using RTSCore.Domain.Entities.Cities;
+using RTSCore.Domain.Entities.Factions;
 
-namespace RTSCore.Domain.Services.Units;
+namespace RTSCore.Domain.Entities.Armies;
 
 public interface IUnitRecruitmentService
 {

@@ -1,8 +1,7 @@
 using MediatR;
 
 using RTSCore.Domain.Common.Repositories;
-using RTSCore.Domain.Services.Lifecycle;
-using RTSCore.Domain.ValueObjects.Identifiers;
+using RTSCore.Domain.Entities.Campaign;
 
 namespace RTSCore.Application.Campaign.Lifecycle;
 

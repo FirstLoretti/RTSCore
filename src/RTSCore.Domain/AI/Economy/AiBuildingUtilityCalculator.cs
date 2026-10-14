@@ -1,7 +1,6 @@
 using RTSCore.Domain.AI.Personality;
-using RTSCore.Domain.Configurations.Buldings;
-using RTSCore.Domain.Entities.Campaign;
-using RTSCore.Domain.Enums;
+using RTSCore.Domain.Configurations.Cities;
+using RTSCore.Domain.Entities.Cities;
 
 namespace RTSCore.Domain.AI.Economy;
 

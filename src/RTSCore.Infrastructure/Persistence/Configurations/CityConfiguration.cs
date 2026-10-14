@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-using RTSCore.Domain.Entities.Campaign;
+using RTSCore.Domain.Entities.Cities;
 using RTSCore.Domain.ValueObjects.Identifiers;
 
 namespace RTSCore.Infrastructure.Persistence.Configurations;

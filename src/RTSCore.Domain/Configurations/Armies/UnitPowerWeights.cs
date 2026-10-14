@@ -1,4 +1,4 @@
-namespace RTSCore.Domain.Configurations.Units;
+namespace RTSCore.Domain.Configurations.Armies;
 
 public readonly record struct UnitPowerWeights(
     float HealthWeight = 1.0f,

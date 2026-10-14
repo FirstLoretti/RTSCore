@@ -1,10 +1,10 @@
 using MediatR;
 
 using RTSCore.Domain.Common.Repositories;
-using RTSCore.Domain.Configurations.Units;
+using RTSCore.Domain.Configurations.Armies;
+using RTSCore.Domain.Entities.Armies;
 using RTSCore.Domain.Exeptions;
 using RTSCore.Domain.Services;
-using RTSCore.Domain.Services.Units;
 
 namespace RTSCore.Application.Campaign.UnitRecruitment;
 

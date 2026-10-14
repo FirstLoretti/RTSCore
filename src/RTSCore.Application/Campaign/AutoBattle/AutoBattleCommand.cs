@@ -1,6 +1,6 @@
 using MediatR;
 
-using RTSCore.Domain.ValueObjects;
+using RTSCore.Domain.Entities.Armies.Combat;
 
 namespace RTSCore.Application.Campaign.AutoBattle;
 

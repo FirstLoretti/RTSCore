@@ -5,12 +5,13 @@ using FluentAssertions;
 using NSubstitute;
 
 using RTSCore.Application.Campaign.UnitRecruitment;
+using RTSCore.Domain;
 using RTSCore.Domain.Common.Repositories;
-using RTSCore.Domain.Configurations.Units;
-using RTSCore.Domain.Entities.Campaign;
-using RTSCore.Domain.Enums;
+using RTSCore.Domain.Configurations.Armies;
+using RTSCore.Domain.Entities.Armies;
+using RTSCore.Domain.Entities.Cities;
+using RTSCore.Domain.Entities.Factions;
 using RTSCore.Domain.Services;
-using RTSCore.Domain.Services.Units;
 using RTSCore.Domain.ValueObjects.Configurations;
 
 namespace RTSCore.Tests.Application.Campaign.UnitRecruitment;

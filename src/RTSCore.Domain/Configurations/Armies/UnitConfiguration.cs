@@ -1,4 +1,4 @@
-namespace RTSCore.Domain.Configurations.Units;
+namespace RTSCore.Domain.Configurations.Armies;
 
 public record UnitConfiguration(
     IReadOnlyList<int> ExpToNextLevel,

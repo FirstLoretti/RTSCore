@@ -3,7 +3,7 @@ using MediatR;
 using RTSCore.Application.Common;
 using RTSCore.Domain.Common.Exceptions;
 using RTSCore.Domain.Common.Repositories;
-using RTSCore.Domain.Events;
+using RTSCore.Domain.Entities.Cities;
 
 namespace RTSCore.Application.Campaign.CityConstruction.CancelConstruction;
 

@@ -1,4 +1,4 @@
-namespace RTSCore.Domain.ValueObjects.Identifiers;
+namespace RTSCore.Domain.Entities.Cities;
 
 public readonly record struct CityId(Guid Value)
 {

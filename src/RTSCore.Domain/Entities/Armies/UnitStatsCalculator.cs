@@ -1,6 +1,6 @@
-using RTSCore.Domain.Configurations.Units;
+using RTSCore.Domain.Configurations.Armies;
 
-namespace RTSCore.Domain.Services.Units;
+namespace RTSCore.Domain.Entities.Armies;
 
 public static class UnitStatsCalculator
 {

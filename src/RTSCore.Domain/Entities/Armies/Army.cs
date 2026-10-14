@@ -1,13 +1,10 @@
 using System.Numerics;
 
-using RTSCore.Domain.Configurations;
-using RTSCore.Domain.Configurations.Units;
-using RTSCore.Domain.Enums;
-using RTSCore.Domain.Services.Armies;
-using RTSCore.Domain.ValueObjects;
-using RTSCore.Domain.ValueObjects.Identifiers;
+using RTSCore.Domain.Configurations.Armies;
+using RTSCore.Domain.Entities.Armies.Combat;
+using RTSCore.Domain.Entities.Campaign;
 
-namespace RTSCore.Domain.Entities.Campaign;
+namespace RTSCore.Domain.Entities.Armies;
 
 public sealed class Army : AggregateRoot
 {
@@ -79,7 +76,7 @@ public sealed class Army : AggregateRoot
     public void MoveTo(Vector2 destination, int movementCost)
     {
         var absCost = int.Abs(movementCost);
-        if (MovementPoints < absCost) throw new GameRuleException("Недостаточно очков перемещения.");
+        if (MovementPoints < absCost) throw new NotImplementedException("Недостаточно очков перемещения.");
 
         MovementPoints -= absCost;
         Coordinates = destination;
@@ -88,7 +85,7 @@ public sealed class Army : AggregateRoot
     internal void RecruitUnit(UnitTemplate template)
     {
         if (!HasFreeSlots)
-            throw new GameRuleException("Нельзя нанять юнита, армия уже укомплектована.");
+            throw new NotImplementedException("Нельзя нанять юнита, армия уже укомплектована.");
 
         _units.Add(Unit.CreateTraining(CampaignId, Faction, template, Id));
     }
@@ -96,10 +93,10 @@ public sealed class Army : AggregateRoot
     public void CancelRecruitUnit(Unit unit)
     {
         if (unit.IsRecruited)
-            throw new GameRuleException("Нельзя отменить найм нанятого юнита");
+            throw new NotImplementedException("Нельзя отменить найм нанятого юнита");
 
         if (unit.Faction == Faction)
-            throw new GameRuleException("Нельзя распустить юнита другой фракции");
+            throw new NotImplementedException("Нельзя распустить юнита другой фракции");
 
         _units.Remove(unit);
     }
@@ -107,10 +104,10 @@ public sealed class Army : AggregateRoot
     public void DisbandUnit(Unit unit)
     {
         if (!unit.IsAlive)
-            throw new GameRuleException($"Не нанятого или мёртвого юнита {unit.Id} нельзя распустить");
+            throw new NotImplementedException($"Не нанятого или мёртвого юнита {unit.Id} нельзя распустить");
 
         if (unit.Faction != Faction)
-            throw new GameRuleException("Нельзя распустить юнита другой фракции");
+            throw new NotImplementedException("Нельзя распустить юнита другой фракции");
 
         _units.Remove(unit);
     }
@@ -142,10 +139,10 @@ public sealed class Army : AggregateRoot
     public void Attack(Army enemy, MovementConfiguration configuration)
     {
         if (_units.Count == 0)
-            throw new GameRuleException("Пустая армия не может атаковать");
+            throw new NotImplementedException("Пустая армия не может атаковать");
 
         if (enemy.Faction == Faction)
-            throw new GameRuleException("Нельзя атаковать армию своей фракции");
+            throw new NotImplementedException("Нельзя атаковать армию своей фракции");
 
         var movementCost = ArmyMovementCalculator.CalculateCost(
             Coordinates,

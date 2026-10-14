@@ -1,8 +1,9 @@
 using RTSCore.Domain.AI.Personality;
-using RTSCore.Domain.Configurations.Buldings;
+using RTSCore.Domain.Configurations.Armies;
+using RTSCore.Domain.Configurations.Armies.Combat;
 using RTSCore.Domain.Configurations.Cities;
+using RTSCore.Domain.Configurations.Diplomacy;
 using RTSCore.Domain.Configurations.Factions;
-using RTSCore.Domain.Configurations.Units;
 
 namespace RTSCore.Domain.Configurations;
 

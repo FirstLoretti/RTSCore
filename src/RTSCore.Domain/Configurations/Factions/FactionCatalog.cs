@@ -1,7 +1,5 @@
 using System.Collections.Frozen;
 
-using RTSCore.Domain.Enums;
-
 namespace RTSCore.Domain.Configurations.Factions;
 
 public record FactionCatalog(IReadOnlyCollection<FactionTemplate> Templates)

@@ -1,6 +1,6 @@
-using RTSCore.Domain.Enums;
+using RTSCore.Domain.Common;
 
-namespace RTSCore.Domain.Events;
+namespace RTSCore.Domain.Entities.Cities;
 
 public record BuildingConstructionCanceledEvent(
     int Cost,

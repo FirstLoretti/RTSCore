@@ -1,7 +1,6 @@
 using MediatR;
 
-using RTSCore.Domain.ValueObjects;
-using RTSCore.Domain.ValueObjects.Identifiers;
+using RTSCore.Domain.Entities.Armies;
 
 namespace RTSCore.Application.Campaign.ArmyMovement;
 

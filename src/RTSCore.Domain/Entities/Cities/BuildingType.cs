@@ -1,4 +1,4 @@
-namespace RTSCore.Domain.Enums;
+namespace RTSCore.Domain.Entities.Cities;
 
 public enum BuildingType
 {

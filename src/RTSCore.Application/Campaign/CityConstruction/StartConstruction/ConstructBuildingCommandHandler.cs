@@ -1,7 +1,7 @@
 using MediatR;
 
 using RTSCore.Domain.Common.Repositories;
-using RTSCore.Domain.Configurations.Buldings;
+using RTSCore.Domain.Configurations.Cities;
 using RTSCore.Domain.Exeptions;
 
 namespace RTSCore.Application.Campaign.CityConstruction.StartConstruction;

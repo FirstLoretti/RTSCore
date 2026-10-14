@@ -10,9 +10,10 @@ using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
 
 using RTSCore.Application.Campaign.ArmyCreation;
+using RTSCore.Domain;
 using RTSCore.Domain.Common.Repositories;
-using RTSCore.Domain.Entities.Campaign;
-using RTSCore.Domain.Enums;
+using RTSCore.Domain.Entities.Armies;
+using RTSCore.Domain.Entities.Cities;
 using RTSCore.Domain.Exeptions;
 using RTSCore.Domain.Interfaces;
 using RTSCore.Domain.ValueObjects;

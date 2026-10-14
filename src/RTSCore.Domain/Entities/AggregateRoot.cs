@@ -1,4 +1,4 @@
-using RTSCore.Domain.Events;
+using RTSCore.Domain.Common;
 
 namespace RTSCore.Domain.Entities;
 

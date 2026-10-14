@@ -1,6 +1,4 @@
-using RTSCore.Domain.Enums;
-
-namespace RTSCore.Domain.Entities.Campaign;
+namespace RTSCore.Domain.Entities.Diplomacy;
 
 public class DiplomacyRelation
 {
@@ -18,7 +16,7 @@ public class DiplomacyRelation
     {
         if (factionA == factionB)
         {
-            throw new GameRuleException("Фракция не может установить дипломатические отношения сама с собой");
+            throw new NotImplementedException("Фракция не может установить дипломатические отношения сама с собой");
         }
 
         Id = Guid.NewGuid();
@@ -36,7 +34,7 @@ public class DiplomacyRelation
     {
         if (!InWar)
         {
-            throw new GameRuleException("Нельзя заключить мир. Фракции уже в состоянии мира");
+            throw new NotImplementedException("Нельзя заключить мир. Фракции уже в состоянии мира");
         }
     }
 
@@ -44,11 +42,11 @@ public class DiplomacyRelation
     {
         if (HasTradeAgreement)
         {
-            throw new GameRuleException("Нельзя начать торговать. Фракции уже торгуют");
+            throw new NotImplementedException("Нельзя начать торговать. Фракции уже торгуют");
         }
         if (InWar)
         {
-            throw new GameRuleException("Нельзя начать торговать. Фракции в состоянии войны");
+            throw new NotImplementedException("Нельзя начать торговать. Фракции в состоянии войны");
         }
     }
 
@@ -56,59 +54,59 @@ public class DiplomacyRelation
     {
         if (InWar)
         {
-            throw new GameRuleException("Нельзя заключить торговый договор, фракции в состоянии войны");
+            throw new NotImplementedException("Нельзя заключить торговый договор, фракции в состоянии войны");
         }
 
         if (HasTradeAgreement)
         {
-            throw new GameRuleException("Торговый договор уже заключён");
+            throw new NotImplementedException("Торговый договор уже заключён");
         }
 
-        if (Standing < GameBalance.Diplomacy.MinStandingForTrade)
-        {
-            throw new GameRuleException(
-                $"Нельзя заключить торговый договор. Уровень отношений: {Standing}. " +
-                $"Требуется минимум: {GameBalance.Diplomacy.MinStandingForTrade}"
-            );
-        }
+        // if (Standing < GameBalance.Diplomacy.MinStandingForTrade)
+        // {
+        //     throw new NotImplementedException(
+        //         $"Нельзя заключить торговый договор. Уровень отношений: {Standing}. " +
+        //         $"Требуется минимум: {GameBalance.Diplomacy.MinStandingForTrade}"
+        //     );
+        // }
 
         HasTradeAgreement = true;
-        ChangeStanding(GameBalance.Diplomacy.AcceptTradeOfferBonus);
+        //ChangeStanding(GameBalance.Diplomacy.AcceptTradeOfferBonus);
     }
 
     public void DeclareWar()
     {
         if (InWar)
         {
-            throw new GameRuleException("Нельзя объявить войну. Фракции уже воюют");
+            throw new NotImplementedException("Нельзя объявить войну. Фракции уже воюют");
         }
 
         HasTradeAgreement = false;
 
         InWar = true;
-        ChangeStanding(GameBalance.Diplomacy.DeclareWarPenalty);
+        //ChangeStanding(GameBalance.Diplomacy.DeclareWarPenalty);
     }
 
     public void MakePeace()
     {
         if (!InWar)
         {
-            throw new GameRuleException("Нельзя заключить мир. Фракции уже в состоянии мира");
+            throw new NotImplementedException("Нельзя заключить мир. Фракции уже в состоянии мира");
         }
 
         InWar = false;
-        ChangeStanding(GameBalance.Diplomacy.AcceptPeaceOfferBonus);
+        //ChangeStanding(GameBalance.Diplomacy.AcceptPeaceOfferBonus);
     }
 
     public void CancelTrade()
     {
         if (!HasTradeAgreement)
         {
-            throw new GameRuleException("Торговый договор не заключён");
+            throw new NotImplementedException("Торговый договор не заключён");
         }
 
         HasTradeAgreement = false;
-        ChangeStanding(GameBalance.Diplomacy.CancelTradePenalty);
+        //ChangeStanding(GameBalance.Diplomacy.CancelTradePenalty);
     }
 
     public void ChangeStanding(int amount)

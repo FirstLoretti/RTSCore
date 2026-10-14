@@ -5,13 +5,13 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
-using RTSCore.Application.AI.Diplomacy;
 using RTSCore.Application.Campaign.UnitRecruitment;
 using RTSCore.Application.Common.Behaviors;
 using RTSCore.Application.Common.Settings;
+using RTSCore.Domain.AI.Diplomacy;
 using RTSCore.Domain.Common;
 using RTSCore.Domain.Common.Repositories;
-using RTSCore.Domain.Services.Combat;
+using RTSCore.Domain.Entities.Armies.Combat;
 using RTSCore.Domain.ValueObjects;
 using RTSCore.Infrastructure.Authentication;
 using RTSCore.Infrastructure.Persistence;

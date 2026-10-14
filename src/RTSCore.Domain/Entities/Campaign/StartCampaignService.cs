@@ -1,9 +1,8 @@
 using RTSCore.Domain.Configurations;
-using RTSCore.Domain.Entities.Campaign;
-using RTSCore.Domain.Enums;
-using RTSCore.Domain.ValueObjects.Identifiers;
+using RTSCore.Domain.Entities.Cities;
+using RTSCore.Domain.Entities.Factions;
 
-namespace RTSCore.Domain.Services.Lifecycle;
+namespace RTSCore.Domain.Entities.Campaign;
 
 public class StartCampaignService(GameConfiguations configurations)
 {

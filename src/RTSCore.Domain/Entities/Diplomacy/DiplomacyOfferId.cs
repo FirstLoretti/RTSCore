@@ -1,4 +1,4 @@
-namespace RTSCore.Domain.ValueObjects.Identifiers;
+namespace RTSCore.Domain.Entities.Diplomacy;
 
 public readonly record struct DiplomacyOfferId(Guid Value)
 {

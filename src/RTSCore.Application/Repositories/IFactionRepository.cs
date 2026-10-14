@@ -1,5 +1,4 @@
-using RTSCore.Domain.Entities.Campaign;
-using RTSCore.Domain.Enums;
+using RTSCore.Domain.Entities.Factions;
 
 namespace RTSCore.Domain.Common.Repositories;
 

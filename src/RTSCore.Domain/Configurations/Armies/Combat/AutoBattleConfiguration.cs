@@ -1,4 +1,4 @@
-namespace RTSCore.Domain.Configurations;
+namespace RTSCore.Domain.Configurations.Armies.Combat;
 
 public record AutoBattleConfiguration(
     float WinnerCasualties = 0.3f,

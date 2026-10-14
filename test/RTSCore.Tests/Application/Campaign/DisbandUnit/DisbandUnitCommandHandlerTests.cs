@@ -4,9 +4,9 @@ using RTSCore.Application.Campaign.DisbandUnit;
 using System.Numerics;
 using NSubstitute;
 using FluentAssertions;
-using RTSCore.Domain.Entities.Campaign;
 using RTSCore.Domain.Common.Repositories;
-using RTSCore.Domain.Enums;
+using RTSCore.Domain.Entities.Armies;
+using RTSCore.Domain;
 
 namespace RTSCore.Tests.Application.Campaign.DisbandUnit;
 

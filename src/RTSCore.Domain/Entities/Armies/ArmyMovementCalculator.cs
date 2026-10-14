@@ -1,6 +1,6 @@
 using System.Numerics;
 
-namespace RTSCore.Domain.Services.Armies;
+namespace RTSCore.Domain.Entities.Armies;
 
 public static class ArmyMovementCalculator
 {

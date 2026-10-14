@@ -1,8 +1,7 @@
-using RTSCore.Domain.Configurations.Units;
-using RTSCore.Domain.Enums;
-using RTSCore.Domain.ValueObjects.Identifiers;
+using RTSCore.Domain.Configurations.Armies;
+using RTSCore.Domain.Entities.Campaign;
 
-namespace RTSCore.Domain.Entities.Campaign;
+namespace RTSCore.Domain.Entities.Armies;
 
 public sealed class Unit
 {

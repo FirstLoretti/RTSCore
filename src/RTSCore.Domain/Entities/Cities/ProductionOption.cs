@@ -1,6 +1,4 @@
-using RTSCore.Domain.Enums;
-
-namespace RTSCore.Domain.ValueObjects;
+namespace RTSCore.Domain.Entities.Cities;
 
 public record ProductionOption(
     string Name,

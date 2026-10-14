@@ -1,7 +1,10 @@
 using Microsoft.EntityFrameworkCore;
 
 using RTSCore.Domain.Entities;
-using RTSCore.Domain.Entities.Campaign;
+using RTSCore.Domain.Entities.Armies;
+using RTSCore.Domain.Entities.Cities;
+using RTSCore.Domain.Entities.Diplomacy;
+using RTSCore.Domain.Entities.Factions;
 
 namespace RTSCore.Infrastructure.Persistence;
 

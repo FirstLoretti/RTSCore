@@ -3,7 +3,7 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 using RTSCore.Application.Campaign.Lifecycle;
-using RTSCore.Domain.Enums;
+using RTSCore.Domain;
 
 namespace RTSCore.WebApi.Controllers;
 

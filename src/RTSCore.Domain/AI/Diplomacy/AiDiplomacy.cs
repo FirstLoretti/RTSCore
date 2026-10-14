@@ -1,90 +1,49 @@
-using RTSCore.Application.Campaign.Diplomacy.OfferResponses;
-using RTSCore.Application.Campaign.Diplomacy.TradeProposal;
-using RTSCore.Application.Campaign.Diplomacy.WarDeclaration;
-using RTSCore.Domain.AI;
-using RTSCore.Domain.AI.Diplomacy;
-using RTSCore.Domain.Common.Repositories;
-using RTSCore.Domain.Entities.Campaign;
-using RTSCore.Domain.Enums;
+namespace RTSCore.Domain.AI.Diplomacy;
 
-namespace RTSCore.Application.AI.Diplomacy;
-
-public sealed class AiDiplomacy(
-
-    IUnitOfWork unitOfWork
-)
+public static class AiDiplomacy
 {
-    public async Task HandleDiplomacyLogicAsync(FactionType factionType, CancellationToken ct)
+    public static AiDiplomacyDecisions ProcessDiplomacy(AiDiplomacyContext diplomacyContext)
     {
-        var factions = await unitOfWork.FactionRepository.GetAsync(ct);
-        var faction = factions.FirstOrDefault(f => f.Type == factionType);
-        var otherFactions = factions
-            .Where(f => f.Type != factionType)
-            .Select(f => f.Type)
-            .ToList();
+        var decisions = new AiDiplomacyDecisions();
 
-        var factionToCityCount = await unitOfWork.CityRepository
-            .GetFactionToCityCountAsync(otherFactions, ct);
-        var factionToMilitaryPower = await unitOfWork.FactionRepository
-            .GetFactionToMilitaryPowerAsync(allFactions, ct);
+        RespondToOffers(diplomacyContext, decisions);
+        GenerateOutgoingOffers(diplomacyContext, decisions);
 
-        var relations = await unitOfWork.DiplomacyRelationRepository.GetAsync(faction, ct);
-
-        var context = new AiFactionContext(faction,)
-
-        await RespondToOffers(faction, factionToCityCount, factionToMilitaryPower, ct);
-        await GenerateOutgoingOffers(faction, otherFactions, relations, factionToCityCount, factionToMilitaryPower, ct);
+        return decisions;
     }
 
-    private async Task GenerateOutgoingOffers(
-        FactionType faction,
-        IReadOnlyCollection<FactionType> otherFactions,
-        IReadOnlyCollection<DiplomacyRelation> relations,
-        AiFactionContext context
-    )
+    private static void GenerateOutgoingOffers(AiDiplomacyContext context, AiDiplomacyDecisions decisions)
     {
-        var factionsUnderNegotiations = await unitOfWork.DiplomacyOfferRepository
-            .GetFactionsUnderNegotiationAsync(faction, ct);
-
-        foreach (var faction in otherFactions)
+        foreach (var opponent in context.OpponentsFactions)
         {
-            if (factionsUnderNegotiations.Contains(faction)) continue;
+            var relation = context.GetRelation(opponent.FactionType);
 
-            var factionContext = new AiFactionContext(ai)
-            var peaseOffer = AiOffersEvaluator.IsPeaceOfferProfitable(relations,)
-
-            var isWarProfitable = await EvaluateDeclareWarUtilityAsync(
-                faction, faction, factionToMilitaryPower, ct
-            );
-            if (isWarProfitable)
+            if (AiOfferEvaluator.IsDeclareWarProfitable(relation, context.Faction, opponent))
             {
-                await mediator.Send(new DeclareWarCommand(faction, faction), ct);
-                continue;
+                decisions.WarToDeclare.Add(opponent.FactionType);
             }
-
-            var isTradeProfitable = await EvaluateTradeOfferUtilityAsync(
-                faction, faction, factionToCityCount, ct
-            );
-            if (isTradeProfitable)
+            if (AiOfferEvaluator.IsPeaceOfferProfitable(relation, context.Faction, opponent))
             {
-                await mediator.Send(new SendTradeOfferCommand(faction, faction), ct);
+                decisions.PeaceOfferToSend.Add(opponent.FactionType);
+            }
+            if (AiOfferEvaluator.IsTradeOfferProfitable(relation, context.Faction, opponent))
+            {
+                decisions.TradeOfferToSend.Add(opponent.FactionType);
             }
         }
     }
 
-    private void RespondToOffers(
-        Faction faction,
-        Faction[] otherFactions,
-        DiplomacyRelation[] relations,
-        DiplomacyOffer[] offers
-    )
+    private static void RespondToOffers(AiDiplomacyContext context, AiDiplomacyDecisions decisions)
     {
-        var context = new AiFactionContext(faction, faction.AiPersonalityType, faction.CitiesCount, faction.)
-        foreach (var offer in offers)
+        foreach (var offer in context.IncomingOffers)
         {
-            var relation = relations.Where(r => r.FactionA == offer.Initiator || r.FactionB == offer.Initiator);
-            var initiatorContext = new AiFactionContext()
-            AiOffersEvaluator.IsOfferProfitable(relation, offer, context,
+            var relation = context.GetRelation(offer.Initiator);
+            var opponent = context.OpponentsFactions.First(f => f.FactionType == offer.Initiator);
+
+            if (AiOfferEvaluator.IsOfferProfitable(offer, relation, context.Faction, opponent))
+                decisions.OffersToAccept.Add(offer);
+            else
+                decisions.OffersToReject.Add(offer);
         }
     }
 }

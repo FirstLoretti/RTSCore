@@ -1,9 +1,9 @@
 using MediatR;
 
-using RTSCore.Domain.ValueObjects.Identifiers;
 using RTSCore.Domain.Configurations;
 using RTSCore.Domain.Common.Repositories;
 using RTSCore.Domain.Common.Exceptions;
+using RTSCore.Domain.Entities.Armies;
 
 namespace RTSCore.Application.Campaign.ArmyCreation;
 

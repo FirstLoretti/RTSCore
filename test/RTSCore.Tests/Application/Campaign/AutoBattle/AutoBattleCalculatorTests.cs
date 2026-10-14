@@ -8,7 +8,7 @@ using RTSCore.Domain.Services;
 using RTSCore.Domain.ValueObjects;
 using RTSCore.Domain.ValueObjects.Configurations;
 
-using Unit = RTSCore.Domain.Entities.Campaign.Unit;
+using Unit = RTSCore.Domain.Entities.Armies.Unit;
 
 namespace RTSCore.Tests.Application.Campaign.AutoBattle;
 

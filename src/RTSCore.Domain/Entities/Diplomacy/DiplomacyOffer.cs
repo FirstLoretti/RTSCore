@@ -1,7 +1,6 @@
-using RTSCore.Domain.Enums;
-using RTSCore.Domain.ValueObjects.Identifiers;
+using RTSCore.Domain.Entities.Campaign;
 
-namespace RTSCore.Domain.Entities.Campaign;
+namespace RTSCore.Domain.Entities.Diplomacy;
 
 public class DiplomacyOffer
 {
@@ -30,21 +29,11 @@ public class DiplomacyOffer
 
     private DiplomacyOffer() { }
 
-    public static ReDiplomacyOffer Create(
-        CampaignId campaignId,
-        FactionType initiator,
-        FactionType target,
-        OfferType offerType
-    )
-    {
-
-    }
-
     public void Accept()
     {
         if (Status != OfferStatus.Pending)
         {
-            throw new GameRuleException($"[{nameof(DiplomacyOffer)}] Нельзя принять предложение со статусом {Status}");
+            throw new NullReferenceException($"[{nameof(DiplomacyOffer)}] Нельзя принять предложение со статусом {Status}");
         }
 
         Status = OfferStatus.Accepted;

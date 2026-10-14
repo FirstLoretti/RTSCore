@@ -2,7 +2,7 @@ using MediatR;
 
 using RTSCore.Domain.Common.Exceptions;
 using RTSCore.Domain.Common.Repositories;
-using RTSCore.Domain.Services.Lifecycle;
+using RTSCore.Domain.Entities.Campaign;
 
 namespace RTSCore.Application.Campaign.Lifecycle;
 

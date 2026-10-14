@@ -1,4 +1,4 @@
-namespace RTSCore.Domain.Configurations;
+namespace RTSCore.Domain.Configurations.Armies;
 
 public record MovementConfiguration(
     int MaxMovementPoints = 100,

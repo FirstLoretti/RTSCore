@@ -1,7 +1,7 @@
 using RTSCore.Application.AI.Brains;
 using RTSCore.Domain.AI.Personality;
-using RTSCore.Domain.Configurations.Units;
-using RTSCore.Domain.Enums;
+using RTSCore.Domain.Configurations.Armies;
+using RTSCore.Domain.Entities.Armies;
 using RTSCore.Domain.ValueObjects.AI;
 
 namespace RTSCore.Tests.Application.AI.Brain;

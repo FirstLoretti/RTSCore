@@ -1,10 +1,10 @@
-using RTSCore.Domain.Configurations;
-using RTSCore.Domain.Configurations.Buldings;
 using RTSCore.Domain.Configurations.Cities;
-using RTSCore.Domain.Entities.Campaign;
-using RTSCore.Domain.Enums;
+using RTSCore.Domain.Configurations.Diplomacy;
+using RTSCore.Domain.Entities.Cities;
+using RTSCore.Domain.Entities.Diplomacy;
+using RTSCore.Domain.Entities.Factions;
 
-namespace RTSCore.Domain.Services.Lifecycle;
+namespace RTSCore.Domain.Entities.Campaign;
 
 public class TurnEndService(
     CityCatalog cityConfiguration,

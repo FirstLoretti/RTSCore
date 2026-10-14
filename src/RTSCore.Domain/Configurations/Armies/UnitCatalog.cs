@@ -1,8 +1,8 @@
 using System.Collections.Frozen;
 
-using RTSCore.Domain.Enums;
+using RTSCore.Domain.Entities.Armies;
 
-namespace RTSCore.Domain.Configurations.Units;
+namespace RTSCore.Domain.Configurations.Armies;
 
 public record UnitCatalog(IReadOnlyCollection<UnitTemplate> Templates)
 {

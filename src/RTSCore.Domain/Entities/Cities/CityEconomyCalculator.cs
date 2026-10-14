@@ -1,9 +1,6 @@
-using RTSCore.Domain.Configurations.Buldings;
 using RTSCore.Domain.Configurations.Cities;
-using RTSCore.Domain.Entities.Campaign;
-using RTSCore.Domain.Enums;
 
-namespace RTSCore.Domain.Services.Economy;
+namespace RTSCore.Domain.Entities.Cities;
 
 internal static class CityEconomyCalculator
 {

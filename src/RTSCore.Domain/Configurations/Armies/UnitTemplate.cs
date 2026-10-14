@@ -1,6 +1,7 @@
-using RTSCore.Domain.Enums;
+using RTSCore.Domain.Entities.Armies;
+using RTSCore.Domain.Entities.Cities;
 
-namespace RTSCore.Domain.Configurations.Units;
+namespace RTSCore.Domain.Configurations.Armies;
 
 public record UnitTemplate(
     UnitType Type = UnitType.MercenaryKnight,

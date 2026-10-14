@@ -1,10 +1,10 @@
 namespace RTSCore.Application.AI.Brains;
 
-using RTSCore.Application.AI.Recruitment;
+using RTSCore.Domain.AI.Military;
 using RTSCore.Domain.AI.Personality;
 using RTSCore.Domain.Common;
-using RTSCore.Domain.Configurations.Units;
-using RTSCore.Domain.Enums;
+using RTSCore.Domain.Configurations.Armies;
+using RTSCore.Domain.Entities.Armies;
 
 public class UnitUtilityCalculator
 {
@@ -28,7 +28,7 @@ public class UnitUtilityCalculator
         {
             UnitCategory.Infantry => personality.Unit.InfantryMultiplier,
             UnitCategory.RangeInfantry => personality.Unit.RangeInfantryMultiplier,
-            _ => throw ThrowHelper.UnsupportedCategory(unit.Category)
+            _ => throw new NotImplementedException()
         };
 
         var utility = (int)(unit.AiUtility * multiplier);

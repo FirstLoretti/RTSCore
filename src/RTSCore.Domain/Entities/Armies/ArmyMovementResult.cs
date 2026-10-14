@@ -1,6 +1,4 @@
-using RTSCore.Domain.ValueObjects.Identifiers;
-
-namespace RTSCore.Domain.ValueObjects;
+namespace RTSCore.Domain.Entities.Armies;
 
 public readonly record struct ArmyMovementResult(
     ArmyId Id,

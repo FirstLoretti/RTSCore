@@ -4,9 +4,8 @@ using MediatR;
 
 using RTSCore.Domain.Common.Exceptions;
 using RTSCore.Domain.Common.Repositories;
-using RTSCore.Domain.Configurations;
-using RTSCore.Domain.Services.Armies;
-using RTSCore.Domain.ValueObjects;
+using RTSCore.Domain.Configurations.Armies;
+using RTSCore.Domain.Entities.Armies;
 
 namespace RTSCore.Application.Campaign.ArmyMovement;
 

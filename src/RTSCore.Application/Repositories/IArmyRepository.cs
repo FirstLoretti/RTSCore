@@ -1,6 +1,4 @@
-using RTSCore.Domain.Entities.Campaign;
-using RTSCore.Domain.Enums;
-using RTSCore.Domain.ValueObjects.Identifiers;
+using RTSCore.Domain.Entities.Armies;
 
 namespace RTSCore.Domain.Common.Repositories;
 

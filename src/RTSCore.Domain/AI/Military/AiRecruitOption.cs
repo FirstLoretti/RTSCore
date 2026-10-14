@@ -1,5 +1,5 @@
-using RTSCore.Domain.Enums;
+using RTSCore.Domain.Entities.Armies;
 
-namespace RTSCore.Application.AI.Recruitment;
+namespace RTSCore.Domain.AI.Military;
 
 public readonly record struct AiRecruitOption(UnitType Unit, int Cost, int Utility);

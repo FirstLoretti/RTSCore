@@ -1,6 +1,6 @@
 namespace RTSCore.Domain.AI.Diplomacy;
 
-public record AiDiplomacyWeights(
+public sealed record AiDiplomacyWeights(
     float WarPowerWeight,
     float WarRelationWeight,
     float WarThreshold,

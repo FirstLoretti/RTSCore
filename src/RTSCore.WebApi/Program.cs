@@ -15,15 +15,15 @@ using RTSCore.Domain.ValueObjects;
 using Serilog;
 using Serilog.Sinks.SystemConsole.Themes;
 using RTSCore.Application.Campaign.Lifecycle;
-using RTSCore.Domain.Services.Combat;
 using RTSCore.Application.Common;
 using RTSCore.Application.Common.Validation;
 using Microsoft.Extensions.Options;
 using RTSCore.WebApi.Configurations;
-using RTSCore.Application.AI.Diplomacy;
 using RTSCore.Domain.Configurations;
 using RTSCore.Domain.Common;
 using RTSCore.Domain.Common.Repositories;
+using RTSCore.Domain.AI.Diplomacy;
+using RTSCore.Domain.Entities.Armies.Combat;
 
 var builder = WebApplication.CreateBuilder(args);
 

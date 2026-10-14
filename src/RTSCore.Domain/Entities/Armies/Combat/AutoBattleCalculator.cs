@@ -1,13 +1,9 @@
 using System.Collections.Frozen;
 
-using RTSCore.Domain.Configurations;
-using RTSCore.Domain.Configurations.Units;
-using RTSCore.Domain.Entities.Campaign;
-using RTSCore.Domain.Enums;
-using RTSCore.Domain.Services.Units;
-using RTSCore.Domain.ValueObjects;
+using RTSCore.Domain.Configurations.Armies;
+using RTSCore.Domain.Configurations.Armies.Combat;
 
-namespace RTSCore.Domain.Services.Combat;
+namespace RTSCore.Domain.Entities.Armies.Combat;
 
 public class AutoBattleCalculator(
     IReadOnlyCollection<UnitTemplate> units,

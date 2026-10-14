@@ -1,7 +1,7 @@
-using RTSCore.Domain.Enums;
-using RTSCore.Domain.ValueObjects;
+using RTSCore.Domain.Entities.Armies;
+using RTSCore.Domain.Entities.Cities;
 
-namespace RTSCore.Domain.Configurations.Buldings;
+namespace RTSCore.Domain.Configurations.Cities;
 
 public record BuildingTemplate(
     BuildingType Type,

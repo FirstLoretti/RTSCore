@@ -6,9 +6,9 @@ using NSubstitute;
 using NSubstitute.ReceivedExtensions;
 
 using RTSCore.Application.Campaign.ArmyMovement;
+using RTSCore.Domain;
 using RTSCore.Domain.Common.Repositories;
-using RTSCore.Domain.Entities.Campaign;
-using RTSCore.Domain.Enums;
+using RTSCore.Domain.Entities.Armies;
 using RTSCore.Domain.Exeptions;
 using RTSCore.Domain.Interfaces;
 using RTSCore.Domain.ValueObjects;

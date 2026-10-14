@@ -1,8 +1,8 @@
 using System.Collections.Frozen;
 
-using RTSCore.Domain.Enums;
+using RTSCore.Domain.Entities.Cities;
 
-namespace RTSCore.Domain.Configurations.Buldings;
+namespace RTSCore.Domain.Configurations.Cities;
 
 public record BuildingCatalog(IReadOnlyCollection<BuildingTemplate> Templates)
 {

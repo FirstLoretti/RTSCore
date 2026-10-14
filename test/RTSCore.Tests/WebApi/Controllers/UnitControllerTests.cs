@@ -10,8 +10,8 @@ using RTSCore.Infrastructure.Persistence;
 using RTSCore.Tests.Base;
 using RTSCore.Application.Campaign.DisbandUnit;
 using System.Numerics;
-using RTSCore.Domain.Entities.Campaign;
-using RTSCore.Domain.Enums;
+using RTSCore.Domain.Entities.Armies;
+using RTSCore.Domain;
 
 namespace RTSCore.Tests.WebApi.Controllers;
 

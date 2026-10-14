@@ -1,15 +1,11 @@
 using System.Numerics;
 
-using RTSCore.Domain.Configurations.Buldings;
+using RTSCore.Domain.Configurations.Armies;
 using RTSCore.Domain.Configurations.Cities;
-using RTSCore.Domain.Configurations.Units;
-using RTSCore.Domain.Enums;
-using RTSCore.Domain.Services.Economy;
-using RTSCore.Domain.ValueObjects;
-using RTSCore.Domain.ValueObjects.Events;
-using RTSCore.Domain.ValueObjects.Identifiers;
+using RTSCore.Domain.Entities.Armies;
+using RTSCore.Domain.Entities.Campaign;
 
-namespace RTSCore.Domain.Entities.Campaign;
+namespace RTSCore.Domain.Entities.Cities;
 
 public sealed class City : AggregateRoot
 {
@@ -94,13 +90,11 @@ public sealed class City : AggregateRoot
 
     public Army CreateArmy(IReadOnlyCollection<UnitTemplate> templates)
     {
-        if (Governor == null)
-            throw new GameRuleException("Сбор армии невозможен без губернатора");
+        if (Governor == null) throw new NullReferenceException();
 
-        var governor = templates.FirstOrDefault(t => t.Type == Governor)
-            ?? throw new GameRuleException("Нет шаблона с типом губернатора");
+        var governor = templates.FirstOrDefault(t => t.Type == Governor); //
 
-        var army = Army.Create(CampaignId, Faction, Coordinates, governor);
+        var army = Army.Create(CampaignId, Faction, Coordinates, governor!);
         Governor = null;
 
         return army;
@@ -108,12 +102,11 @@ public sealed class City : AggregateRoot
 
     public void AssertCanRecruit(UnitTemplate unit)
     {
-        if (Governor == null)
-            throw new GameRuleException("Найм невозможен без губернатора");
+        if (Governor == null) throw new NullReferenceException();
 
         var hasRequiredBuilding = _buildings.Any(b => b.IsConstructed && b.Type == unit.RequiredBuilding);
         if (!hasRequiredBuilding)
-            throw new GameRuleException("Нет требуемого здания для найма");
+            throw new NullReferenceException();
     }
 
     public void GrowPopulation(float growthRate, CityTemplate template)
@@ -125,10 +118,10 @@ public sealed class City : AggregateRoot
     public void StartConstruction(BuildingTemplate template)
     {
         if (!template.AllowedCityTypes.Any(t => t == Type))
-            throw new GameRuleException("Здание недоступно для этого типа города");
+            throw new NullReferenceException();
 
         if (_buildings.Any(b => b.Type == template.Type))
-            throw new GameRuleException("Здание такого типа уже построено");
+            throw new NullReferenceException();
 
         if (template.RequiredBuildings != null)
         {
@@ -136,7 +129,7 @@ public sealed class City : AggregateRoot
                 _buildings.Any(b => b.Type == reqType));
 
             if (!hasRequiredBuildings)
-                throw new GameRuleException("Не все требуемые здания построены");
+                throw new NullReferenceException();
         }
 
         _buildings.Add(Building.CreateUnderConstruction(CampaignId, template, Faction, Id));
@@ -145,10 +138,10 @@ public sealed class City : AggregateRoot
     public void CancelConstruction(BuildingId id)
     {
         var building = _buildings.FirstOrDefault(b => b.Id == id)
-            ?? throw new NotFoundException("Здания нет в городе");
+            ?? throw new NullReferenceException("Здания нет в городе");
 
         if (!building.IsConstructed)
-            throw new GameRuleException("Нельзя отменить построенное здание");
+            throw new NullReferenceException("Нельзя отменить построенное здание");
 
         _buildings.Remove(building);
         AddDomainEvent(new BuildingConstructionCanceledEvent(building.Cost, Faction));
@@ -166,12 +159,12 @@ public sealed class City : AggregateRoot
         }
 
         var cityTemplate = cityTemplates.FirstOrDefault(t => t.Type == Type)
-            ?? throw new NotFoundException("Шаблон грода не найден");
+            ?? throw new NullReferenceException("Шаблон грода не найден");
 
         var constructedTemplates = _buildings
             .Where(b => b.IsConstructed)
             .Select(b => buildingTemplates.FirstOrDefault(t => t.Type == b.Type)
-                ?? throw new NotFoundException("Шаблон здания не найден"))
+                ?? throw new NullReferenceException("Шаблон здания не найден"))
             .ToList();
 
         income = CityEconomyCalculator.CalculateTurnEndIncome(

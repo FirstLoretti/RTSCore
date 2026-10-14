@@ -1,4 +1,4 @@
-namespace RTSCore.Domain.Configurations;
+namespace RTSCore.Domain.Configurations.Diplomacy;
 
 public record DiplomacyConfiguration(
     int InitialStanding = 0,

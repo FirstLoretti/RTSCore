@@ -1,4 +1,5 @@
-using RTSCore.Domain.Enums;
+using RTSCore.Domain.Entities.Armies;
+using RTSCore.Domain.Entities.Cities;
 
 namespace RTSCore.Domain.Configurations.Cities;
 

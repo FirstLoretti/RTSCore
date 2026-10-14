@@ -1,7 +1,4 @@
-using RTSCore.Domain.Entities.Campaign;
-using RTSCore.Domain.ValueObjects;
-
-namespace RTSCore.Domain.Services.Combat;
+namespace RTSCore.Domain.Entities.Armies.Combat;
 
 public class AutoBattleService(IAutoBattleCalculator calculator)
 {
