@@ -52,7 +52,7 @@ public sealed class AiRecruiter
         foreach (var unit in unitsToRecruitment)
         {
             faction.SpendGold(unit.Cost);
-            army.RecruitUnit(_unitCatalog.Get(unit.UnitType));
+            army.RecruitUnit(_unitCatalog.GetUnit(unit.UnitType));
         }
     }
 }

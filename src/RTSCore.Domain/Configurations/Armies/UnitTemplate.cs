@@ -3,20 +3,20 @@ using RTSCore.Domain.Entities.Cities;
 
 namespace RTSCore.Domain.Configurations.Armies;
 
-public record UnitTemplate(
-    UnitType Type = UnitType.MercenaryKnight,
-    string DisplayName = "Путевой Рыцарь",
-    int Cost = 200,
-    int MaxHealth = 200,
-    int Damage = 100,
-    int Armor = 10,
+public sealed record UnitTemplate(
+    UnitType Type = UnitType.Peasant,
+    string DisplayName = "Peasant",
+    int Cost = 100,
+    int MaxHealth = 50,
+    int Damage = 10,
+    int Armor = 0,
     int Speed = 5,
-    int ExpKillReward = 50,
+    int ExpKillReward = 10,
     float HealthGrowthRate = 1.1f,
     float DamageGrowthRate = 1.1f,
-    int TurnsToRecruit = 0,
+    int TurnsToRecruit = 1,
+    int AiUtility = 10,
     UnitCategory Category = UnitCategory.Infantry,
-    int AiUtility = 50,
     ProductionCategory ProductionCategory = ProductionCategory.Military,
-    BuildingType? RequiredBuilding = null
+    BuildingType RequiredBuilding = BuildingType.ReqruitBarrack
 );
