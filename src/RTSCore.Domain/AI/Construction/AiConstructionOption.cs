@@ -1,6 +1,6 @@
 using RTSCore.Domain.Entities.Cities;
 
-namespace RTSCore.Domain.AI.Economy;
+namespace RTSCore.Domain.AI.Construction;
 
 public readonly record struct AiConstructionOption(
     CityId CityId,

@@ -3,7 +3,7 @@ using RTSCore.Domain.Configurations.Cities;
 using RTSCore.Domain.Entities.Cities;
 using RTSCore.Domain.Entities.Factions;
 
-namespace RTSCore.Domain.AI.Economy;
+namespace RTSCore.Domain.AI.Construction;
 
 public sealed class AiConstructor(BuildingCatalog catalog)
 {

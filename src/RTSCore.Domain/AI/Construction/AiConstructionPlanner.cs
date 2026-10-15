@@ -2,7 +2,7 @@ using RTSCore.Domain.AI.Personality;
 using RTSCore.Domain.Configurations.Cities;
 using RTSCore.Domain.Entities.Cities;
 
-namespace RTSCore.Domain.AI.Economy;
+namespace RTSCore.Domain.AI.Construction;
 
 public static class AiConstructionPlanner
 {
@@ -13,7 +13,6 @@ public static class AiConstructionPlanner
         int gold
     )
     {
-
         var buildings = EvaluateAvailableBuildings(catalog, personality, cities);
         var buildingsToConstruct = new List<AiConstructionOption>();
 

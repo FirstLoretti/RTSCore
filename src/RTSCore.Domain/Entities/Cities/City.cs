@@ -53,7 +53,7 @@ public sealed class City : AggregateRoot
         return city;
     }
 
-    public IReadOnlyCollection<ProductionOption> GetRecruitableUnits(
+    public IReadOnlyCollection<UnitTemplate> GetRecruitableUnits(
         IReadOnlyCollection<UnitTemplate> templates
     )
     {
@@ -64,12 +64,7 @@ public sealed class City : AggregateRoot
 
         return [.. templates
             .Where(t => t.RequiredBuilding != null && constructedBuildings.Contains(t.RequiredBuilding.Value))
-            .Select(t => new ProductionOption(
-                Name: t.DisplayName,
-                Cost: t.Cost,
-                TurnsToConstruct: t.TurnsToRecruit,
-                Category: t.ProductionCategory
-            ))];
+        ];
     }
 
     public IReadOnlyCollection<BuildingTemplate> GetConstructableBuildings(

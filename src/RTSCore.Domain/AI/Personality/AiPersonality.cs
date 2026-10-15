@@ -1,6 +1,6 @@
+using RTSCore.Domain.AI.Construction;
 using RTSCore.Domain.AI.Diplomacy;
-using RTSCore.Domain.AI.Economy;
-using RTSCore.Domain.AI.Military;
+using RTSCore.Domain.AI.Recruitment;
 
 namespace RTSCore.Domain.AI.Personality;
 
