@@ -18,7 +18,7 @@ public sealed class AiConstructor(BuildingCatalog catalog)
         foreach (var building in buildingsToConstruct)
         {
             var city = cities.First(c => c.Id == building.CityId);
-            var buildingTemplate = catalog.Get(building.BuildingType);
+            var buildingTemplate = catalog.GetBuilding(building.BuildingType);
 
             faction.SpendGold(building.Cost);
             city.StartConstruction(buildingTemplate);

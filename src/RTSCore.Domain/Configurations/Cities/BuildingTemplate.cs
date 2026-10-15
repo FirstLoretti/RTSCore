@@ -1,21 +1,22 @@
+using System.Collections.Frozen;
+using System.Collections.Immutable;
+
 using RTSCore.Domain.Entities.Armies;
 using RTSCore.Domain.Entities.Cities;
 
 namespace RTSCore.Domain.Configurations.Cities;
 
-public record BuildingTemplate(
-    BuildingType Type,
-    string DisplayName,
-    int Cost,
-    int TurnsToConstruct,
-    CityType[] AllowedCityTypes,
-    ProductionCategory ProductionCategory,
-    int AiUtility,
-    BuildingType[]? RequiredBuildings = null,
-    BuildingEffect[]? Effects = null,
-    Dictionary<UnitType, int>? Garrison = null
-)
+public sealed record BuildingTemplate
 {
-    public BuildingType[] RequiredBuildings { get; init; } = RequiredBuildings ?? [];
-    public BuildingEffect[] Effects { get; init; } = Effects ?? [];
+    public required BuildingType Type { get; init; }
+    public required string DisplayName { get; init; }
+    public required int Cost { get; init; }
+    public required int TurnsToConstruct { get; init; }
+    public required ProductionCategory ProductionCategory { get; init; }
+    public required int AiUtility { get; init; }
+    public required ImmutableArray<CityType> AllowedCityTypes { get; init; }
+
+    public ImmutableArray<BuildingType> RequiredBuildings { get; init; } = [];
+    public ImmutableArray<BuildingEffect> Effects { get; init; } = [];
+    public FrozenDictionary<UnitType, int> Garrison { get; init; } = FrozenDictionary<UnitType, int>.Empty;
 }

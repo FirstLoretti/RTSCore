@@ -1,14 +1,14 @@
+using System.Collections.Immutable;
+
 using RTSCore.Domain.Entities.Armies;
 using RTSCore.Domain.Entities.Cities;
 
 namespace RTSCore.Domain.Configurations.Cities;
 
-public record CityTemplate(
+public sealed record CityTemplate(
     CityType Type,
-    string Name,
+    string DisplayName,
     int MaxPopulation,
-    float GrowthRate,
-    float TaxRatePerCitizen,
-    List<BuildingType> ConstructableBuildings,
+    ImmutableArray<BuildingType> ConstructableBuildings,
     UnitType Governor
 );
