@@ -4,7 +4,7 @@ using RTSCore.Domain.AI.Recruitment;
 
 namespace RTSCore.Domain.AI.Personality;
 
-public record AiPersonality(
+public sealed record AiPersonality(
     AiPersonalityType Type,
     AiBudgetWeights Budget,
     AiUnitWeights Unit,

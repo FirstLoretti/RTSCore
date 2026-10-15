@@ -10,7 +10,7 @@ using RTSCore.Domain.Entities.Factions;
 
 namespace RTSCore.Domain.AI.Recruitment;
 
-public class AiRecruiter
+public sealed class AiRecruiter
 {
     private readonly UnitCatalog _unitCatalog;
     private readonly FrozenDictionary<AiPersonality, ImmutableArray<AiRecruitOption>> _evaluatedOptions;
