@@ -1,12 +1,14 @@
+using System.Collections.Immutable;
+
 using RTSCore.Domain.AI.Personality;
 using RTSCore.Domain.Configurations.Cities;
 
 namespace RTSCore.Domain.Configurations.Factions;
 
-public record FactionTemplate(
+public sealed record FactionTemplate(
     FactionType Type,
-    string Name,
+    string DisplayName,
     int Gold,
-    IReadOnlyCollection<CityPreset> CityPresets,
+    ImmutableArray<CityPreset> CityPresets,
     AiPersonalityType AiPersonalityType
 );

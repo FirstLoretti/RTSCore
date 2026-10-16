@@ -1,15 +1,16 @@
 namespace RTSCore.Domain.Configurations.Diplomacy;
 
-public record DiplomacyConfiguration(
-    int InitialStanding = 0,
+public sealed record DiplomacyConfiguration
+{
+    public int InitialStanding { get; init; }
 
-    int AcceptPeaceOfferBonus = 25,
-    int RejectOfferPenalty = -5,
+    public required int AcceptPeaceOfferBonus { get; init; }
+    public required int RejectOfferPenalty { get; init; }
 
-    int MinStandingForTrade = -80,
-    int AcceptTradeOfferBonus = 10,
-    int TradeIncomePerPartnerCity = 25,
-    int CancelTradePenalty = -15,
+    public required int MinStandingForTrade { get; init; }
+    public required int AcceptTradeOfferBonus { get; init; }
+    public required int TradeIncomePerPartnerCity { get; init; }
+    public required int CancelTradePenalty { get; init; }
 
-    int DeclareWarPenalty = -50
-);
+    public required int DeclareWarPenalty { get; init; }
+}

@@ -7,16 +7,16 @@ using RTSCore.Domain.Configurations.Factions;
 
 namespace RTSCore.Domain.Configurations;
 
-public class GameConfiguations
+public sealed record GameConfigurations
 {
-    public UnitCatalog Units { get; init; } = new([]);
-    public FactionCatalog Factions { get; init; } = new([]);
-    public BuildingCatalog Buildings { get; init; } = new([]);
-    public CityCatalog Cities { get; init; } = new([]);
-    public AiCatalog AiPersotalities { get; init; } = new([]);
+    public required UnitCatalog Units { get; init; }
+    public required FactionCatalog Factions { get; init; }
+    public required BuildingCatalog Buildings { get; init; }
+    public required CityCatalog Cities { get; init; }
+    public required AiCatalog AiPersonalities { get; init; }
 
-    public MovementConfiguration Movement { get; init; } = new();
-    public DiplomacyConfiguration Diplomacy { get; init; } = new();
-    public AutoBattleConfiguration AutoBattle { get; init; } = new();
-    public UnitConfiguration UnitConfiguration { get; init; } = new([], new());
+    public required MovementConfiguration Movement { get; init; }
+    public required DiplomacyConfiguration Diplomacy { get; init; }
+    public required AutoBattleConfiguration AutoBattle { get; init; }
+    public required UnitConfiguration UnitConfiguration { get; init; }
 }

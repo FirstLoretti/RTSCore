@@ -4,7 +4,7 @@ using RTSCore.Domain.Entities.Factions;
 
 namespace RTSCore.Domain.Entities.Campaign;
 
-public class StartCampaignService(GameConfiguations configurations)
+public class StartCampaignService(GameConfigurations configurations)
 {
     public (IReadOnlyCollection<Faction> factions, IReadOnlyCollection<City> cities) InitializeWorld(
         CampaignId campaignId,
