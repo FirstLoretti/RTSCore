@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using System.Numerics;
 
 using RTSCore.Domain.Configurations.Armies;
@@ -19,7 +20,7 @@ public sealed class Army : AggregateRoot
     public ArmyId? Target { get; private set; }
 
     private readonly List<Unit> _units = [];
-    public IReadOnlyList<Unit> Units => _units.AsReadOnly();
+    public ImmutableArray<Unit> Units => [.. _units];
 
     public const int MaxSize = 20;
     public bool HasFreeSlots => _units.Count < MaxSize;
@@ -121,7 +122,7 @@ public sealed class Army : AggregateRoot
         }
     }
 
-    internal void TakeCasualties(List<BattleLog> logs)
+    internal void TakeCasualties(List<UnitBattleLog> logs)
     {
         foreach (var log in logs)
         {

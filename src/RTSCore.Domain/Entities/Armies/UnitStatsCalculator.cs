@@ -7,7 +7,7 @@ public static class UnitStatsCalculator
     public static int CalculateStat(int value, int level, float growthRate) =>
         (int)float.Round(value * float.Pow(growthRate, level), MidpointRounding.AwayFromZero);
 
-    public static int CalculateCurrentPower(UnitTemplate unit, int level, int health)
+    public static int CalculatePower(UnitTemplate unit, int level, int health)
     {
         if (health <= 0 || unit.MaxHealth <= 0) throw new ArgumentException("Здоровье юнита не может быть <= 0");
 

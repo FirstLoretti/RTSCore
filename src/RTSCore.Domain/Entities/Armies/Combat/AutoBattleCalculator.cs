@@ -1,74 +1,62 @@
-using System.Collections.Frozen;
+using System.Collections.Immutable;
 
 using RTSCore.Domain.Configurations.Armies;
 using RTSCore.Domain.Configurations.Armies.Combat;
 
 namespace RTSCore.Domain.Entities.Armies.Combat;
 
-public class AutoBattleCalculator(
-    IReadOnlyCollection<UnitTemplate> units,
-    AutoBattleConfiguration configuration
-) : IAutoBattleCalculator
+public sealed class AutoBattleCalculator(UnitCatalog catalog, AutoBattleConfiguration config)
 {
-    private readonly FrozenDictionary<UnitType, UnitTemplate> _typeToTemplate = units.ToFrozenDictionary(u => u.Type);
-
-    public BattleResult Calculate(IReadOnlyCollection<Unit> attakers, IReadOnlyCollection<Unit> defenders)
+    public BattleResult Calculate(ImmutableArray<Unit> attaсkers, ImmutableArray<Unit> defenders)
     {
-        var liveAttackers = attakers.Where(u => u.IsAlive).ToList();
-        var attackerPower = liveAttackers
+        var attackerPower = attaсkers
             .Sum(u =>
             {
-                var template = _typeToTemplate.GetValueOrDefault(u.Type);
-                return template == null
-                    ? throw new NullReferenceException("Шаблона не существует")
-                    : UnitStatsCalculator.CalculateCurrentPower(template, u.Level, u.Health);
+                var template = catalog.GetUnit(u.Type);
+                return UnitStatsCalculator.CalculatePower(template, u.Level, u.Health);
             });
 
-        var liveDifenders = defenders.Where(u => u.IsAlive).ToList();
-        var defenderPower = liveDifenders
+        var defenderPower = defenders
             .Sum(u =>
             {
-                var template = _typeToTemplate.GetValueOrDefault(u.Type);
-                return template == null
-                    ? throw new NullReferenceException("Шаблона не существует")
-                    : UnitStatsCalculator.CalculateCurrentPower(template, u.Level, u.Health);
+                var template = catalog.GetUnit(u.Type);
+                return UnitStatsCalculator.CalculatePower(template, u.Level, u.Health);
             });
 
-        if (attackerPower <= 0 || defenderPower <= 0)
-            throw new ArgumentException($"[{nameof(AutoBattleCalculator)}] Сила одной из армий <= 0");
+        var powerBalance = attackerPower.CompareTo(defenderPower);
 
-        var compareResult = attackerPower.CompareTo(defenderPower);
-
-        var (attackerCasualties, defenderCasualties) = compareResult switch
+        var (damageToAttacker, damageToDefender) = powerBalance switch
         {
-            1 => (configuration.WinnerCasualties, configuration.LoserCasualties),
-            -1 => (configuration.LoserCasualties, configuration.WinnerCasualties),
-            _ => (configuration.DrawCasualties, configuration.DrawCasualties),
+            1 => (config.DamageToWinner, config.DamageToLoser),
+            -1 => (config.DamageToLoser, config.DamageToWinner),
+            _ => (config.DrawDamage, config.DrawDamage),
         };
 
-        var attackerLogs = CalculateCasualties(liveAttackers, attackerCasualties);
-        var defenderLogs = CalculateCasualties(liveDifenders, defenderCasualties);
+        var attackerLogs = CalculateLogs(attaсkers, damageToAttacker);
+        var defenderLogs = CalculateLogs(defenders, damageToDefender);
 
         return new BattleResult(
-            IsAttackerWon: compareResult == 1,
-            IsDefenderWon: compareResult == -1,
+            IsAttackerWon: powerBalance == 1,
+            IsDefenderWon: powerBalance == -1,
             attackerLogs,
             defenderLogs
         );
     }
 
-    private List<BattleLog> CalculateCasualties(List<Unit> units, float damagePercent)
+    private ImmutableArray<UnitBattleLog> CalculateLogs(ImmutableArray<Unit> units, float damageTaken)
     {
-        List<BattleLog> logs = [];
+        var logs = ImmutableArray.CreateBuilder<UnitBattleLog>(units.Length);
+
         foreach (var unit in units)
         {
-            var template = _typeToTemplate[unit.Type];
-            var damage = (int)(template.MaxHealth * damagePercent);
+            var template = catalog.GetUnit(unit.Type);
+
+            var damage = (int)(template.MaxHealth * damageTaken);
             var health = unit.Health - damage;
 
-            logs.Add(new(unit.Id, damage, health, unit.IsAlive));
+            logs.Add(new(unit.Id, damage, health));
         }
 
-        return logs;
+        return logs.MoveToImmutable();
     }
 }

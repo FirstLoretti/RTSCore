@@ -1,8 +1,7 @@
 namespace RTSCore.Domain.Entities.Armies.Combat;
 
-public readonly record struct BattleLog(
+public readonly record struct UnitBattleLog(
     UnitId UnitId,
     int DamageTaken,
-    int RemainingHealth,
-    bool IsAlive
+    int RemainingHealth
 );

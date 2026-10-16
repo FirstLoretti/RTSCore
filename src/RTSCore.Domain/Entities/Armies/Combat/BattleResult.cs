@@ -1,8 +1,10 @@
+using System.Collections.Immutable;
+
 namespace RTSCore.Domain.Entities.Armies.Combat;
 
-public record BattleResult(
+public readonly record struct BattleResult(
     bool IsAttackerWon,
     bool IsDefenderWon,
-    List<BattleLog> AttackerBattleLogs,
-    List<BattleLog> DefenderBattleLogs
+    ImmutableArray<UnitBattleLog> AttackerBattleLogs,
+    ImmutableArray<UnitBattleLog> DefenderBattleLogs
 );
