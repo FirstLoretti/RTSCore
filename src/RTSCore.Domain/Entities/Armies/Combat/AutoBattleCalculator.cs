@@ -1,5 +1,3 @@
-using System.Collections.Immutable;
-
 using RTSCore.Domain.Configurations.Armies;
 using RTSCore.Domain.Configurations.Armies.Combat;
 
@@ -7,7 +5,7 @@ namespace RTSCore.Domain.Entities.Armies.Combat;
 
 public sealed class AutoBattleCalculator(UnitCatalog catalog, AutoBattleConfiguration config)
 {
-    public BattleResult Calculate(ImmutableArray<Unit> attaсkers, ImmutableArray<Unit> defenders)
+    public BattleResult Calculate(IReadOnlyCollection<Unit> attaсkers, IReadOnlyCollection<Unit> defenders)
     {
         var attackerPower = attaсkers
             .Sum(u =>
@@ -43,9 +41,9 @@ public sealed class AutoBattleCalculator(UnitCatalog catalog, AutoBattleConfigur
         );
     }
 
-    private ImmutableArray<UnitBattleLog> CalculateLogs(ImmutableArray<Unit> units, float damageTaken)
+    private List<UnitBattleLog> CalculateLogs(IReadOnlyCollection<Unit> units, float damageTaken)
     {
-        var logs = ImmutableArray.CreateBuilder<UnitBattleLog>(units.Length);
+        List<UnitBattleLog> logs = [];
 
         foreach (var unit in units)
         {
@@ -57,6 +55,6 @@ public sealed class AutoBattleCalculator(UnitCatalog catalog, AutoBattleConfigur
             logs.Add(new(unit.Id, damage, health));
         }
 
-        return logs.MoveToImmutable();
+        return logs;
     }
 }

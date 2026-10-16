@@ -1,26 +1,24 @@
-using System.Collections.Immutable;
 using System.Numerics;
 
 using RTSCore.Domain.Configurations.Armies;
 using RTSCore.Domain.Entities.Armies.Combat;
 using RTSCore.Domain.Entities.Campaign;
+using RTSCore.Domain.Errors;
 
 namespace RTSCore.Domain.Entities.Armies;
 
 public sealed class Army : AggregateRoot
 {
     public CampaignId CampaignId { get; }
-
     public ArmyId Id { get; }
     public FactionType Faction { get; }
+
     public UnitId GeneralId { get; private set; }
     public Vector2 Coordinates { get; private set; }
-
     public int MovementPoints { get; private set; }
-    public ArmyId? Target { get; private set; }
 
     private readonly List<Unit> _units = [];
-    public ImmutableArray<Unit> Units => [.. _units];
+    public IReadOnlyCollection<Unit> Units => _units;
 
     public const int MaxSize = 20;
     public bool HasFreeSlots => _units.Count < MaxSize;
@@ -57,103 +55,73 @@ public sealed class Army : AggregateRoot
         return army;
     }
 
-    public static Army CreateWithMovementPoints(
-        CampaignId campaignId,
-        FactionType faction,
-        Vector2 coordinates,
-        UnitTemplate general,
-        MovementConfiguration configuration
-    )
+    public void RestoreMovementPoints(MovementConfiguration config) => MovementPoints = config.MaxMovementPoints;
+
+    public Result MoveTo(Vector2 destination, int movementCost)
     {
-        var army = Create(campaignId, faction, coordinates, general);
-        army.RestoreMovementPoints(configuration);
+        if (MovementPoints < movementCost) return Result.Failure(GameErrors.NotEnoughMovementPoints);
 
-        return army;
-    }
-
-    public void RestoreMovementPoints(MovementConfiguration configuration)
-        => MovementPoints = configuration.MaxMovementPoints;
-
-    public void MoveTo(Vector2 destination, int movementCost)
-    {
-        var absCost = int.Abs(movementCost);
-        if (MovementPoints < absCost) throw new NotImplementedException("Недостаточно очков перемещения.");
-
-        MovementPoints -= absCost;
+        MovementPoints -= movementCost;
         Coordinates = destination;
+
+        return Result.Success();
     }
 
-    internal void RecruitUnit(UnitTemplate template)
+    public Result RecruitUnit(UnitTemplate template)
     {
-        if (!HasFreeSlots)
-            throw new NotImplementedException("Нельзя нанять юнита, армия уже укомплектована.");
+        if (!HasFreeSlots) return Result.Failure(GameErrors.ArmyDontHaveFreeSlots);
 
         _units.Add(Unit.CreateTraining(CampaignId, Faction, template, Id));
+
+        return Result.Success();
     }
 
-    public void CancelRecruitUnit(Unit unit)
+    public void AssignGeneral(UnitTemplate template)
     {
-        if (unit.IsRecruited)
-            throw new NotImplementedException("Нельзя отменить найм нанятого юнита");
+        if (GeneralId != UnitId.Empty)
+        {
+            var general = _units.Single(u => u.Id == GeneralId);
+            DisbandUnit(general);
+        }
 
-        if (unit.Faction == Faction)
-            throw new NotImplementedException("Нельзя распустить юнита другой фракции");
-
-        _units.Remove(unit);
+        var unit = Unit.CreateReady(CampaignId, Faction, template, Id);
+        _units.Add(unit);
+        GeneralId = unit.Id;
     }
 
     public void DisbandUnit(Unit unit)
     {
-        if (!unit.IsAlive)
-            throw new NotImplementedException($"Не нанятого или мёртвого юнита {unit.Id} нельзя распустить");
-
-        if (unit.Faction != Faction)
-            throw new NotImplementedException("Нельзя распустить юнита другой фракции");
-
         _units.Remove(unit);
-    }
 
-    internal void PurgeDeadUnits()
-    {
-        var deadUnits = _units.Where(u => !u.IsAlive).ToList();
-        foreach (var unit in deadUnits)
+        if (unit.Id == GeneralId)
         {
-            _units.Remove(unit);
+            GeneralId = UnitId.Empty;
+            // TODO: Event
         }
     }
 
-    internal void TakeCasualties(List<UnitBattleLog> logs)
+    public void PurgeDeadUnits()
+    {
+        var general = _units.Single(u => u.Id == GeneralId);
+
+        if (!general.IsAlive)
+        {
+            GeneralId = UnitId.Empty;
+            // TODO: Event
+        }
+
+        _units.RemoveAll(u => !u.IsAlive);
+    }
+
+    public void TakeCasualties(List<UnitBattleLog> logs)
     {
         foreach (var log in logs)
         {
-            var unit = _units.FirstOrDefault(u => u.Id == log.UnitId)
-                ?? throw new NullReferenceException("Batlelog содержит юнита не существуюшего в армии");
+            var unit = _units.Single(u => u.Id == log.UnitId);
 
             unit.TakeDamage(log.DamageTaken);
         }
 
         PurgeDeadUnits();
-    }
-
-    public void ReleaseFromBattle() => Target = null;
-
-    public void Attack(Army enemy, MovementConfiguration configuration)
-    {
-        if (_units.Count == 0)
-            throw new NotImplementedException("Пустая армия не может атаковать");
-
-        if (enemy.Faction == Faction)
-            throw new NotImplementedException("Нельзя атаковать армию своей фракции");
-
-        var movementCost = ArmyMovementCalculator.CalculateCost(
-            Coordinates,
-            enemy.Coordinates,
-            configuration.BaseUnitDistanceCost
-        );
-
-        MoveTo(enemy.Coordinates, movementCost);
-
-        Target = enemy.Id;
-        enemy.Target = Id;
     }
 }

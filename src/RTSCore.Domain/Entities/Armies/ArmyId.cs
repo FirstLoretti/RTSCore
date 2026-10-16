@@ -3,5 +3,5 @@ namespace RTSCore.Domain.Entities.Armies;
 public readonly record struct ArmyId(Guid Value)
 {
     public static ArmyId New() => new(Guid.NewGuid());
-    public static ArmyId Empty => new(Guid.Empty);
+    public static ArmyId Empty => default;
 }

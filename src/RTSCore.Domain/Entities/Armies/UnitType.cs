@@ -7,6 +7,5 @@ public enum UnitType
     PeasantArcher,
     Militia,
     MilitiaArcher,
-    Knight,
-    MercenaryKnight
+    Knight
 }
