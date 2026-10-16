@@ -55,6 +55,8 @@ public sealed class Army : AggregateRoot
         return army;
     }
 
+    public IReadOnlyCollection<Unit> GetReadyCombatants() => [.. _units.Where(u => u.IsAlive && u.IsRecruited)];
+
     public void RestoreMovementPoints(MovementConfiguration config) => MovementPoints = config.MaxMovementPoints;
 
     public Result MoveTo(Vector2 destination, int movementCost)

@@ -3,7 +3,11 @@ using RTSCore.Domain.Configurations.Armies.Combat;
 
 namespace RTSCore.Domain.Entities.Armies.Combat;
 
-public sealed class AutoBattleCalculator(UnitCatalog catalog, AutoBattleConfiguration config)
+public sealed class AutoBattleCalculator(
+    UnitCatalog catalog,
+    AutoBattleConfiguration config,
+    UnitStatsCalculator statsCalculator
+)
 {
     public BattleResult Calculate(IReadOnlyCollection<Unit> attaсkers, IReadOnlyCollection<Unit> defenders)
     {
@@ -11,14 +15,14 @@ public sealed class AutoBattleCalculator(UnitCatalog catalog, AutoBattleConfigur
             .Sum(u =>
             {
                 var template = catalog.GetUnit(u.Type);
-                return UnitStatsCalculator.CalculatePower(template, u.Level, u.Health);
+                return statsCalculator.Power(template, u.Level, u.Health);
             });
 
         var defenderPower = defenders
             .Sum(u =>
             {
                 var template = catalog.GetUnit(u.Type);
-                return UnitStatsCalculator.CalculatePower(template, u.Level, u.Health);
+                return statsCalculator.Power(template, u.Level, u.Health);
             });
 
         var powerBalance = attackerPower.CompareTo(defenderPower);
@@ -30,8 +34,8 @@ public sealed class AutoBattleCalculator(UnitCatalog catalog, AutoBattleConfigur
             _ => (config.DrawDamage, config.DrawDamage),
         };
 
-        var attackerLogs = CalculateLogs(attaсkers, damageToAttacker);
-        var defenderLogs = CalculateLogs(defenders, damageToDefender);
+        var attackerLogs = CreateLogs(attaсkers, damageToAttacker);
+        var defenderLogs = CreateLogs(defenders, damageToDefender);
 
         return new BattleResult(
             IsAttackerWon: powerBalance == 1,
@@ -41,7 +45,7 @@ public sealed class AutoBattleCalculator(UnitCatalog catalog, AutoBattleConfigur
         );
     }
 
-    private List<UnitBattleLog> CalculateLogs(IReadOnlyCollection<Unit> units, float damageTaken)
+    private List<UnitBattleLog> CreateLogs(IReadOnlyCollection<Unit> units, float damageTaken)
     {
         List<UnitBattleLog> logs = [];
 

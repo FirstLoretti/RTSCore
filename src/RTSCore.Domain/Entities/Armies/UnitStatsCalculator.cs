@@ -2,18 +2,15 @@ using RTSCore.Domain.Configurations.Armies;
 
 namespace RTSCore.Domain.Entities.Armies;
 
-public static class UnitStatsCalculator
+public sealed class UnitStatsCalculator(UnitStatsWeights statsWeights)
 {
-    public static int CalculateStat(int value, int level, float growthRate) =>
-        (int)float.Round(value * float.Pow(growthRate, level), MidpointRounding.AwayFromZero);
+    public static int Stat(int value, int level, float growthPercent) =>
+        (int)(value + value * (growthPercent * level));
 
-    public static int CalculatePower(UnitTemplate unit, int level, int health)
+    public int Power(UnitTemplate unit, int level, int health)
     {
-        if (health <= 0 || unit.MaxHealth <= 0) throw new ArgumentException("Здоровье юнита не может быть <= 0");
+        var damage = Stat(unit.Damage, level, unit.DamageGrowthRate);
 
-        var damage = CalculateStat(unit.Damage, level, unit.DamageGrowthRate);
-        var healthPercentage = health / (float)unit.MaxHealth;
-
-        return (int)float.Round(damage * healthPercentage, MidpointRounding.AwayFromZero);
+        return (int)(damage * statsWeights.Damage + health * statsWeights.Health);
     }
 }
