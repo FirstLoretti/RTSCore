@@ -3,7 +3,7 @@ using System.Numerics;
 using RTSCore.Domain.Configurations.Armies;
 using RTSCore.Domain.Configurations.Cities;
 using RTSCore.Domain.Entities.Armies;
-using RTSCore.Domain.Entities.Campaign;
+using RTSCore.Domain.Entities.Campaigns;
 
 namespace RTSCore.Domain.Entities.Cities;
 
@@ -63,7 +63,7 @@ public sealed class City : AggregateRoot
             .ToList();
 
         return [.. templates
-            .Where(t => t.RequiredBuilding != null && constructedBuildings.Contains(t.RequiredBuilding.Value))
+            .Where(t => t.RequiredBuilding != null && constructedBuildings.Contains(t.RequiredBuilding))
         ];
     }
 

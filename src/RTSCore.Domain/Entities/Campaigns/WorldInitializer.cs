@@ -1,22 +1,20 @@
-using RTSCore.Domain.Configurations;
+using RTSCore.Domain.Configurations.Cities;
+using RTSCore.Domain.Configurations.Factions;
 using RTSCore.Domain.Entities.Cities;
 using RTSCore.Domain.Entities.Factions;
 
-namespace RTSCore.Domain.Entities.Campaign;
+namespace RTSCore.Domain.Entities.Campaigns;
 
-public class StartCampaignService(GameConfigurations configurations)
+public sealed class WorldInitializer(FactionCatalog factionCatalog, CityCatalog cityCatalog)
 {
-    public (IReadOnlyCollection<Faction> factions, IReadOnlyCollection<City> cities) InitializeWorld(
-        CampaignId campaignId,
-        FactionType[] playersFactions
-    )
+    public InitializeWorldResult Initialize(CampaignId campaignId, IReadOnlySet<FactionType> playersFactions)
     {
-        var cityTypeToTemplate = configurations.Cities.Templates.ToDictionary(t => t.Type);
+        var campaign = new Campaign(campaignId);
 
         List<Faction> factions = [];
         List<City> cities = [];
 
-        foreach (var template in configurations.Factions.Templates)
+        foreach (var template in factionCatalog.Templates)
         {
             var faction = playersFactions.Contains(template.Type)
                 ? Faction.CreateHuman(campaignId, template)
@@ -26,13 +24,13 @@ public class StartCampaignService(GameConfigurations configurations)
 
             foreach (var preset in template.CityPresets)
             {
-                var cityTemplate = cityTypeToTemplate[preset.Type];
+                var cityTemplate = cityCatalog.GetCity(preset.Type);
                 var city = faction.FoundCity(cityTemplate, preset.Coordinates);
 
                 cities.Add(city);
             }
         }
 
-        return (factions, cities);
+        return new(campaign, factions, cities);
     }
 }

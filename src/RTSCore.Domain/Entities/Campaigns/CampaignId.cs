@@ -1,4 +1,4 @@
-namespace RTSCore.Domain.Entities.Campaign;
+namespace RTSCore.Domain.Entities.Campaigns;
 
 public readonly record struct CampaignId(Guid Value)
 {

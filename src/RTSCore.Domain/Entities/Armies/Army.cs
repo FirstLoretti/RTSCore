@@ -2,7 +2,7 @@ using System.Numerics;
 
 using RTSCore.Domain.Configurations.Armies;
 using RTSCore.Domain.Entities.Armies.Combat;
-using RTSCore.Domain.Entities.Campaign;
+using RTSCore.Domain.Entities.Campaigns;
 using RTSCore.Domain.Errors;
 
 namespace RTSCore.Domain.Entities.Armies;

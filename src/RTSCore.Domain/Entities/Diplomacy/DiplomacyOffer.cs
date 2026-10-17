@@ -1,4 +1,4 @@
-using RTSCore.Domain.Entities.Campaign;
+using RTSCore.Domain.Entities.Campaigns;
 
 namespace RTSCore.Domain.Entities.Diplomacy;
 
