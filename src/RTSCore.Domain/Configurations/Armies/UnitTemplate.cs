@@ -3,20 +3,22 @@ using RTSCore.Domain.Entities.Cities;
 
 namespace RTSCore.Domain.Configurations.Armies;
 
-public sealed record UnitTemplate(
-    UnitType Type = UnitType.Peasant,
-    string DisplayName = "Peasant",
-    int Cost = 100,
-    int MaxHealth = 50,
-    int Damage = 10,
-    int Armor = 0,
-    int Speed = 5,
-    int ExpKillReward = 10,
-    float HealthGrowthRate = 1.1f,
-    float DamageGrowthRate = 1.1f,
-    int TurnsToRecruit = 1,
-    int AiUtility = 10,
-    UnitCategory Category = UnitCategory.Infantry,
-    ProductionCategory ProductionCategory = ProductionCategory.Military,
-    BuildingType RequiredBuilding = BuildingType.ReqruitBarrack
-);
+public sealed record UnitTemplate
+{
+    public required UnitType Type { get; init; }
+    public required string DisplayName { get; init; } = string.Empty;
+    public required int Cost { get; init; }
+    public required int MaxHealth { get; init; }
+    public required int Damage { get; init; }
+    public required int Armor { get; init; }
+    public required int Speed { get; init; }
+    public required int ExpKillReward { get; init; }
+    public required float HealthGrowthRate { get; init; }
+    public required float DamageGrowthRate { get; init; }
+    public required int TurnsToRecruit { get; init; }
+    public required int AiUtility { get; init; }
+    public required UnitCategory Category { get; init; }
+    public required ProductionCategory ProductionCategory { get; init; }
+
+    public BuildingType RequiredBuilding { get; init; }
+}

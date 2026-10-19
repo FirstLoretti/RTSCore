@@ -1,8 +1,10 @@
 namespace RTSCore.Domain.Entities.Cities;
 
-public record ProductionOption(
-    string Name,
+public readonly record struct ProductionOption<TType>(
+    string DisplayName,
+    TType Type,
     int Cost,
     int TurnsToConstruct,
-    ProductionCategory Category
-);
+    ProductionCategory ProductionCategory,
+    int AiUtility
+) where TType : Enum;

@@ -1,6 +1,5 @@
 using System.Collections.Immutable;
 
-using RTSCore.Domain.Entities.Armies;
 using RTSCore.Domain.Entities.Cities;
 
 namespace RTSCore.Domain.Configurations.Cities;
@@ -8,7 +7,6 @@ namespace RTSCore.Domain.Configurations.Cities;
 public sealed record CityTemplate(
     CityType Type,
     string DisplayName,
-    int MaxPopulation,
-    ImmutableArray<BuildingType> ConstructableBuildings,
-    UnitType Governor
+    int PopulationToUpgrade,
+    ImmutableArray<BuildingType> ConstructableBuildings
 );

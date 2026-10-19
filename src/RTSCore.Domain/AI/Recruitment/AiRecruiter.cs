@@ -43,6 +43,7 @@ public sealed class AiRecruiter
     public void RecruitUnits(Faction faction, Army army, AiPersonality personality, City city)
     {
         HashSet<UnitType> units = [.. city.GetRecruitableUnits(_unitCatalog.Templates).Select(u => u.Type)];
+
         var options = _evaluatedOptions[personality]
             .Where(o => units.Contains(o.UnitType))
             .ToList();

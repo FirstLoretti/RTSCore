@@ -19,4 +19,5 @@ public sealed record GameConfigurations
     public required DiplomacyConfiguration Diplomacy { get; init; }
     public required AutoBattleConfiguration AutoBattle { get; init; }
     public required UnitConfiguration UnitConfiguration { get; init; }
+    public required CityConfiguration CityConfiguration { get; init; }
 }

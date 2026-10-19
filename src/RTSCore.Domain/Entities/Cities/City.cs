@@ -4,22 +4,22 @@ using RTSCore.Domain.Configurations.Armies;
 using RTSCore.Domain.Configurations.Cities;
 using RTSCore.Domain.Entities.Armies;
 using RTSCore.Domain.Entities.Campaigns;
+using RTSCore.Domain.Errors;
 
 namespace RTSCore.Domain.Entities.Cities;
 
 public sealed class City : AggregateRoot
 {
-    public CampaignId CampaignId { get; init; }
-    public CityId Id { get; init; }
-    public Vector2 Coordinates { get; init; }
+    public CampaignId CampaignId { get; }
+    public CityId Id { get; }
+    public Vector2 Coordinates { get; }
 
     public FactionType Faction { get; private set; }
     public CityType Type { get; private set; }
     public int Population { get; private set; }
-    public UnitType? Governor { get; private set; }
 
-    public IReadOnlyList<Building> Buildings => _buildings.AsReadOnly();
     private readonly List<Building> _buildings = [];
+    public IReadOnlyCollection<Building> Buildings => _buildings;
 
     private City(
         CampaignId campaignId,
@@ -33,9 +33,8 @@ public sealed class City : AggregateRoot
         Id = cityId;
         Type = template.Type;
         Faction = faction;
-        Population = template.MaxPopulation;
+        Population = template.PopulationToUpgrade;
         Coordinates = coordinates;
-        Governor = template.Governor;
     }
 
     private City() { }
@@ -45,127 +44,124 @@ public sealed class City : AggregateRoot
         CityTemplate template,
         FactionType faction,
         Vector2 coordinates
+    ) => new(campaignId, CityId.New(), template, faction, coordinates);
+
+    public IReadOnlyCollection<ProductionOption<UnitType>> GetRecruitableUnits(
+        IReadOnlyCollection<UnitTemplate> units
     )
     {
-        var city = new City(campaignId, CityId.New(), template, faction, coordinates);
-        city.AddDomainEvent(new CityCreatedEvent(faction));
+        var isConstructed = IsConstructed();
 
-        return city;
+        return [.. units
+            .Where(u => isConstructed[(int)u.RequiredBuilding])
+            .Select(u => new ProductionOption<UnitType>(
+                u.DisplayName,
+                u.Type,
+                u.Cost,
+                u.TurnsToRecruit,
+                u.ProductionCategory,
+                u.AiUtility))];
     }
 
-    public IReadOnlyCollection<UnitTemplate> GetRecruitableUnits(
-        IReadOnlyCollection<UnitTemplate> templates
+    public IReadOnlyCollection<ProductionOption<BuildingType>> GetConstructableBuildings(
+        IReadOnlyCollection<BuildingTemplate> buildings
     )
     {
-        var constructedBuildings = _buildings
-            .Where(b => b.IsConstructed)
-            .Select(b => b.Type)
-            .ToList();
+        var isConstructed = IsConstructed();
 
-        return [.. templates
-            .Where(t => t.RequiredBuilding != null && constructedBuildings.Contains(t.RequiredBuilding))
-        ];
+        return [.. buildings
+            .Where(b =>
+                b.AllowedCityTypes.Contains(Type) &&
+                b.RequiredBuildings.All(type => isConstructed[(int)type]))
+            .Select(b => new ProductionOption<BuildingType>(
+                b.DisplayName,
+                b.Type,
+                b.Cost,
+                b.TurnsToConstruct,
+                b.ProductionCategory,
+                b.AiUtility))];
     }
 
-    public IReadOnlyCollection<BuildingTemplate> GetConstructableBuildings(
-        IReadOnlyCollection<BuildingTemplate> templates
-    )
+    private bool[] IsConstructed()
     {
-        var constructedBuildings = _buildings
-            .Where(b => b.IsConstructed)
-            .Select(b => b.Type)
-            .ToList();
+        bool[] isConstructed = new bool[Enum.GetValues<BuildingType>().Length];
 
-        return [.. templates
-            .Where(t =>
-                !_buildings.Any(b => t.Type == t.Type)
-                && t.RequiredBuildings.All(reqType => constructedBuildings.Contains(reqType))
-            )];
-    }
-
-    public Army CreateArmy(IReadOnlyCollection<UnitTemplate> templates)
-    {
-        if (Governor == null) throw new NullReferenceException();
-
-        var governor = templates.FirstOrDefault(t => t.Type == Governor); //
-
-        var army = Army.Create(CampaignId, Faction, Coordinates, governor!);
-        Governor = null;
-
-        return army;
-    }
-
-    public void AssertCanRecruit(UnitTemplate unit)
-    {
-        if (Governor == null) throw new NullReferenceException();
-
-        var hasRequiredBuilding = _buildings.Any(b => b.IsConstructed && b.Type == unit.RequiredBuilding);
-        if (!hasRequiredBuilding)
-            throw new NullReferenceException();
-    }
-
-    public void GrowPopulation(float growthRate, CityTemplate template)
-    {
-        var growth = (int)(Population * growthRate);
-        Population = int.Clamp(Population + growth, 0, template.MaxPopulation);
-    }
-
-    public void StartConstruction(BuildingTemplate template)
-    {
-        if (!template.AllowedCityTypes.Any(t => t == Type))
-            throw new NullReferenceException();
-
-        if (_buildings.Any(b => b.Type == template.Type))
-            throw new NullReferenceException();
-
-        if (template.RequiredBuildings != null)
-        {
-            var hasRequiredBuildings = template.RequiredBuildings.All(reqType =>
-                _buildings.Any(b => b.Type == reqType));
-
-            if (!hasRequiredBuildings)
-                throw new NullReferenceException();
-        }
-
-        _buildings.Add(Building.CreateUnderConstruction(CampaignId, template, Faction, Id));
-    }
-
-    public void CancelConstruction(BuildingId id)
-    {
-        var building = _buildings.FirstOrDefault(b => b.Id == id)
-            ?? throw new NullReferenceException("Здания нет в городе");
-
-        if (!building.IsConstructed)
-            throw new NullReferenceException("Нельзя отменить построенное здание");
-
-        _buildings.Remove(building);
-        AddDomainEvent(new BuildingConstructionCanceledEvent(building.Cost, Faction));
-    }
-
-    public void TurnEnd(
-        IReadOnlyCollection<CityTemplate> cityTemplates,
-        IReadOnlyCollection<BuildingTemplate> buildingTemplates,
-        out int income
-    )
-    {
         foreach (var building in _buildings)
         {
-            building.AdvanceConstruction();
+            if (building.IsConstructed)
+                isConstructed[(int)building.Type] = true;
         }
 
-        var cityTemplate = cityTemplates.FirstOrDefault(t => t.Type == Type)
-            ?? throw new NullReferenceException("Шаблон грода не найден");
+        return isConstructed;
+    }
 
-        var constructedTemplates = _buildings
-            .Where(b => b.IsConstructed)
-            .Select(b => buildingTemplates.FirstOrDefault(t => t.Type == b.Type)
-                ?? throw new NullReferenceException("Шаблон здания не найден"))
-            .ToList();
+    public Army CreateArmy(UnitTemplate general) => Army.Create(CampaignId, Faction, Coordinates, general);
 
-        income = CityEconomyCalculator.CalculateTurnEndIncome(
-            cityTemplate,
-            Population,
-            constructedTemplates
-        );
+    public Result AssertCanRecruit(UnitTemplate unit) =>
+        _buildings.Any(b => b.IsConstructed && b.Type == unit.RequiredBuilding)
+            ? Result.Success()
+            : Result.Failure(GameErrors.UnavailableRecruitOption);
+
+    public void TurnEnd(BuildingCatalog catalog, CityConfiguration configuration)
+    {
+        float effectsValue = 0f;
+        int income = 0;
+
+        foreach (var building in _buildings)
+        {
+            if (!building.IsConstructed) continue;
+
+            var template = catalog.GetBuilding(building.Type);
+
+            foreach (var effect in template.Effects)
+            {
+                if (effect.Type == BuildingEffectType.PopulationGrowth)
+                    effectsValue += effect.Value;
+
+                if (effect.Type == BuildingEffectType.GoldIncome)
+                    income += effect.Value;
+            }
+        }
+
+        var taxIncome = (int)(Population * configuration.TaxPerCitizen);
+        income += taxIncome;
+
+        var populationGrowth = (int)(Population * effectsValue);
+        Population = int.Max(0, Population + populationGrowth);
+
+        AddDomainEvent(new CityTurnEndEvent(Faction, income));
+    }
+
+    public Result StartConstruction(BuildingTemplate building)
+    {
+        if (!building.AllowedCityTypes.Contains(Type))
+            return Result.Failure(GameErrors.CityUnavailableConstructionOption);
+
+        if (_buildings.Any(b => b.Type == building.Type))
+            return Result.Failure(GameErrors.CantConstructBuildingDublicate);
+
+        var hasRequiredBuildings = building.RequiredBuildings.All(reqType =>
+            _buildings.Any(b => b.Type == reqType));
+
+        if (!hasRequiredBuildings)
+            return Result.Failure(GameErrors.ChainUnavailableConstructionOption);
+
+        _buildings.Add(Building.CreateUnderConstruction(CampaignId, building, Faction, Id));
+
+        return Result.Success();
+    }
+
+    public Result CancelConstruction(BuildingId id)
+    {
+        var building = _buildings.Single(b => b.Id == id);
+
+        if (building.IsConstructed)
+            return Result.Failure(GameErrors.CantCancelAlreadyConstructed);
+
+        _buildings.Remove(building);
+
+        AddDomainEvent(new BuildingConstructionCanceledEvent(Faction, building.Cost));
+
+        return Result.Success();
     }
 }

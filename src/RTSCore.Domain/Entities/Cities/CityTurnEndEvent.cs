@@ -2,6 +2,7 @@ using RTSCore.Domain.Common;
 
 namespace RTSCore.Domain.Entities.Cities;
 
-public record CityCreatedEvent(
-    FactionType Faction
+public record CityTurnEndEvent(
+    FactionType Faction,
+    int Income
 ) : IDomainEvent;

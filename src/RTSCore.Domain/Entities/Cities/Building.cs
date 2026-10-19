@@ -6,15 +6,14 @@ namespace RTSCore.Domain.Entities.Cities;
 public sealed class Building
 {
     public CampaignId CampaignId { get; }
-
     public BuildingId Id { get; }
     public BuildingType Type { get; }
     public FactionType Faction { get; }
     public CityId CityId { get; }
     public int Cost { get; }
-    public int TurnsToConstruct { get; private set; }
 
-    public bool IsConstructed => TurnsToConstruct <= 0;
+    public int TurnsToConstruct { get; private set; }
+    public bool IsConstructed => TurnsToConstruct == 0;
 
     private Building(
         CampaignId campaignId,
@@ -50,5 +49,5 @@ public sealed class Building
         CityId cityId
     ) => new(campaignId, BuildingId.New(), template, faction, cityId, turnsToConstruct: 0);
 
-    internal void AdvanceConstruction() => TurnsToConstruct--;
+    internal void AdvanceConstruction() => TurnsToConstruct = int.Max(0, TurnsToConstruct - 1);
 }

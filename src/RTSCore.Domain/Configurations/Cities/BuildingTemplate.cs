@@ -14,9 +14,9 @@ public sealed record BuildingTemplate
     public required int TurnsToConstruct { get; init; }
     public required ProductionCategory ProductionCategory { get; init; }
     public required int AiUtility { get; init; }
-    public required ImmutableArray<CityType> AllowedCityTypes { get; init; }
+    public required FrozenSet<CityType> AllowedCityTypes { get; init; }
 
-    public ImmutableArray<BuildingType> RequiredBuildings { get; init; } = [];
-    public ImmutableArray<BuildingEffect> Effects { get; init; } = [];
+    public FrozenSet<BuildingType> RequiredBuildings { get; init; } = [];
+    public FrozenSet<BuildingEffect> Effects { get; init; } = [];
     public FrozenDictionary<UnitType, int> Garrison { get; init; } = FrozenDictionary<UnitType, int>.Empty;
 }
