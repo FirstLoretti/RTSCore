@@ -2,7 +2,7 @@ using RTSCore.Domain.Errors;
 
 namespace RTSCore.Domain.Common;
 
-public readonly struct Result
+public readonly record struct Result
 {
     public bool IsSuccess { get; }
     public bool IsFailure => !IsSuccess;

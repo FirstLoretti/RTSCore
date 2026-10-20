@@ -1,3 +1,3 @@
 namespace RTSCore.Domain.Errors;
 
-public record GameError(string Message);
+public sealed record GameError(string Code, string Message);
