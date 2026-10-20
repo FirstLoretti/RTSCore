@@ -1,3 +1,4 @@
+using RTSCore.Domain.Common;
 using RTSCore.Domain.Errors;
 
 namespace RTSCore.Domain.Entities.Diplomacy;
@@ -29,10 +30,10 @@ public sealed class DiplomacyRelation
     public Result OpenTrade(int standingBonus)
     {
         if (InWar)
-            return Result.Failure(GameErrors.CantTradeWithWarOpponent);
+            return Result.Failure(GameErrors.CantTradeWithEnemy);
 
         if (HasTradeAgreement)
-            return Result.Failure(GameErrors.CantTradeAlreadyConcluded);
+            return Result.Failure(GameErrors.CantTradeAlreadyExist);
 
         HasTradeAgreement = true;
         ChangeStanding(standingBonus);
@@ -43,7 +44,7 @@ public sealed class DiplomacyRelation
     public Result DeclareWar(int standingPenalty)
     {
         if (InWar)
-            return Result.Failure(GameErrors.CantWarAlreadyHappening);
+            return Result.Failure(GameErrors.CantWarFactionsAlreadyWar);
 
         HasTradeAgreement = false;
         InWar = true;
@@ -55,7 +56,7 @@ public sealed class DiplomacyRelation
     public Result MakePeace(int standingBonus)
     {
         if (!InWar)
-            return Result.Failure(GameErrors.CantPeaceFactionsNotAtWarState);
+            return Result.Failure(GameErrors.CantPeaceFactionsNotWar);
 
         InWar = false;
         ChangeStanding(standingBonus);
@@ -66,7 +67,7 @@ public sealed class DiplomacyRelation
     public Result CancelTrade(int standingPenalty)
     {
         if (!HasTradeAgreement)
-            return Result.Failure(GameErrors.CantCancelTradeDontConcluded);
+            return Result.Failure(GameErrors.CantCancelTradeNotExist);
 
         HasTradeAgreement = false;
         ChangeStanding(standingPenalty);

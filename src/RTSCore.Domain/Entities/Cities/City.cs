@@ -1,5 +1,6 @@
 using System.Numerics;
 
+using RTSCore.Domain.Common;
 using RTSCore.Domain.Configurations.Armies;
 using RTSCore.Domain.Configurations.Cities;
 using RTSCore.Domain.Entities.Armies;
@@ -138,7 +139,7 @@ public sealed class City : AggregateRoot
             return Result.Failure(GameErrors.CityUnavailableConstructionOption);
 
         if (_buildings.Any(b => b.Type == building.Type))
-            return Result.Failure(GameErrors.CantConstructBuildingDublicate);
+            return Result.Failure(GameErrors.CantConstructBuildingDuplicate);
 
         var hasRequiredBuildings = building.RequiredBuildings.All(reqType =>
             _buildings.Any(b => b.Type == reqType));

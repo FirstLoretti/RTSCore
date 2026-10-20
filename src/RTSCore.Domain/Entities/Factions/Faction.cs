@@ -1,6 +1,5 @@
 using System.Numerics;
 
-using RTSCore.Domain.AI.Personality;
 using RTSCore.Domain.Configurations.Cities;
 using RTSCore.Domain.Configurations.Factions;
 using RTSCore.Domain.Entities.Campaigns;
@@ -8,65 +7,28 @@ using RTSCore.Domain.Entities.Cities;
 
 namespace RTSCore.Domain.Entities.Factions;
 
-public class Faction : AggregateRoot
+public sealed class Faction : AggregateRoot
 {
-    public CampaignId CampaignId { get; init; }
-    public PlayerType PlayerType { get; init; }
-    public FactionType Type { get; init; }
+    public CampaignId CampaignId { get; }
+    public FactionType Type { get; }
 
-    public AiPersonalityType? AiPersonalityType { get; private set; }
     public int Gold { get; private set; }
 
-    private Faction(
-        CampaignId campaignId,
-        PlayerType player,
-        FactionTemplate template,
-        AiPersonalityType? aiPersonalityType
-    )
+    public Faction(CampaignId campaignId, FactionTemplate template)
     {
         CampaignId = campaignId;
         Type = template.Type;
-        PlayerType = player;
         Gold = template.Gold;
-        AiPersonalityType = aiPersonalityType;
     }
 
     private Faction() { }
 
-    public static Faction CreateHuman(
-        CampaignId campaignId,
-        FactionTemplate template
-    ) => new(campaignId, PlayerType.Human, template, null);
-
-    public static Faction CreateAi(
-        CampaignId campaignId,
-        FactionTemplate template,
-        AiPersonalityType aiPersonalityType
-    ) => new(campaignId, PlayerType.Ai, template, aiPersonalityType);
-
     public City FoundCity(CityTemplate template, Vector2 coordinates)
-    {
-        return City.Create(CampaignId, template, Type, coordinates);
-    }
+        => City.Create(CampaignId, template, Type, coordinates);
 
-    public void SpendGold(int amount)
-    {
-        ArgumentOutOfRangeException.ThrowIfNegative(amount);
-        if (Gold < amount)
-            throw new NotImplementedException("В казне недостаточно средств");
+    public void SpendGold(int amount) => Gold = int.Max(int.MinValue, Gold - amount);
 
-        Gold -= amount;
-    }
+    public void EarnGold(int amount) => Gold = int.Min(Gold + amount, int.MaxValue);
 
-    public void EarnGold(int amount)
-    {
-        ArgumentOutOfRangeException.ThrowIfNegative(amount);
-        Gold += amount;
-    }
-
-    public void RefundGold(int amount)
-    {
-        ArgumentOutOfRangeException.ThrowIfNegative(amount);
-        Gold += amount;
-    }
+    public void RefundGold(int amount) => Gold = int.Min(Gold + amount, int.MaxValue);
 }

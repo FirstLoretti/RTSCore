@@ -1,6 +1,6 @@
 using RTSCore.Domain.Errors;
 
-namespace RTSCore.Domain;
+namespace RTSCore.Domain.Common;
 
 public readonly struct Result
 {

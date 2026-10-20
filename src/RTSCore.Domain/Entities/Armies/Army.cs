@@ -1,5 +1,6 @@
 using System.Numerics;
 
+using RTSCore.Domain.Common;
 using RTSCore.Domain.Configurations.Armies;
 using RTSCore.Domain.Entities.Armies.Combat;
 using RTSCore.Domain.Entities.Campaigns;
@@ -71,7 +72,7 @@ public sealed class Army : AggregateRoot
 
     public Result RecruitUnit(UnitTemplate template)
     {
-        if (!HasFreeSlots) return Result.Failure(GameErrors.ArmyDontHaveFreeSlots);
+        if (!HasFreeSlots) return Result.Failure(GameErrors.ArmyDoesNotHaveFreeSlots);
 
         _units.Add(Unit.CreateTraining(CampaignId, Faction, template, Id));
 
