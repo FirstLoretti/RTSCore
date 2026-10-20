@@ -3,5 +3,5 @@ namespace RTSCore.Domain.Entities.Diplomacy;
 public readonly record struct DiplomacyOfferId(Guid Value)
 {
     public static DiplomacyOfferId New() => new(Guid.NewGuid());
-    public static DiplomacyOfferId Empty() => new(Guid.Empty);
+    public static DiplomacyOfferId Empty => new(Guid.Empty);
 }

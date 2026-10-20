@@ -2,16 +2,17 @@ using RTSCore.Domain.Entities.Campaigns;
 
 namespace RTSCore.Domain.Entities.Diplomacy;
 
-public class DiplomacyOffer
+public sealed class DiplomacyOffer
 {
-    public CampaignId CampaignId { get; init; }
-    public DiplomacyOfferId Id { get; init; }
-    public FactionType Initiator { get; init; }
-    public FactionType Target { get; init; }
-    public OfferType Type { get; init; }
+    public CampaignId CampaignId { get; }
+    public DiplomacyOfferId Id { get; }
+    public FactionType Initiator { get; }
+    public FactionType Target { get; }
+    public OfferType Type { get; }
+
     public OfferStatus Status { get; private set; }
 
-    private DiplomacyOffer(
+    public DiplomacyOffer(
         CampaignId campaignId,
         DiplomacyOfferId offerId,
         FactionType initiator,
@@ -24,20 +25,11 @@ public class DiplomacyOffer
         Initiator = initiator;
         Target = target;
         Type = type;
-        Status = OfferStatus.Pending;
     }
 
     private DiplomacyOffer() { }
 
-    public void Accept()
-    {
-        if (Status != OfferStatus.Pending)
-        {
-            throw new NullReferenceException($"[{nameof(DiplomacyOffer)}] Нельзя принять предложение со статусом {Status}");
-        }
-
-        Status = OfferStatus.Accepted;
-    }
+    public void Accept() => Status = OfferStatus.Accepted;
 
     public void Reject() => Status = OfferStatus.Rejeсted;
 }

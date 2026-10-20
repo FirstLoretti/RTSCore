@@ -2,7 +2,7 @@ namespace RTSCore.Domain.Entities.Diplomacy;
 
 public enum OfferStatus
 {
-    Pending,
+    Pending = 0,
     Accepted,
     Rejeсted
 }

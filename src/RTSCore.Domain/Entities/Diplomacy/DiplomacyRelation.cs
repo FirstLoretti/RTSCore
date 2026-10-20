@@ -1,116 +1,79 @@
+using RTSCore.Domain.Errors;
+
 namespace RTSCore.Domain.Entities.Diplomacy;
 
-public class DiplomacyRelation
+public sealed class DiplomacyRelation
 {
-    public Guid Id { get; init; }
-    public FactionType FactionA { get; init; }
-    public FactionType FactionB { get; init; }
+    public DiplomacyRelationId Id { get; }
+    public FactionType FactionA { get; }
+    public FactionType FactionB { get; }
+
     public int Standing { get; private set; }
     public bool HasTradeAgreement { get; private set; }
     public bool InWar { get; private set; }
 
-    public const int MinStanding = -100;
     public const int MaxStanding = 100;
+    public const int MinStanding = -100;
 
-    public DiplomacyRelation(FactionType factionA, FactionType factionB, int startingStanding)
+    public DiplomacyRelation(FactionType factionA, FactionType factionB, int standing)
     {
-        if (factionA == factionB)
-        {
-            throw new NotImplementedException("Фракция не может установить дипломатические отношения сама с собой");
-        }
-
-        Id = Guid.NewGuid();
-
         (FactionA, FactionB) = factionA < factionB
             ? (factionA, factionB)
             : (factionB, factionA);
 
-        Standing = startingStanding;
+        Standing = standing;
     }
 
     private DiplomacyRelation() { }
 
-    public void ThrowIfCannotProposePeaceOffer()
-    {
-        if (!InWar)
-        {
-            throw new NotImplementedException("Нельзя заключить мир. Фракции уже в состоянии мира");
-        }
-    }
-
-    public void ThrowIfCannotProposeTradeOffer()
-    {
-        if (HasTradeAgreement)
-        {
-            throw new NotImplementedException("Нельзя начать торговать. Фракции уже торгуют");
-        }
-        if (InWar)
-        {
-            throw new NotImplementedException("Нельзя начать торговать. Фракции в состоянии войны");
-        }
-    }
-
-    public void OpenTrade()
+    public Result OpenTrade(int standingBonus)
     {
         if (InWar)
-        {
-            throw new NotImplementedException("Нельзя заключить торговый договор, фракции в состоянии войны");
-        }
+            return Result.Failure(GameErrors.CantTradeWithWarOpponent);
 
         if (HasTradeAgreement)
-        {
-            throw new NotImplementedException("Торговый договор уже заключён");
-        }
-
-        // if (Standing < GameBalance.Diplomacy.MinStandingForTrade)
-        // {
-        //     throw new NotImplementedException(
-        //         $"Нельзя заключить торговый договор. Уровень отношений: {Standing}. " +
-        //         $"Требуется минимум: {GameBalance.Diplomacy.MinStandingForTrade}"
-        //     );
-        // }
+            return Result.Failure(GameErrors.CantTradeAlreadyConcluded);
 
         HasTradeAgreement = true;
-        //ChangeStanding(GameBalance.Diplomacy.AcceptTradeOfferBonus);
+        ChangeStanding(standingBonus);
+
+        return Result.Success();
     }
 
-    public void DeclareWar()
+    public Result DeclareWar(int standingPenalty)
     {
         if (InWar)
-        {
-            throw new NotImplementedException("Нельзя объявить войну. Фракции уже воюют");
-        }
+            return Result.Failure(GameErrors.CantWarAlreadyHappening);
 
         HasTradeAgreement = false;
-
         InWar = true;
-        //ChangeStanding(GameBalance.Diplomacy.DeclareWarPenalty);
+        ChangeStanding(standingPenalty);
+
+        return Result.Success();
     }
 
-    public void MakePeace()
+    public Result MakePeace(int standingBonus)
     {
         if (!InWar)
-        {
-            throw new NotImplementedException("Нельзя заключить мир. Фракции уже в состоянии мира");
-        }
+            return Result.Failure(GameErrors.CantPeaceFactionsNotAtWarState);
 
         InWar = false;
-        //ChangeStanding(GameBalance.Diplomacy.AcceptPeaceOfferBonus);
+        ChangeStanding(standingBonus);
+
+        return Result.Success();
     }
 
-    public void CancelTrade()
+    public Result CancelTrade(int standingPenalty)
     {
         if (!HasTradeAgreement)
-        {
-            throw new NotImplementedException("Торговый договор не заключён");
-        }
+            return Result.Failure(GameErrors.CantCancelTradeDontConcluded);
 
         HasTradeAgreement = false;
-        //ChangeStanding(GameBalance.Diplomacy.CancelTradePenalty);
+        ChangeStanding(standingPenalty);
+
+        return Result.Success();
     }
 
-    public void ChangeStanding(int amount)
-    {
-        Standing = int.Clamp(Standing + amount, MinStanding, MaxStanding);
-    }
+    private void ChangeStanding(int amount)
+        => Standing = int.Clamp(Standing + amount, MinStanding, MaxStanding);
 }
