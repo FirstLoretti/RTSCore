@@ -23,8 +23,8 @@ public class AutoBattleCalculatorTests
         result.DefenderBattleLogs.Should().HaveCount(1);
         result.IsAttackerWon.Should().BeTrue();
         result.IsDefenderWon.Should().BeFalse();
-        result.AttackerBattleLogs.Should().OnlyContain(u => u.RemainingHealth == 50);
-        result.DefenderBattleLogs.Should().ContainSingle(u => u.RemainingHealth == 0);
+        result.AttackerBattleLogs.Should().OnlyContain(u => u.DamageTaken == 50);
+        result.DefenderBattleLogs.Should().ContainSingle(u => u.DamageTaken == 100);
     }
 
     [Fact]
@@ -41,8 +41,8 @@ public class AutoBattleCalculatorTests
         result.DefenderBattleLogs.Should().HaveCount(5);
         result.IsAttackerWon.Should().BeFalse();
         result.IsDefenderWon.Should().BeTrue();
-        result.AttackerBattleLogs.Should().ContainSingle(u => u.RemainingHealth == 0);
-        result.DefenderBattleLogs.Should().OnlyContain(u => u.RemainingHealth == 50);
+        result.AttackerBattleLogs.Should().ContainSingle(u => u.DamageTaken == 100);
+        result.DefenderBattleLogs.Should().OnlyContain(u => u.DamageTaken == 50);
     }
 
     [Fact]
@@ -59,8 +59,8 @@ public class AutoBattleCalculatorTests
         result.DefenderBattleLogs.Should().HaveCount(5);
         result.IsAttackerWon.Should().BeFalse();
         result.IsDefenderWon.Should().BeFalse();
-        result.AttackerBattleLogs.Should().OnlyContain(u => u.RemainingHealth == 50);
-        result.DefenderBattleLogs.Should().OnlyContain(u => u.RemainingHealth == 50);
+        result.AttackerBattleLogs.Should().OnlyContain(u => u.DamageTaken == 50);
+        result.DefenderBattleLogs.Should().OnlyContain(u => u.DamageTaken == 50);
     }
 
     private static (UnitTemplate template, AutoBattleCalculator calculator) Arrange()

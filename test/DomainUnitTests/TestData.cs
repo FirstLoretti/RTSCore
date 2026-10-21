@@ -23,12 +23,18 @@ public static class TestData
         ProductionCategory = ProductionCategory.Military,
         RequiredBuilding = BuildingType.ReqruitBarrack,
         Speed = 0,
-        TurnsToRecruit = 0,
+        TurnsToRecruit = 1,
         Type = UnitType.Peasant
     };
+
+    public static UnitStatsWeights UnitStatsWeights { get; } = new(Damage: 1f, Health: 1f);
+
+    public static MovementConfiguration MovementConfiguration { get; } = new(BaseUnitDistanceCost: 10, MaxMovementPoints: 100);
+
 
     public static Unit CreateUnit(UnitTemplate template) =>
         Unit.CreateReady(CampaignId.Empty, FactionType.England, template, ArmyId.Empty);
 
-    public static UnitStatsWeights UnitStatsWeights { get; } = new() { Damage = 1f, Health = 1f };
+    public static Army CreateArmy() =>
+        Army.Create(CampaignId.New(), FactionType.England, new(0f, 0f), CreateUnitTemplate(100));
 }

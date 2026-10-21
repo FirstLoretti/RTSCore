@@ -161,7 +161,7 @@ public sealed class City : AggregateRoot
 
         _buildings.Remove(building);
 
-        AddDomainEvent(new BuildingConstructionCanceledEvent(Faction, building.Cost));
+        AddDomainEvent(new ConstructionCanceledEvent(Faction, building.Cost));
 
         return Result.Success();
     }

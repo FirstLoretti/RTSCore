@@ -16,4 +16,6 @@ public readonly record struct Result
 
     public static Result Success() => new(true, null);
     public static Result Failure(GameError error) => new(false, error);
+
+    public static implicit operator Result(GameError error) => Failure(error);
 }

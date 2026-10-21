@@ -54,9 +54,8 @@ public sealed class AutoBattleCalculator(
             var template = catalog.GetUnit(unit.Type);
 
             var damage = (int)(template.MaxHealth * damageTaken);
-            var health = unit.Health - damage;
 
-            logs.Add(new(unit.Id, damage, health));
+            logs.Add(new(unit.Id, damage));
         }
 
         return logs;

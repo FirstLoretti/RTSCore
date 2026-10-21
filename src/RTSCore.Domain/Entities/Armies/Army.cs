@@ -70,21 +70,32 @@ public sealed class Army : AggregateRoot
         return Result.Success();
     }
 
-    public Result RecruitUnit(UnitTemplate template)
+    public Result<UnitId> RecruitUnit(UnitTemplate template)
     {
-        if (!HasFreeSlots) return Result.Failure(GameErrors.ArmyDoesNotHaveFreeSlots);
+        if (!HasFreeSlots) return GameErrors.ArmyDoesNotHaveFreeSlots;
 
-        _units.Add(Unit.CreateTraining(CampaignId, Faction, template, Id));
+        var unit = Unit.CreateTraining(CampaignId, Faction, template, Id);
+        _units.Add(unit);
 
-        return Result.Success();
+        return unit.Id;
     }
 
-    public void AssignGeneral(UnitTemplate template)
+    public Result<UnitId> AddReadyUnit(UnitTemplate template)
+    {
+        if (!HasFreeSlots) return GameErrors.ArmyDoesNotHaveFreeSlots;
+
+        var unit = Unit.CreateReady(CampaignId, Faction, template, Id);
+        _units.Add(unit);
+
+        return unit.Id;
+    }
+
+    public void ReplaceGeneral(UnitTemplate template)
     {
         if (GeneralId != UnitId.Empty)
         {
-            var general = _units.Single(u => u.Id == GeneralId);
-            DisbandUnit(general);
+            var general = GetUnitOrThrow(GeneralId);
+            _units.Remove(general);
         }
 
         var unit = Unit.CreateReady(CampaignId, Faction, template, Id);
@@ -92,25 +103,24 @@ public sealed class Army : AggregateRoot
         GeneralId = unit.Id;
     }
 
-    public void DisbandUnit(Unit unit)
+    public Result DisbandUnit(UnitId id)
     {
+        if (id == GeneralId) return GameErrors.CantDisbandGeneral;
+
+        var unit = GetUnitOrThrow(id);
         _units.Remove(unit);
 
-        if (unit.Id == GeneralId)
-        {
-            GeneralId = UnitId.Empty;
-            // TODO: Event
-        }
+        return Result.Success();
     }
 
     public void PurgeDeadUnits()
     {
-        var general = _units.Single(u => u.Id == GeneralId);
+        var general = GetUnitOrThrow(GeneralId);
 
         if (!general.IsAlive)
         {
+            AddDomainEvent(new RemoveGeneralEvent(CampaignId, GeneralId));
             GeneralId = UnitId.Empty;
-            // TODO: Event
         }
 
         _units.RemoveAll(u => !u.IsAlive);
@@ -120,11 +130,14 @@ public sealed class Army : AggregateRoot
     {
         foreach (var log in logs)
         {
-            var unit = _units.Single(u => u.Id == log.UnitId);
-
+            var unit = GetUnitOrThrow(log.UnitId);
             unit.TakeDamage(log.DamageTaken);
         }
 
         PurgeDeadUnits();
     }
+
+    private Unit GetUnitOrThrow(UnitId id) => _units.SingleOrDefault(u => u.Id == id)
+        ?? throw new InvalidOperationException($"Army:{Id} does not contain it's own unit:{id}");
+
 }

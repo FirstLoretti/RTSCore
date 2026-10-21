@@ -6,8 +6,6 @@ public static class GameErrors
         = new("Army.NotEnoughMovementPoints", "Not enough movement points.");
     public static GameError ArmyDoesNotHaveFreeSlots { get; }
         = new("Army.DoesNotHaveFreeSlots", "Army does not have free slots.");
-    public static GameError CantCancelRecruitUnit { get; }
-        = new("Army.CantCancelRecruitUnit", "Cannot cancel recruitment for an already recruited unit.");
     public static GameError CantDisbandGeneral { get; }
         = new("Army.CantDisbandGeneral", "General cannot be disbanded.");
 
