@@ -8,8 +8,8 @@ public class UnitStatsCalculatorTests
 {
 
     [Theory]
-    [InlineData(10, 0, 2f, 10)]
-    [InlineData(10, 1, 2f, 20)]
+    [InlineData(10, 0, 1f, 10)]
+    [InlineData(10, 1, 1f, 20)]
     public void Stat_ShouldReturnExpectedValue(int value, int level, float growthPercent, int expectedValue)
     {
         var stat = UnitStatsCalculator.Stat(value, level, growthPercent);

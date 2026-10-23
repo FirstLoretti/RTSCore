@@ -1,7 +1,11 @@
+using System.Collections.Immutable;
 using System.Numerics;
 
 using RTSCore.Domain;
+using RTSCore.Domain.AI.Personality;
 using RTSCore.Domain.Configurations.Armies;
+using RTSCore.Domain.Configurations.Cities;
+using RTSCore.Domain.Configurations.Factions;
 using RTSCore.Domain.Entities.Armies;
 using RTSCore.Domain.Entities.Campaigns;
 using RTSCore.Domain.Entities.Cities;
@@ -38,4 +42,35 @@ public static class TestData
 
     public static Army CreateArmy() =>
         Army.Create(CampaignId.New(), FactionType.England, Vector2.Zero, CreateUnitTemplate(maxHealth: 100));
+
+    private static ImmutableArray<CityPreset> EnglandCityPresets { get; } =
+    [
+        new(CityType.Settlement, DisplayName: "York", Vector2.Zero),
+    ];
+
+    private static ImmutableArray<CityPreset> FranceCityPresets { get; } =
+    [
+        new(CityType.Settlement, DisplayName: "Paris", Vector2.One),
+    ];
+
+    private static ImmutableArray<CityPreset> SpainCityPresets { get; } =
+    [
+        new(CityType.Village, DisplayName: "Madrid", new(2f, 2f)),
+        new(CityType.Village, DisplayName: "Seville", new(3f, 3f))
+    ];
+
+    public static FactionCatalog FactionCatalog { get; } = new(
+        [
+            new(FactionType.England, "England", 1000, EnglandCityPresets, AiPersonalityType.Conqueror),
+            new(FactionType.France, "France", 1000, FranceCityPresets, AiPersonalityType.Conqueror),
+            new(FactionType.Spain, "Spain", 1000, SpainCityPresets, AiPersonalityType.Defender)
+        ]
+    );
+
+    public static CityCatalog CityCatalog { get; } = new(
+        [
+            new(CityType.Village, "", PopulationForUpgrade: 0, ConstructableBuildings: []),
+            new(CityType.Settlement, "", PopulationForUpgrade: 0, ConstructableBuildings: [])
+        ]
+    );
 }

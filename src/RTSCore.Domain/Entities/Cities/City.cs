@@ -34,7 +34,7 @@ public sealed class City : AggregateRoot
         Id = cityId;
         Type = template.Type;
         Faction = faction;
-        Population = template.PopulationToUpgrade;
+        Population = template.PopulationForUpgrade;
         Coordinates = coordinates;
     }
 

@@ -7,6 +7,6 @@ namespace RTSCore.Domain.Configurations.Cities;
 public sealed record CityTemplate(
     CityType Type,
     string DisplayName,
-    int PopulationToUpgrade,
+    int PopulationForUpgrade,
     ImmutableArray<BuildingType> ConstructableBuildings
 );
