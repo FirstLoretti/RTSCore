@@ -2,8 +2,6 @@ using System.Numerics;
 
 using FluentAssertions;
 
-using Microsoft.VisualBasic;
-
 using RTSCore.Domain.Entities.Armies;
 using RTSCore.Domain.Entities.Armies.Combat;
 using RTSCore.Domain.Errors;
@@ -12,10 +10,10 @@ namespace DomainUnitTests.Entities.Armies;
 
 public partial class ArmyTests
 {
-    public class Create
+    public class Factory
     {
         [Fact]
-        public void ShouldCreateArmyWithGeneral()
+        public void Create_ShouldCreateArmyWithGeneral()
         {
             var army = TestData.CreateArmy();
 
