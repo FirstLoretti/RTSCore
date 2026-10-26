@@ -1,3 +1,4 @@
+using System.Collections.Frozen;
 using System.Collections.Immutable;
 using System.Numerics;
 
@@ -43,6 +44,44 @@ public static class TestData
     public static Army CreateArmy() =>
         Army.Create(CampaignId.New(), FactionType.England, Vector2.Zero, CreateUnitTemplate(maxHealth: 100));
 
+    public static BuildingTemplate CreateBuildingTemplate() => new()
+    {
+        AiUtility = 0,
+        AllowedCityTypes = [CityType.Settlement, CityType.Village],
+        Cost = 0,
+        DisplayName = "",
+        ProductionCategory = ProductionCategory.Military,
+        TurnsToConstruct = 1,
+        Type = BuildingType.ReqruitBarrack,
+        Effects = [],
+        Garrison = FrozenDictionary<UnitType, int>.Empty,
+        RequiredBuildings = []
+    };
+
+    public static CityTemplate CreateCityTemplate() => new(
+        CityType.Settlement,
+        "",
+        StartingPopulation: 0,
+        PopulationForUpgrade: 0,
+        ConstructableBuildings:
+        [
+            BuildingType.ReqruitBarrack,
+            BuildingType.MilitiaBarrack,
+            BuildingType.Market,
+            BuildingType.BigMarket,
+            BuildingType.CultivatedField,
+            BuildingType.CultivatedFieldsComplex
+        ]
+    );
+
+    public static CityConfiguration CityConfiguration { get; } = new(GrowthRate: 1f, TaxPerCitizen: 1f);
+
+    public static Building CreateBuilding(BuildingTemplate template) =>
+        Building.CreateUnderConstruction(CampaignId.New(), template, FactionType.England, CityId.Empty);
+
+    public static City CreateCity(CityTemplate template) =>
+        City.Create(CampaignId.New(), template, FactionType.England, Vector2.Zero);
+
     private static ImmutableArray<CityPreset> EnglandCityPresets { get; } =
     [
         new(CityType.Settlement, DisplayName: "York", Vector2.Zero),
@@ -69,8 +108,50 @@ public static class TestData
 
     public static CityCatalog CityCatalog { get; } = new(
         [
-            new(CityType.Village, "", PopulationForUpgrade: 0, ConstructableBuildings: []),
-            new(CityType.Settlement, "", PopulationForUpgrade: 0, ConstructableBuildings: [])
+            CreateCityTemplate() with {Type = CityType.Village},
+            CreateCityTemplate() with {Type = CityType.Settlement}
+        ]
+    );
+
+    public static BuildingCatalog BuildingCatalog { get; } = new(
+        [
+            CreateBuildingTemplate() with
+            {
+                TurnsToConstruct = 1,
+                Type = BuildingType.ReqruitBarrack
+            },
+            CreateBuildingTemplate() with
+            {
+                TurnsToConstruct = 1,
+                Type = BuildingType.MilitiaBarrack,
+                RequiredBuildings = [BuildingType.ReqruitBarrack]
+            },
+            CreateBuildingTemplate() with
+            {
+                TurnsToConstruct = 1,
+                Type = BuildingType.Market,
+                Effects = [new(BuildingEffectType.GoldIncome, 1000)]
+            },
+            CreateBuildingTemplate() with
+            {
+                TurnsToConstruct = 1,
+                Type = BuildingType.BigMarket,
+                RequiredBuildings = [BuildingType.Market],
+                Effects = [new(BuildingEffectType.GoldIncome, 2000)]
+            },
+            CreateBuildingTemplate() with
+            {
+                TurnsToConstruct = 1,
+                Type = BuildingType.CultivatedField,
+                Effects = [new(BuildingEffectType.PopulationGrowth, 0.25f)]
+            },
+            CreateBuildingTemplate() with
+            {
+                TurnsToConstruct = 1,
+                Type = BuildingType.CultivatedFieldsComplex,
+                RequiredBuildings = [BuildingType.CultivatedField],
+                Effects = [new(BuildingEffectType.PopulationGrowth, 0.5f)]
+            }
         ]
     );
 }

@@ -4,5 +4,6 @@ namespace RTSCore.Domain.Entities.Cities;
 
 public record CityTurnEndEvent(
     FactionType Faction,
-    int Income
+    int BuildingsIncome,
+    int TaxesIncome
 ) : IDomainEvent;

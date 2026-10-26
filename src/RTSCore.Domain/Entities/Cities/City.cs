@@ -34,7 +34,7 @@ public sealed class City : AggregateRoot
         Id = cityId;
         Type = template.Type;
         Faction = faction;
-        Population = template.PopulationForUpgrade;
+        Population = template.StartingPopulation;
         Coordinates = coordinates;
     }
 
@@ -48,12 +48,12 @@ public sealed class City : AggregateRoot
     ) => new(campaignId, CityId.New(), template, faction, coordinates);
 
     public IReadOnlyCollection<ProductionOption<UnitType>> GetRecruitableUnits(
-        IReadOnlyCollection<UnitTemplate> units
+        IReadOnlyCollection<UnitTemplate> unitTemplates
     )
     {
         var isConstructed = IsConstructed();
 
-        return [.. units
+        return [.. unitTemplates
             .Where(u => isConstructed[(int)u.RequiredBuilding])
             .Select(u => new ProductionOption<UnitType>(
                 u.DisplayName,
@@ -65,14 +65,15 @@ public sealed class City : AggregateRoot
     }
 
     public IReadOnlyCollection<ProductionOption<BuildingType>> GetConstructableBuildings(
-        IReadOnlyCollection<BuildingTemplate> buildings
+        IReadOnlyCollection<BuildingTemplate> buildingTemplates
     )
     {
         var isConstructed = IsConstructed();
 
-        return [.. buildings
+        return [.. buildingTemplates
             .Where(b =>
                 b.AllowedCityTypes.Contains(Type) &&
+                !isConstructed[(int)b.Type] &&
                 b.RequiredBuildings.All(type => isConstructed[(int)type]))
             .Select(b => new ProductionOption<BuildingType>(
                 b.DisplayName,
@@ -98,18 +99,15 @@ public sealed class City : AggregateRoot
 
     public Army CreateArmy(UnitTemplate general) => Army.Create(CampaignId, Faction, Coordinates, general);
 
-    public Result AssertCanRecruit(UnitTemplate unit) =>
-        _buildings.Any(b => b.IsConstructed && b.Type == unit.RequiredBuilding)
-            ? Result.Success()
-            : Result.Failure(GameErrors.UnavailableRecruitOption);
-
     public void TurnEnd(BuildingCatalog catalog, CityConfiguration configuration)
     {
-        float effectsValue = 0f;
-        int income = 0;
+        var growthEffects = 0f;
+        var buildingsIncome = 0f;
 
         foreach (var building in _buildings)
         {
+            building.AdvanceConstruction();
+
             if (!building.IsConstructed) continue;
 
             var template = catalog.GetBuilding(building.Type);
@@ -117,44 +115,48 @@ public sealed class City : AggregateRoot
             foreach (var effect in template.Effects)
             {
                 if (effect.Type == BuildingEffectType.PopulationGrowth)
-                    effectsValue += effect.Value;
+                    growthEffects += effect.Value;
 
                 if (effect.Type == BuildingEffectType.GoldIncome)
-                    income += effect.Value;
+                    buildingsIncome += effect.Value;
             }
         }
 
-        var taxIncome = (int)(Population * configuration.TaxPerCitizen);
-        income += taxIncome;
-
-        var populationGrowth = (int)(Population * effectsValue);
+        var populationGrowth = (int)(Population * growthEffects);
         Population = int.Max(0, Population + populationGrowth);
 
-        AddDomainEvent(new CityTurnEndEvent(Faction, income));
+        var taxesIncome = (int)(Population * configuration.TaxPerCitizen);
+
+        AddDomainEvent(new CityTurnEndEvent(Faction, (int)buildingsIncome, taxesIncome));
     }
 
-    public Result StartConstruction(BuildingTemplate building)
+    public Result<BuildingId> StartConstruction(BuildingTemplate template)
     {
-        if (!building.AllowedCityTypes.Contains(Type))
-            return Result.Failure(GameErrors.CityUnavailableConstructionOption);
+        var result = CanConstruct(template);
 
-        if (_buildings.Any(b => b.Type == building.Type))
-            return Result.Failure(GameErrors.CantConstructBuildingDuplicate);
+        if (result.IsFailure) return result.Error;
 
-        var hasRequiredBuildings = building.RequiredBuildings.All(reqType =>
-            _buildings.Any(b => b.Type == reqType));
+        var building = Building.CreateUnderConstruction(CampaignId, template, Faction, Id);
+        _buildings.Add(building);
 
-        if (!hasRequiredBuildings)
-            return Result.Failure(GameErrors.ChainUnavailableConstructionOption);
+        return building.Id;
+    }
 
-        _buildings.Add(Building.CreateUnderConstruction(CampaignId, building, Faction, Id));
+    public Result<BuildingId> ConstructInstally(BuildingTemplate template)
+    {
+        var result = CanConstruct(template);
 
-        return Result.Success();
+        if (result.IsFailure) return result.Error;
+
+        var building = Building.CreateConstructed(CampaignId, template, Faction, Id);
+        _buildings.Add(building);
+
+        return building.Id;
     }
 
     public Result CancelConstruction(BuildingId id)
     {
-        var building = _buildings.Single(b => b.Id == id);
+        var building = GetBuildingOrThrow(id);
 
         if (building.IsConstructed)
             return Result.Failure(GameErrors.CantCancelAlreadyConstructed);
@@ -165,4 +167,23 @@ public sealed class City : AggregateRoot
 
         return Result.Success();
     }
+
+    internal Result CanConstruct(BuildingTemplate building)
+    {
+        if (!building.AllowedCityTypes.Contains(Type))
+            return Result.Failure(GameErrors.CityCantConstructThisBuildingType);
+
+        if (_buildings.Any(b => b.Type == building.Type))
+            return Result.Failure(GameErrors.CantConstructBuildingDuplicate);
+
+        var hasRequiredBuildings = building.RequiredBuildings.All(reqType =>
+            _buildings.Any(b => b.Type == reqType));
+
+        return !hasRequiredBuildings
+            ? Result.Failure(GameErrors.ChainUnavailableConstructionOption)
+            : Result.Success();
+    }
+
+    private Building GetBuildingOrThrow(BuildingId id) => _buildings.SingleOrDefault(b => b.Id == id)
+        ?? throw new InvalidOperationException($"City:{Id} does not contain it's own building:{id}");
 }

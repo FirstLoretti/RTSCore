@@ -12,8 +12,8 @@ public static class GameErrors
     public static GameError UnavailableRecruitOption { get; }
         = new("City.UnavailableRecruitOption", "Recruit option is unavailable.");
 
-    public static GameError CityUnavailableConstructionOption { get; }
-        = new("City.UnavailableConstructionOption", "Unavailable construction option for this city type.");
+    public static GameError CityCantConstructThisBuildingType { get; }
+        = new("City.CityCantConstructThisBuildingType", "This building do not allowed for construction in this city type.");
     public static GameError CantConstructBuildingDuplicate { get; }
         = new("City.CantConstructBuildingDuplicate", "Cannot construct a duplicate building.");
     public static GameError ChainUnavailableConstructionOption { get; }

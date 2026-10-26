@@ -5,6 +5,7 @@ public enum BuildingType
     ReqruitBarrack,
     MilitiaBarrack,
     Market,
+    BigMarket,
     CultivatedField,
     CultivatedFieldsComplex
 }
