@@ -6,10 +6,12 @@ using RTSCore.Domain;
 using RTSCore.Domain.AI.Personality;
 using RTSCore.Domain.Configurations.Armies;
 using RTSCore.Domain.Configurations.Cities;
+using RTSCore.Domain.Configurations.Diplomacy;
 using RTSCore.Domain.Configurations.Factions;
 using RTSCore.Domain.Entities.Armies;
 using RTSCore.Domain.Entities.Campaigns;
 using RTSCore.Domain.Entities.Cities;
+using RTSCore.Domain.Entities.Diplomacy;
 
 namespace DomainUnitTests;
 
@@ -154,4 +156,16 @@ public static class TestData
             }
         ]
     );
+
+    public static DiplomacyRelation CreateDiplomacyRelation() =>
+        new(FactionType.England, FactionType.France, DiplomacyConfig.InitialStanding);
+
+    public static DiplomacyConfiguration DiplomacyConfig { get; } = new()
+    {
+        InitialStanding = 0,
+        AcceptPeaceOfferBonus = 1,
+        AcceptTradeOfferBonus = 1,
+        CancelTradePenalty = -1,
+        DeclareWarPenalty = -1,
+    };
 }

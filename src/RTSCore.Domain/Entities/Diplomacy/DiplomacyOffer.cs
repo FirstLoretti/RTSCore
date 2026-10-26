@@ -29,7 +29,23 @@ public sealed class DiplomacyOffer
 
     private DiplomacyOffer() { }
 
-    public void Accept() => Status = OfferStatus.Accepted;
+    public void Accept()
+    {
+        ThrowIfInvalidStatus();
 
-    public void Reject() => Status = OfferStatus.Rejeсted;
+        Status = OfferStatus.Accepted;
+    }
+
+    public void Reject()
+    {
+        ThrowIfInvalidStatus();
+
+        Status = OfferStatus.Rejeсted;
+    }
+
+    private void ThrowIfInvalidStatus()
+    {
+        if (Status != OfferStatus.Pending)
+            throw new InvalidOperationException($"Diplomacy offer:{Id} with status:{Status} cannot be accept or reject");
+    }
 }
