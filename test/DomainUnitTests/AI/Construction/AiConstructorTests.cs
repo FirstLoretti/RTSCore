@@ -1,5 +1,3 @@
-using System.Numerics;
-
 using FluentAssertions;
 
 using RTSCore.Domain.AI.Construction;
@@ -8,7 +6,7 @@ using RTSCore.Domain.Entities.Cities;
 
 using static DomainUnitTests.TestData;
 
-namespace DomainUnitTests.AI;
+namespace DomainUnitTests.AI.Construction;
 
 public class AiConstructorTests
 {

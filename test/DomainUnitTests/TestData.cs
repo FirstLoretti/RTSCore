@@ -196,4 +196,12 @@ public static class TestData
         AiBuildingWeights,
         AiDiplomacyWeights
     );
+
+    public static AiFactionContext AiFactionContext { get; } = new(
+        FactionType.England,
+        AiPersonality,
+        Gold: 1,
+        CitiesCount: 1,
+        MilitaryPower: 1
+    );
 }

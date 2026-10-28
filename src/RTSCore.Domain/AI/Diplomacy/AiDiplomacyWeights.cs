@@ -5,11 +5,11 @@ public sealed record AiDiplomacyWeights(
     float WarRelationWeight,
     float WarThreshold,
 
-    float PeaceDefeatWeight,
+    float PeacePowerWeight,
     float PeaceStandingWeight,
     float PeaсeThreshold,
 
-    int TradeScorePerPartnerCity,
+    int PartnerTradeScorePerCity,
     float TradeEconomicWeight,
     float TradeStandingWeight,
     float TradeThreshold

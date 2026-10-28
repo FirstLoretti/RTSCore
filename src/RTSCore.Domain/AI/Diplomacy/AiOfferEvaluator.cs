@@ -1,6 +1,5 @@
 using System.Runtime.CompilerServices;
 
-using RTSCore.Domain.AI.Personality;
 using RTSCore.Domain.Entities.Diplomacy;
 
 namespace RTSCore.Domain.AI.Diplomacy;
@@ -29,7 +28,6 @@ public static class AiOfferEvaluator
     )
     {
         if (relation.HasTradeAgreement || relation.InWar) return false;
-        if (relation.Standing < faction.AiPersonality.Diplomacy.TradeThreshold) return false;
 
         var score = CalculateTradeScore(relation, faction, opponentFaction);
 
@@ -42,8 +40,7 @@ public static class AiOfferEvaluator
         AiFactionContext opponentFaction
     )
     {
-        if (!relation.InWar) return false;
-        if (faction.MilitaryPower <= 0) return true;
+        if (!relation.InWar || opponentFaction.MilitaryPower == 0) return false;
 
         var score = CalculatePeaceScore(faction, opponentFaction, relation);
 
@@ -56,8 +53,8 @@ public static class AiOfferEvaluator
         AiFactionContext opponentFaction
     )
     {
-        if (relation.InWar || faction.MilitaryPower <= 0) return false;
-        if (opponentFaction.MilitaryPower <= 0) return true;
+        if (relation.InWar) return false;
+        if (opponentFaction.MilitaryPower == 0) return true;
 
         var score = CalculateWarScore(relation, faction, opponentFaction);
 
@@ -90,7 +87,7 @@ public static class AiOfferEvaluator
         var standingScore = (int)((relation.Standing + DiplomacyRelation.MaxStanding) * 0.5f);
 
         var economicScore = Math.Min(
-            opponent.CitiesCount * faction.AiPersonality.Diplomacy.TradeScorePerPartnerCity,
+            opponent.CitiesCount * faction.AiPersonality.Diplomacy.PartnerTradeScorePerCity,
             DiplomacyRelation.MaxStanding
         );
 
@@ -106,13 +103,14 @@ public static class AiOfferEvaluator
         DiplomacyRelation relation
     )
     {
-        var powerRatio = (float)faction.MilitaryPower / opponentFaction.MilitaryPower;
-        var powerScore = float.Clamp((powerRatio - 1f) * 100f, 0f, 100f);
+        var totalPower = faction.MilitaryPower + opponentFaction.MilitaryPower;
+        var powerRatio = (float)faction.MilitaryPower / totalPower;
+        var powerScore = (1f - powerRatio) * 100f;
 
         var standingScore = (relation.Standing + 100) * 0.5f;
 
         return (int)(
-            (powerScore * faction.AiPersonality.Diplomacy.PeaceDefeatWeight) +
+            (powerScore * faction.AiPersonality.Diplomacy.PeacePowerWeight) +
             (standingScore * faction.AiPersonality.Diplomacy.PeaceStandingWeight)
         );
     }
