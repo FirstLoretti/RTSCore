@@ -1,9 +1,11 @@
 using System.Numerics;
 
+using RTSCore.Domain.Common;
 using RTSCore.Domain.Configurations.Cities;
 using RTSCore.Domain.Configurations.Factions;
 using RTSCore.Domain.Entities.Campaigns;
 using RTSCore.Domain.Entities.Cities;
+using RTSCore.Domain.Errors;
 
 namespace RTSCore.Domain.Entities.Factions;
 
@@ -26,9 +28,17 @@ public sealed class Faction : AggregateRoot
     public City FoundCity(CityTemplate template, Vector2 coordinates)
         => City.Create(CampaignId, template, Type, coordinates);
 
-    public void SpendGold(int amount) => Gold = int.Max(int.MinValue, Gold - amount);
+    public Result SpendGold(int amount)
+    {
+        if (Gold < amount)
+            return GameErrors.NotEnoughGold;
 
-    public void EarnGold(int amount) => Gold = int.Min(Gold + amount, int.MaxValue);
+        Gold -= amount;
 
-    public void RefundGold(int amount) => Gold = int.Min(Gold + amount, int.MaxValue);
+        return Result.Success();
+    }
+
+    public void EarnGold(int amount) => Gold += amount;
+
+    public void RefundGold(int amount) => Gold += amount;
 }

@@ -14,38 +14,18 @@ public static class AiConstructor
         IReadOnlyCollection<City> cities
     )
     {
-        var buildingsToConstruct = PlaneConstruction(catalog, personality, cities, faction.Gold);
+        var sortedOptions = EvaluateAvailableBuildings(catalog, personality, cities);
 
-        foreach (var building in buildingsToConstruct)
+        foreach (var option in sortedOptions)
         {
-            var city = cities.Single(c => c.Id == building.CityId);
-            var buildingTemplate = catalog.GetBuilding(building.BuildingType);
+            if (faction.Gold < option.Cost) continue;
 
-            faction.SpendGold(building.Cost);
-            city.StartConstruction(buildingTemplate);
+            var city = cities.Single(c => c.Id == option.CityId);
+            var buildingTemplate = catalog.GetBuilding(option.BuildingType);
+
+            if (city.StartConstruction(buildingTemplate).IsFailure) continue;
+            faction.SpendGold(option.Cost);
         }
-    }
-
-    private static List<AiConstructionOption> PlaneConstruction(
-        BuildingCatalog catalog,
-        AiPersonality personality,
-        IReadOnlyCollection<City> cities,
-        int gold
-    )
-    {
-        var buildings = EvaluateAvailableBuildings(catalog, personality, cities);
-        var buildingsToConstruct = new List<AiConstructionOption>();
-
-        foreach (var building in buildings)
-        {
-            if (gold >= building.Cost)
-            {
-                buildingsToConstruct.Add(building);
-                gold -= building.Cost;
-            }
-        }
-
-        return buildingsToConstruct;
     }
 
     private static List<AiConstructionOption> EvaluateAvailableBuildings(

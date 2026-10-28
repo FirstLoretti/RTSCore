@@ -31,4 +31,6 @@ public static class GameErrors
         = new("Diplomacy.CantPeaceFactionsNotWar", "Factions are not at war.");
     public static GameError CantCancelTradeNotExist { get; }
         = new("Diplomacy.CantCancelTradeNotExist", "Trade agreement does not exist.");
+
+    public static GameError NotEnoughGold { get; } = new("NotEnoughGold", "Not enough gold");
 }

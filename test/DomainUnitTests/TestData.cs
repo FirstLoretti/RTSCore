@@ -3,7 +3,11 @@ using System.Collections.Immutable;
 using System.Numerics;
 
 using RTSCore.Domain;
+using RTSCore.Domain.AI;
+using RTSCore.Domain.AI.Construction;
+using RTSCore.Domain.AI.Diplomacy;
 using RTSCore.Domain.AI.Personality;
+using RTSCore.Domain.AI.Recruitment;
 using RTSCore.Domain.Configurations.Armies;
 using RTSCore.Domain.Configurations.Cities;
 using RTSCore.Domain.Configurations.Diplomacy;
@@ -12,6 +16,7 @@ using RTSCore.Domain.Entities.Armies;
 using RTSCore.Domain.Entities.Campaigns;
 using RTSCore.Domain.Entities.Cities;
 using RTSCore.Domain.Entities.Diplomacy;
+using RTSCore.Domain.Entities.Factions;
 
 namespace DomainUnitTests;
 
@@ -20,18 +25,18 @@ public static class TestData
     public static UnitTemplate CreateUnitTemplate(int maxHealth) => new()
     {
         MaxHealth = maxHealth,
-        AiUtility = 0,
+        AiUtility = 1,
         Armor = 0,
         Category = UnitCategory.Infantry,
-        Cost = 0,
-        Damage = 0,
-        DamageGrowthRate = 0f,
-        DisplayName = "",
-        ExpKillReward = 0,
-        HealthGrowthRate = 0f,
+        Cost = 1,
+        Damage = 1,
+        DamageGrowthRate = 1f,
+        DisplayName = "Military",
+        ExpKillReward = 1,
+        HealthGrowthRate = 1f,
         ProductionCategory = ProductionCategory.Military,
         RequiredBuilding = BuildingType.ReqruitBarrack,
-        Speed = 0,
+        Speed = 1,
         TurnsToRecruit = 1,
         Type = UnitType.Peasant
     };
@@ -48,10 +53,10 @@ public static class TestData
 
     public static BuildingTemplate CreateBuildingTemplate() => new()
     {
-        AiUtility = 0,
+        AiUtility = 1,
         AllowedCityTypes = [CityType.Settlement, CityType.Village],
-        Cost = 0,
-        DisplayName = "",
+        Cost = 1,
+        DisplayName = "Reqruit Barrack",
         ProductionCategory = ProductionCategory.Military,
         TurnsToConstruct = 1,
         Type = BuildingType.ReqruitBarrack,
@@ -62,9 +67,9 @@ public static class TestData
 
     public static CityTemplate CreateCityTemplate() => new(
         CityType.Settlement,
-        "",
-        StartingPopulation: 0,
-        PopulationForUpgrade: 0,
+        "Settlement",
+        StartingPopulation: 1,
+        PopulationForUpgrade: 2,
         ConstructableBuildings:
         [
             BuildingType.ReqruitBarrack,
@@ -168,4 +173,27 @@ public static class TestData
         CancelTradePenalty = -1,
         DeclareWarPenalty = -1,
     };
+
+    public static FactionTemplate FactionTemplate { get; } = new(
+        FactionType.England,
+        "England",
+        1000,
+        CityPresets: [],
+        AiPersonalityType.Conqueror
+    );
+
+    public static Faction CreateFaction() => new(CampaignId.New(), FactionTemplate);
+
+    public static AiBudgetWeights AiBudgetWeights { get; } = new(Construction: 0.5f, Recruitment: 0.5f);
+    public static AiUnitWeights AiUnitWeights { get; } = new(InfantryMultiplier: 1f, RangeInfantryMultiplier: 1f);
+    public static AiBuildingWeights AiBuildingWeights { get; } = new(EconomicMultiplier: 1f, MilitaryMultiplier: 1f);
+    public static AiDiplomacyWeights AiDiplomacyWeights { get; } = new(1f, 1f, 1f, 1f, 1f, 1f, 1, 1f, 1f, 1f);
+
+    public static AiPersonality AiPersonality { get; } = new(
+        AiPersonalityType.Conqueror,
+        AiBudgetWeights,
+        AiUnitWeights,
+        AiBuildingWeights,
+        AiDiplomacyWeights
+    );
 }
