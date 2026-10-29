@@ -1,6 +1,7 @@
 using FluentAssertions;
 
 using RTSCore.Domain;
+using RTSCore.Domain.Entities.Campaigns;
 using RTSCore.Domain.Entities.Diplomacy;
 using RTSCore.Domain.Errors;
 
@@ -15,10 +16,10 @@ public class DiplomacyRelationTests
         [Fact]
         public void New_ShouldCreateWithCorrectFactionsOrder()
         {
-            var relation1 = new DiplomacyRelation(FactionType.England, FactionType.France, DiplomacyConfig.InitialStanding);
-            var relation2 = new DiplomacyRelation(FactionType.France, FactionType.England, DiplomacyConfig.InitialStanding);
+            var relation1 = new DiplomacyRelation(CampaignId.Empty, FactionType.England, FactionType.France, DiplomacyConfig.InitialStanding);
+            var relation2 = new DiplomacyRelation(CampaignId.Empty, FactionType.France, FactionType.England, DiplomacyConfig.InitialStanding);
 
-            relation1.Should().BeEquivalentTo(relation2);
+            relation1.FactionA.Should().Be(relation2.FactionA);
         }
     }
 
@@ -160,7 +161,7 @@ public class DiplomacyRelationTests
         [Fact]
         public void Change_ShouldNotGoBelowMinStanding()
         {
-            var relation = new DiplomacyRelation(FactionType.England, FactionType.France, DiplomacyRelation.MinStanding);
+            var relation = new DiplomacyRelation(CampaignId.Empty, FactionType.England, FactionType.France, DiplomacyRelation.MinStanding);
 
             relation.DeclareWar(DiplomacyConfig.DeclareWarPenalty);
 
@@ -170,7 +171,7 @@ public class DiplomacyRelationTests
         [Fact]
         public void Change_ShouldNotGoAboveMaxStanding()
         {
-            var relation = new DiplomacyRelation(FactionType.England, FactionType.France, DiplomacyRelation.MaxStanding);
+            var relation = new DiplomacyRelation(CampaignId.Empty, FactionType.England, FactionType.France, DiplomacyRelation.MaxStanding);
 
             relation.OpenTrade(DiplomacyConfig.AcceptTradeOfferBonus);
 

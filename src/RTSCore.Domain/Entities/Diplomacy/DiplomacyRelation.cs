@@ -1,10 +1,12 @@
 using RTSCore.Domain.Common;
+using RTSCore.Domain.Entities.Campaigns;
 using RTSCore.Domain.Errors;
 
 namespace RTSCore.Domain.Entities.Diplomacy;
 
 public sealed class DiplomacyRelation
 {
+    public CampaignId CampaignId { get; }
     public DiplomacyRelationId Id { get; }
     public FactionType FactionA { get; }
     public FactionType FactionB { get; }
@@ -16,12 +18,14 @@ public sealed class DiplomacyRelation
     public const int MaxStanding = 100;
     public const int MinStanding = -100;
 
-    public DiplomacyRelation(FactionType factionA, FactionType factionB, int standing)
+    public DiplomacyRelation(CampaignId campaignId, FactionType factionA, FactionType factionB, int standing)
     {
         (FactionA, FactionB) = factionA < factionB
             ? (factionA, factionB)
             : (factionB, factionA);
 
+        CampaignId = campaignId;
+        Id = DiplomacyRelationId.New();
         Standing = standing;
     }
 

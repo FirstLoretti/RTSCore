@@ -163,7 +163,7 @@ public static class TestData
     );
 
     public static DiplomacyRelation CreateDiplomacyRelation() =>
-        new(FactionType.England, FactionType.France, DiplomacyConfig.InitialStanding);
+        new(CampaignId.New(), FactionType.England, FactionType.France, DiplomacyConfig.InitialStanding);
 
     public static DiplomacyConfiguration DiplomacyConfig { get; } = new()
     {
@@ -187,7 +187,7 @@ public static class TestData
     public static AiBudgetWeights AiBudgetWeights { get; } = new(Construction: 0.5f, Recruitment: 0.5f);
     public static AiUnitWeights AiUnitWeights { get; } = new(InfantryMultiplier: 1f, RangeInfantryMultiplier: 1f);
     public static AiBuildingWeights AiBuildingWeights { get; } = new(EconomicMultiplier: 1f, MilitaryMultiplier: 1f);
-    public static AiDiplomacyWeights AiDiplomacyWeights { get; } = new(1f, 1f, 1f, 1f, 1f, 1f, 1, 1f, 1f, 1f);
+    public static AiDiplomacyWeights AiDiplomacyWeights { get; } = new(1f, 1f, 50f, 1f, 1f, 50f, 1, 1f, 1f, 50f);
 
     public static AiPersonality AiPersonality { get; } = new(
         AiPersonalityType.Conqueror,
@@ -203,5 +203,16 @@ public static class TestData
         Gold: 1,
         CitiesCount: 1,
         MilitaryPower: 1
+    );
+
+    public static AiDiplomacyContext AiDiplomacyContext { get; } = new(
+        AiFactionContext,
+        AiPersonality,
+        AnotherFactions: [
+            AiFactionContext with { FactionType = FactionType.France },
+            AiFactionContext with { FactionType = FactionType.Spain }
+        ],
+        Relations: [],
+        IncomingOffers: []
     );
 }

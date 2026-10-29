@@ -2,6 +2,7 @@ using FluentAssertions;
 
 using RTSCore.Domain;
 using RTSCore.Domain.AI.Diplomacy;
+using RTSCore.Domain.Entities.Campaigns;
 using RTSCore.Domain.Entities.Diplomacy;
 
 using static DomainUnitTests.TestData;
@@ -41,7 +42,7 @@ public class AiOfferEvaluatorTests
         [Fact]
         public void ShouldReturnTrue_WhenNotProfitable()
         {
-            var relation = new DiplomacyRelation(FactionType.England, FactionType.France, -50);
+            var relation = new DiplomacyRelation(CampaignId.Empty, FactionType.England, FactionType.France, standing: -50);
             var initiator = AiFactionContext with { FactionType = relation.FactionA };
             var target = AiFactionContext with { FactionType = relation.FactionB };
 

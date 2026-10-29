@@ -14,14 +14,13 @@ public sealed class DiplomacyOffer
 
     public DiplomacyOffer(
         CampaignId campaignId,
-        DiplomacyOfferId offerId,
         FactionType initiator,
         FactionType target,
         OfferType type
     )
     {
         CampaignId = campaignId;
-        Id = offerId;
+        Id = DiplomacyOfferId.New();
         Initiator = initiator;
         Target = target;
         Type = type;

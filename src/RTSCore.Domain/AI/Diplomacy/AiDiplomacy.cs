@@ -14,21 +14,22 @@ public static class AiDiplomacy
 
     private static void GenerateOutgoingOffers(AiDiplomacyContext context, AiDiplomacyDecisions decisions)
     {
-        foreach (var opponent in context.OpponentsFactions)
+        foreach (var anotherFaction in context.AnotherFactions)
         {
-            var relation = context.GetRelation(opponent.FactionType);
+            var relation = context.GetRelation(anotherFaction.FactionType);
 
-            if (AiOfferEvaluator.IsDeclareWarProfitable(relation, context.Faction, opponent))
+            if (AiOfferEvaluator.IsDeclareWarProfitable(relation, context.Faction, anotherFaction))
             {
-                decisions.WarToDeclare.Add(opponent.FactionType);
+                decisions.WarToDeclare.Add(anotherFaction.FactionType);
+                continue;
             }
-            if (AiOfferEvaluator.IsPeaceOfferProfitable(relation, context.Faction, opponent))
+            if (AiOfferEvaluator.IsPeaceOfferProfitable(relation, context.Faction, anotherFaction))
             {
-                decisions.PeaceOfferToSend.Add(opponent.FactionType);
+                decisions.PeaceOfferToSend.Add(anotherFaction.FactionType);
             }
-            if (AiOfferEvaluator.IsTradeOfferProfitable(relation, context.Faction, opponent))
+            if (AiOfferEvaluator.IsTradeOfferProfitable(relation, context.Faction, anotherFaction))
             {
-                decisions.TradeOfferToSend.Add(opponent.FactionType);
+                decisions.TradeOfferToSend.Add(anotherFaction.FactionType);
             }
         }
     }
@@ -38,12 +39,31 @@ public static class AiDiplomacy
         foreach (var offer in context.IncomingOffers)
         {
             var relation = context.GetRelation(offer.Initiator);
-            var opponent = context.OpponentsFactions.First(f => f.FactionType == offer.Initiator);
+            var opponent = GetOpponent(context, offer.Initiator);
 
             if (AiOfferEvaluator.IsOfferProfitable(offer, relation, context.Faction, opponent))
+            {
                 decisions.OffersToAccept.Add(offer);
+            }
             else
+            {
                 decisions.OffersToReject.Add(offer);
+            }
         }
+
+        context.IncomingOffers.Clear();
+    }
+
+    private static AiFactionContext GetOpponent(AiDiplomacyContext context, FactionType initiator)
+    {
+        foreach (var faction in context.AnotherFactions)
+        {
+            if (faction.FactionType == initiator)
+            {
+                return faction;
+            }
+        }
+
+        throw new KeyNotFoundException($"Faction {initiator} is missing from the world");
     }
 }
