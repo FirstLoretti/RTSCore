@@ -41,6 +41,13 @@ public static class TestData
         Type = UnitType.Peasant
     };
 
+    public static UnitCatalog UnitCatalog { get; } = new(
+        [
+           CreateUnitTemplate(maxHealth: 100) with {Type = UnitType.Peasant, Category = UnitCategory.Infantry},
+           CreateUnitTemplate(maxHealth: 100) with {Type = UnitType.PeasantArcher, Category = UnitCategory.RangeInfantry}
+        ]
+    );
+
     public static UnitStatsWeights UnitStatsWeights { get; } = new(Damage: 1f, Health: 1f);
 
     public static MovementConfiguration MovementConfiguration { get; } = new(BaseUnitDistanceCost: 10, MaxMovementPoints: 100);
@@ -215,4 +222,21 @@ public static class TestData
         Relations: [],
         IncomingOffers: []
     );
+
+    public static AiCatalog AiCatalog { get; } = new(
+        [
+           AiPersonality with {Type = AiPersonalityType.Conqueror, Unit = new AiUnitWeights(2f, 1f)},
+           AiPersonality with {Type = AiPersonalityType.Defender, Unit = new AiUnitWeights(1f, 2f)},
+        ]
+    );
+
+    public static ProductionOption<TType> CreateProductionOption<TType>(TType type) where TType : Enum
+        => new(
+            DisplayName: "",
+            Type: type,
+            Cost: 1,
+            TurnsToConstruct: 1,
+            ProductionCategory: ProductionCategory.Military,
+            AiUtility: 1
+        );
 }

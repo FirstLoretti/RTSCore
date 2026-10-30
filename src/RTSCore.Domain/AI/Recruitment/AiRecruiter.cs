@@ -1,5 +1,6 @@
 using System.Collections.Frozen;
 using System.Collections.Immutable;
+using System.Runtime.CompilerServices;
 
 using RTSCore.Domain.AI.Personality;
 using RTSCore.Domain.Configurations.Armies;
@@ -13,47 +14,71 @@ namespace RTSCore.Domain.AI.Recruitment;
 public sealed class AiRecruiter
 {
     private readonly UnitCatalog _unitCatalog;
-    private readonly FrozenDictionary<AiPersonality, ImmutableArray<AiRecruitOption>> _evaluatedOptions;
+    private readonly FrozenDictionary<AiPersonalityType, ImmutableArray<ProductionOption<UnitType>>> _unitsByPersonality;
+
+    public ImmutableArray<ProductionOption<UnitType>> GetUnits(AiPersonalityType personality) => _unitsByPersonality[personality];
 
     public AiRecruiter(UnitCatalog unitCatalog, AiCatalog aiCatalog)
     {
         _unitCatalog = unitCatalog;
 
-        var temp = new Dictionary<AiPersonality, ImmutableArray<AiRecruitOption>>();
+        var tempDic = new Dictionary<AiPersonalityType, ImmutableArray<ProductionOption<UnitType>>>();
 
         foreach (var personality in aiCatalog.Personalities)
         {
-            var options = new List<AiRecruitOption>();
+            var units = new List<ProductionOption<UnitType>>();
 
             foreach (var template in unitCatalog.Templates)
             {
-                var option = AiRecruitmentPlanner.EvaluateUnitUtility(template, personality);
-                if (option.Utility > 0)
+                var unit = EvaluateUnitUtility(template, personality);
+                if (unit.AiUtility > 0)
                 {
-                    options.Add(option);
+                    units.Add(unit);
                 }
             }
 
-            temp[personality] = [.. options.OrderByDescending(o => o.Utility)];
+            tempDic[personality.Type] = [.. units.OrderByDescending(u => u.AiUtility)];
         }
 
-        _evaluatedOptions = temp.ToFrozenDictionary();
+        _unitsByPersonality = tempDic.ToFrozenDictionary();
     }
 
-    public void RecruitUnits(Faction faction, Army army, AiPersonality personality, City city)
+    public void RecruitUnits(
+        Faction faction,
+        Army army,
+        AiPersonalityType personality,
+        ImmutableArray<ProductionOption<UnitType>> availableUnits
+    )
     {
-        HashSet<UnitType> units = [.. city.GetRecruitableUnits(_unitCatalog.Templates).Select(u => u.Type)];
+        var allUnits = _unitsByPersonality[personality];
 
-        var options = _evaluatedOptions[personality]
-            .Where(o => units.Contains(o.UnitType))
-            .ToList();
-
-        var unitsToRecruitment = AiRecruitmentPlanner.PlanRecruitment(options, faction.Gold);
-
-        foreach (var unit in unitsToRecruitment)
+        foreach (var unit in allUnits)
         {
-            faction.SpendGold(unit.Cost);
-            army.RecruitUnit(_unitCatalog.GetUnit(unit.UnitType));
+            var availableUnit = availableUnits.FirstOrDefault(u => u.Type == unit.Type);
+
+            if (availableUnit != default)
+            {
+                while (faction.Gold >= availableUnit.Cost)
+                {
+                    faction.SpendGold(availableUnit.Cost);
+                    army.RecruitUnit(_unitCatalog.GetUnit(availableUnit.Type));
+                }
+            }
         }
+    }
+
+    private static ProductionOption<UnitType> EvaluateUnitUtility(UnitTemplate unit, AiPersonality personality)
+    {
+        float multiplier = unit.Category switch
+        {
+            UnitCategory.Infantry => personality.Unit.InfantryMultiplier,
+            UnitCategory.RangeInfantry => personality.Unit.RangeInfantryMultiplier,
+            _ => throw new SwitchExpressionException($"Unhandled unit category {unit.Category}")
+        };
+
+        var utility = (int)(unit.AiUtility * multiplier);
+
+        return new ProductionOption<UnitType>(
+            unit.DisplayName, unit.Type, unit.Cost, unit.TurnsToRecruit, unit.ProductionCategory, utility);
     }
 }

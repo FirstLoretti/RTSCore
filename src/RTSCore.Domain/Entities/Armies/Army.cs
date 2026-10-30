@@ -19,7 +19,7 @@ public sealed class Army : AggregateRoot
     public int MovementPoints { get; private set; }
 
     private readonly List<Unit> _units = [];
-    public IReadOnlyCollection<Unit> Units => _units;
+    public IReadOnlyList<Unit> Units => _units;
 
     public const int MaxSize = 20;
     public bool HasFreeSlots => _units.Count < MaxSize;

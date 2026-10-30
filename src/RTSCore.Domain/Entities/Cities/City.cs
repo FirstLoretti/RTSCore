@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using System.Numerics;
 
 using RTSCore.Domain.Common;
@@ -47,7 +48,7 @@ public sealed class City : AggregateRoot
         Vector2 coordinates
     ) => new(campaignId, CityId.New(), template, faction, coordinates);
 
-    public IReadOnlyCollection<ProductionOption<UnitType>> GetRecruitableUnits(
+    public ImmutableArray<ProductionOption<UnitType>> GetRecruitableUnits(
         IReadOnlyCollection<UnitTemplate> unitTemplates
     )
     {
@@ -64,7 +65,7 @@ public sealed class City : AggregateRoot
                 u.AiUtility))];
     }
 
-    public IReadOnlyCollection<ProductionOption<BuildingType>> GetConstructableBuildings(
+    public ImmutableArray<ProductionOption<BuildingType>> GetConstructableBuildings(
         IReadOnlyCollection<BuildingTemplate> buildingTemplates
     )
     {

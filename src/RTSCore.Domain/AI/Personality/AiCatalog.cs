@@ -15,7 +15,7 @@ public sealed record AiCatalog
         Personalities = [.. personalities];
 
         var tempDic = new Dictionary<AiPersonalityType, AiPersonality>(personalities.Count);
-        foreach (var personality in personalities)
+        foreach (var personality in Personalities)
         {
             tempDic[personality.Type] = personality;
         }
