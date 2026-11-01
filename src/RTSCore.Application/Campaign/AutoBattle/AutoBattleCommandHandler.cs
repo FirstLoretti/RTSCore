@@ -1,25 +1,28 @@
+using Ardalis.GuardClauses;
+
 using MediatR;
 
-using RTSCore.Domain.Common.Exceptions;
-using RTSCore.Domain.Common.Repositories;
+using RTSCore.Application.Repositories;
 using RTSCore.Domain.Entities.Armies.Combat;
-using RTSCore.Domain.Services;
 
 namespace RTSCore.Application.Campaign.AutoBattle;
 
-public class AutoBattleCommandHandler(
+public sealed class AutoBattleCommandHandler(
     IUnitOfWork unitOfWork,
-    IAutoBattleService autoBattleService
+    AutoBattleCalculator calculator
 ) : IRequestHandler<AutoBattleCommand, BattleResult>
 {
     public async Task<BattleResult> Handle(AutoBattleCommand request, CancellationToken ct)
     {
-        var attacker = await unitOfWork.ArmyRepository.GetAsync(request.AttackerArmyId, ct);
-        Guard.Against.NotFound(attacker, request.AttackerArmyId);
-        var defender = await unitOfWork.ArmyRepository.GetAsync(request.DefenderArmyId, ct);
-        Guard.Against.NotFound(defender, request.DefenderArmyId);
+        var attacker = await unitOfWork.ArmyRepository.GetAsync(request.AttackerId, ct);
+        Guard.Against.NotFound(request.AttackerId, attacker);
+        var defender = await unitOfWork.ArmyRepository.GetAsync(request.DefenderId, ct);
+        Guard.Against.NotFound(request.DefenderId, defender);
 
-        var battleResult = autoBattleService.StartAutoBattle(attacker, defender);
+        var battleResult = calculator.Calculate(attacker.GetReadyCombatants(), defender.GetReadyCombatants());
+
+        attacker.TakeCasualties(battleResult.AttackerBattleLogs);
+        defender.TakeCasualties(battleResult.DefenderBattleLogs);
 
         await unitOfWork.SaveChangesAsync(ct);
 

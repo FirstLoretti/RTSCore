@@ -1,31 +1,29 @@
 using MediatR;
 
-using RTSCore.Domain.Common.Exceptions;
-using RTSCore.Domain.Common.Repositories;
-using RTSCore.Domain.Entities.Campaign;
+using RTSCore.Application.Repositories;
+using RTSCore.Domain.Configurations.Cities;
 
 namespace RTSCore.Application.Campaign.Lifecycle;
 
-public class EndTurnCommandHandler(
+public sealed class EndTurnCommandHandler(
     IUnitOfWork unitOfWork,
-    TurnEndService turnEndService
+    BuildingCatalog buildingCatalog,
+    CityConfiguration cityConfiguration
 ) : IRequestHandler<EndTurnCommand>
 {
     public async Task Handle(EndTurnCommand request, CancellationToken ct)
     {
-        var faction = await unitOfWork.FactionRepository.GetAsync(request.FactionType, ct);
-        Guard.Against.NotFound(faction, request.FactionType);
+        var cities = await unitOfWork.CityRepository.GetAsync(request.Faction, ct);
+        var armies = await unitOfWork.ArmyRepository.GetAsync(request.Faction, ct);
 
-        var cities = await unitOfWork.CityRepository.GetAsync(faction.Type, ct);
-        var relations = await unitOfWork.DiplomacyRelationRepository.GetAsync(faction.Type, ct);
-
-        var partners = relations
-            .Select(r => r.FactionA == faction.Type ? r.FactionB : r.FactionA)
-            .ToList();
-
-        var partnerCityCounts = await unitOfWork.CityRepository.GetFactionToCityCountAsync(partners, ct);
-
-        turnEndService.TurnEnd(faction, cities, relations, partnerCityCounts);
+        foreach (var city in cities)
+        {
+            city.TurnEnd(buildingCatalog, cityConfiguration);
+        }
+        foreach (var army in armies)
+        {
+            army.TurnEnd();
+        }
 
         await unitOfWork.SaveChangesAsync(ct);
     }

@@ -1,12 +1,13 @@
+using RTSCore.Domain;
 using RTSCore.Domain.Entities.Diplomacy;
 
-namespace RTSCore.Domain.Common.Repositories;
+namespace RTSCore.Application.Repositories;
 
 public interface IDiplomacyOfferRepository
 {
     void Add(DiplomacyOffer offer);
 
-    Task<DiplomacyOffer?> GetAsync(Guid id, CancellationToken cancellationToken);
-    Task<HashSet<FactionType>> GetFactionsUnderNegotiationAsync(FactionType initiator, CancellationToken cancellationToken);
-    Task<IReadOnlyCollection<DiplomacyOffer>> GetFactionOffersAsync(FactionType faction, CancellationToken cancellationToken);
+    Task<DiplomacyOffer?> GetAsync(DiplomacyOfferId id, CancellationToken ct);
+    Task<HashSet<FactionType>> GetFactionsUnderNegotiationAsync(FactionType initiator, CancellationToken ct);
+    Task<IReadOnlyCollection<DiplomacyOffer>> GetFactionOffersAsync(FactionType faction, CancellationToken ct);
 }

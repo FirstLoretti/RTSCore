@@ -1,26 +1,20 @@
+using Ardalis.GuardClauses;
+
 using MediatR;
 
-using RTSCore.Domain.Common.Exceptions;
-using RTSCore.Domain.Common.Repositories;
-using RTSCore.Domain.Services;
+using RTSCore.Application.Repositories;
 
 namespace RTSCore.Application.Campaign.Diplomacy.OfferResponses;
 
-public class RejectOfferCommandHandler(IUnitOfWork unitOfWork) : IRequestHandler<RejectOfferCommand>
+public sealed class RejectOfferCommandHandler(IUnitOfWork unitOfWork) : IRequestHandler<RejectOfferCommand>
 {
-    public async Task Handle(RejectOfferCommand request, CancellationToken cancellationToken)
+    public async Task Handle(RejectOfferCommand request, CancellationToken ct)
     {
-        var offer = await unitOfWork.DiplomacyOfferRepository.GetAsync(request.OfferId, cancellationToken);
-        Guard.Against.NotFound(offer, request.OfferId);
+        var offer = await unitOfWork.DiplomacyOfferRepository.GetAsync(request.OfferId, ct);
+        Guard.Against.NotFound(request.OfferId, offer);
 
         offer.Reject();
 
-        var relation = await unitOfWork.DiplomacyRelationRepository.GetAsync(
-            offer.Initiator, offer.Target, cancellationToken);
-        Guard.Against.NotFoundRelation(relation, offer.Initiator, offer.Target);
-
-        relation.ChangeStanding(GameBalance.Diplomacy.RejectOfferPenalty);
-
-        await unitOfWork.SaveChangesAsync(cancellationToken);
+        await unitOfWork.SaveChangesAsync(ct);
     }
 }

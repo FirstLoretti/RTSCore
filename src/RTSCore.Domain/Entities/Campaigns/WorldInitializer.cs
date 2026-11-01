@@ -1,3 +1,5 @@
+using System.Collections.Immutable;
+
 using RTSCore.Domain.AI;
 using RTSCore.Domain.Configurations.Cities;
 using RTSCore.Domain.Configurations.Factions;
@@ -17,9 +19,9 @@ public static class WorldInitializer
     {
         var campaign = new Campaign(campaignId);
 
-        List<Faction> factions = [];
-        List<City> cities = [];
-        List<AiFactionAgent> aiAgents = [];
+        var factions = ImmutableArray.CreateBuilder<Faction>();
+        var cities = ImmutableArray.CreateBuilder<City>();
+        var aiAgents = ImmutableArray.CreateBuilder<AiFactionAgent>();
 
         foreach (var template in factionCatalog.Templates)
         {
@@ -40,6 +42,6 @@ public static class WorldInitializer
             }
         }
 
-        return new(campaign, factions, cities, aiAgents);
+        return new(campaign, factions.ToImmutable(), cities.ToImmutable(), aiAgents.ToImmutable());
     }
 }

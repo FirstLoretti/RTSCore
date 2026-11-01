@@ -1,6 +1,7 @@
+using RTSCore.Domain;
 using RTSCore.Domain.Entities.Armies;
 
-namespace RTSCore.Domain.Common.Repositories;
+namespace RTSCore.Application.Repositories;
 
 public interface IUnitRepository
 {

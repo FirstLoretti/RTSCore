@@ -11,6 +11,7 @@ public sealed class Unit
     public FactionType Faction { get; }
 
     public ArmyId ArmyId { get; private set; }
+    public int Cost { get; private set; }
     public int Health { get; private set; }
     public int Level { get; private set; }
     public int Experience { get; private set; }
@@ -35,6 +36,7 @@ public sealed class Unit
         Type = template.Type;
         Health = template.MaxHealth;
         TurnsToRecruit = turnsToRecruit;
+        Cost = template.Cost;
     }
 
     internal static Unit CreateReady(

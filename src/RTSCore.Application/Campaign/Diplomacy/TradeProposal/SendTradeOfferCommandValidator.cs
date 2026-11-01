@@ -1,15 +1,14 @@
 using FluentValidation;
 
-using RTSCore.Domain;
-
 namespace RTSCore.Application.Campaign.Diplomacy.TradeProposal;
 
-public class SendTraidOfferCommandValidator : AbstractValidator<SendTradeOfferCommand>
+public sealed class SendTraidOfferCommandValidator : AbstractValidator<SendTradeOfferCommand>
 {
     public SendTraidOfferCommandValidator()
     {
-        RuleFor(c => c.Initiator).IsInEnum().NotEqual(FactionType.None);
-        RuleFor(c => c.Target).IsInEnum().NotEqual(FactionType.None);
+        RuleFor(c => c.CampaignId).NotEmpty();
+        RuleFor(c => c.Initiator).IsInEnum();
+        RuleFor(c => c.Target).IsInEnum();
         RuleFor(c => c).Must(c => c.Initiator != c.Target);
     }
 }

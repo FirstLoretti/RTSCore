@@ -1,6 +1,6 @@
 using MediatR;
 
-using RTSCore.Domain.Common.Repositories;
+using RTSCore.Application.Repositories;
 
 namespace RTSCore.Application.Authentication.Tokens;
 

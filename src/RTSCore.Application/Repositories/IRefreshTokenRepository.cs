@@ -1,6 +1,6 @@
 using RTSCore.Domain.Entities;
 
-namespace RTSCore.Domain.Common.Repositories;
+namespace RTSCore.Application.Repositories;
 
 public interface IRefreshTokenRepository
 {

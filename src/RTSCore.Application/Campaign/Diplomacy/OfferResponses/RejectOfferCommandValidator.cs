@@ -2,7 +2,7 @@ using FluentValidation;
 
 namespace RTSCore.Application.Campaign.Diplomacy.OfferResponses;
 
-public class RejectOfferCommandValidator : AbstractValidator<RejectOfferCommand>
+public sealed class RejectOfferCommandValidator : AbstractValidator<RejectOfferCommand>
 {
     public RejectOfferCommandValidator()
     {

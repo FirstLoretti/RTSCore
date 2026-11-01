@@ -1,5 +1,7 @@
 using MediatR;
 
+using RTSCore.Domain.Entities.Diplomacy;
+
 namespace RTSCore.Application.Campaign.Diplomacy.OfferResponses;
 
-public record RejectOfferCommand(Guid OfferId) : IRequest;
+public sealed record RejectOfferCommand(DiplomacyOfferId OfferId) : IRequest;

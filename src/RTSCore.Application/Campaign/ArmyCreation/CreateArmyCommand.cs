@@ -5,4 +5,4 @@ using RTSCore.Domain.Entities.Cities;
 
 namespace RTSCore.Application.Campaign.ArmyCreation;
 
-public record CreateArmyCommand(CityId CityId) : IRequest<ArmyId>;
+public sealed record CreateArmyCommand(CityId CityId, UnitType GeneralType) : IRequest<ArmyId>;

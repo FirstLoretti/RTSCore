@@ -80,6 +80,19 @@ public sealed class Army : AggregateRoot
         return unit.Id;
     }
 
+    public Result<UnitId> CancelRecruitUnit(UnitId id)
+    {
+        var unit = GetUnitOrThrow(id);
+
+        ThrowIfInvalidState(unit);
+
+        _units.Remove(unit);
+
+        AddDomainEvent(new CancelRecruitmentEvent(Faction, unit.Cost));
+
+        return unit.Id;
+    }
+
     public Result<UnitId> AddReadyUnit(UnitTemplate template)
     {
         if (!HasFreeSlots) return GameErrors.ArmyDoesNotHaveFreeSlots;
@@ -108,6 +121,7 @@ public sealed class Army : AggregateRoot
         if (id == GeneralId) return GameErrors.CantDisbandGeneral;
 
         var unit = GetUnitOrThrow(id);
+
         _units.Remove(unit);
 
         return Result.Success();
@@ -126,7 +140,7 @@ public sealed class Army : AggregateRoot
         _units.RemoveAll(u => !u.IsAlive);
     }
 
-    public void TakeCasualties(List<UnitBattleLog> logs)
+    public void TakeCasualties(IReadOnlyCollection<UnitBattleLog> logs)
     {
         foreach (var log in logs)
         {
@@ -137,7 +151,25 @@ public sealed class Army : AggregateRoot
         PurgeDeadUnits();
     }
 
-    private Unit GetUnitOrThrow(UnitId id) => _units.SingleOrDefault(u => u.Id == id)
+    public void TurnEnd()
+    {
+        foreach (var unit in _units)
+        {
+            if (!unit.IsRecruited)
+                unit.AdvanceRecruitment();
+        }
+    }
+
+    private Unit GetUnitOrThrow(UnitId id) => _units.FirstOrDefault(u => u.Id == id)
         ?? throw new InvalidOperationException($"Army:{Id} does not contain it's own unit:{id}");
 
+    private static void ThrowIfInvalidState(Unit unit)
+    {
+        if (!unit.IsAlive || !unit.IsRecruited)
+        {
+            throw new InvalidOperationException(
+                $"Cannot cancel recruiting unit:{unit.Id} with wrong state alive:{unit.IsAlive}, recruited:{unit.IsRecruited}"
+            );
+        }
+    }
 }

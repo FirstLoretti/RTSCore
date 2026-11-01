@@ -1,10 +1,11 @@
 using MediatR;
 
+using RTSCore.Domain.Entities.Armies;
 using RTSCore.Domain.Entities.Armies.Combat;
 
 namespace RTSCore.Application.Campaign.AutoBattle;
 
-public record AutoBattleCommand(
-    string AttackerArmyId,
-    string DefenderArmyId
+public sealed record AutoBattleCommand(
+    ArmyId AttackerId,
+    ArmyId DefenderId
 ) : IRequest<BattleResult>;

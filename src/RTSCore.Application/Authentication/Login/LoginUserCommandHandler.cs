@@ -1,8 +1,8 @@
 using MediatR;
 
 using RTSCore.Application.Authentication.Common;
+using RTSCore.Application.Repositories;
 using RTSCore.Domain.Common;
-using RTSCore.Domain.Common.Repositories;
 using RTSCore.Domain.Entities;
 using RTSCore.Domain.Exeptions;
 

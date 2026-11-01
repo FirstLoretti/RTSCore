@@ -1,14 +1,12 @@
 using FluentValidation;
 
-using RTSCore.Domain.Entities.Cities;
-
 namespace RTSCore.Application.Campaign.CityConstruction.StartConstruction;
 
-public class ConstructBuildingCommandValidator : AbstractValidator<ConstructBuildingCommand>
+public sealed class ConstructBuildingCommandValidator : AbstractValidator<ConstructBuildingCommand>
 {
     public ConstructBuildingCommandValidator()
     {
-        RuleFor(c => c.CityId.Value).NotEmpty().MaximumLength(256);
-        RuleFor(c => c.BuildingType).IsInEnum().NotEqual(BuildingType.None);
+        RuleFor(c => c.CityId.Value).NotEmpty();
+        RuleFor(c => c.BuildingType).IsInEnum();
     }
 }

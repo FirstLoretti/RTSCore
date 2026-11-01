@@ -1,37 +1,35 @@
+using Ardalis.GuardClauses;
+
 using MediatR;
 
-using RTSCore.Domain.Common.Exceptions;
-using RTSCore.Domain.Common.Repositories;
-using RTSCore.Domain.Enums;
+using RTSCore.Application.Repositories;
+using RTSCore.Domain.Configurations.Diplomacy;
+using RTSCore.Domain.Entities.Diplomacy;
 
 namespace RTSCore.Application.Campaign.Diplomacy.OfferResponses;
 
-public class AcceptOfferCommandHandler(IUnitOfWork unitOfWork) : IRequestHandler<AcceptOfferCommand>
+public sealed class AcceptOfferCommandHandler(
+    IUnitOfWork unitOfWork,
+    DiplomacyConfiguration config
+) : IRequestHandler<AcceptOfferCommand>
 {
-    public async Task Handle(AcceptOfferCommand request, CancellationToken cancellationToken)
+    public async Task Handle(AcceptOfferCommand request, CancellationToken ct)
     {
-        var offer = await unitOfWork.DiplomacyOfferRepository.GetAsync(request.OfferId, cancellationToken);
-        Guard.Against.NotFound(offer, request.OfferId);
+        var offer = await unitOfWork.DiplomacyOfferRepository.GetAsync(request.OfferId, ct);
+        Guard.Against.NotFound(request.OfferId, offer);
 
-        var relation = await unitOfWork.DiplomacyRelationRepository.GetAsync(
-            offer.Initiator, offer.Target, cancellationToken
-        );
-        Guard.Against.NotFoundRelation(relation, offer.Initiator, offer.Target);
+        var relation = await unitOfWork.DiplomacyRelationRepository.GetAsync(offer.CampaignId, offer.Initiator, offer.Target, ct);
+        Guard.Against.NotFound(offer.Initiator, relation);
 
-        if (offer.Type == OfferType.TradeAgreement)
+        _ = offer.Type switch
         {
-            relation.OpenTrade();
-        }
-        else if (offer.Type == OfferType.PeaceTreaty)
-        {
-            relation.MakePeace();
-        }
-        else
-        {
-            throw new NotImplementedException($"Логика для типа соглашений {offer.Type} не реализована");
-        }
+            OfferType.TradeAgreement => relation.OpenTrade(config.AcceptTradeOfferBonus),
+            OfferType.PeaceTreaty => relation.MakePeace(config.AcceptPeaceOfferBonus),
+            _ => throw new InvalidOperationException($"Offer:{offer.Type} do not added in accept offer handler logic")
+        };
 
         offer.Accept();
-        await unitOfWork.SaveChangesAsync(cancellationToken);
+
+        await unitOfWork.SaveChangesAsync(ct);
     }
 }

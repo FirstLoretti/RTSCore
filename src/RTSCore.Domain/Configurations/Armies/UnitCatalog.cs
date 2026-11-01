@@ -8,5 +8,5 @@ public sealed record UnitCatalog(IReadOnlyCollection<UnitTemplate> Templates)
 {
     private readonly FrozenDictionary<UnitType, UnitTemplate> _units = Templates.ToFrozenDictionary(t => t.Type);
 
-    public UnitTemplate GetUnit(UnitType unitType) => _units[unitType];
+    public UnitTemplate GetTemplate(UnitType unitType) => _units[unitType];
 }

@@ -9,11 +9,10 @@ public static class GameErrors
     public static GameError CantDisbandGeneral { get; }
         = new("Army.CantDisbandGeneral", "General cannot be disbanded.");
 
-    public static GameError UnavailableRecruitOption { get; }
-        = new("City.UnavailableRecruitOption", "Recruit option is unavailable.");
-
-    public static GameError CityCantConstructThisBuildingType { get; }
+    public static GameError CantConstructThisBuildingType { get; }
         = new("City.CityCantConstructThisBuildingType", "This building do not allowed for construction in this city type.");
+    public static GameError CantRecruitBuildingNotConstructed { get; }
+        = new("City.CityCantRecruitBuildingNotConstructed", "Cannot recruit unit, construct required building first.");
     public static GameError CantConstructBuildingDuplicate { get; }
         = new("City.CantConstructBuildingDuplicate", "Cannot construct a duplicate building.");
     public static GameError ChainUnavailableConstructionOption { get; }

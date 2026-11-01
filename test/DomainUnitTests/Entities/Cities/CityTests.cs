@@ -144,7 +144,7 @@ public class CityTests
             var result = city.CanConstruct(buildingTemplate);
 
             result.IsFailure.Should().BeTrue();
-            result.Error.Should().Be(GameErrors.CityCantConstructThisBuildingType);
+            result.Error.Should().Be(GameErrors.CantConstructThisBuildingType);
         }
 
         [Fact]

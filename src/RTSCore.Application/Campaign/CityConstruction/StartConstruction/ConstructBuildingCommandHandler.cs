@@ -1,40 +1,40 @@
+using Ardalis.GuardClauses;
+
 using MediatR;
 
-using RTSCore.Domain.Common.Repositories;
+using RTSCore.Application.Repositories;
+using RTSCore.Domain.Common;
 using RTSCore.Domain.Configurations.Cities;
-using RTSCore.Domain.Exeptions;
+using RTSCore.Domain.Entities.Cities;
 
 namespace RTSCore.Application.Campaign.CityConstruction.StartConstruction;
 
-public class ConstructBuildingCommandHandler(
+public sealed class ConstructBuildingCommandHandler(
     IUnitOfWork unitOfWork,
-    IReadOnlyCollection<BuildingTemplate> buildingTemplates
-) : IRequestHandler<ConstructBuildingCommand>
+    BuildingCatalog catalog
+) : IRequestHandler<ConstructBuildingCommand, Result<BuildingId>>
 {
-    public async Task Handle(ConstructBuildingCommand request, CancellationToken ct)
+    public async Task<Result<BuildingId>> Handle(ConstructBuildingCommand request, CancellationToken ct)
     {
-        var city = await unitOfWork.CityRepository.GetAsync(request.CityId, ct)
-            ?? throw new NotFoundException(
-                $"[{nameof(ConstructBuildingCommandHandler)}] " +
-                $"Поселения {request.CityId} нет на карте кампании"
-            );
+        var city = await unitOfWork.CityRepository.GetAsync(request.CityId, ct);
+        Guard.Against.NotFound(request.CityId, city);
 
-        var faction = await unitOfWork.FactionRepository.GetAsync(city.Faction, ct)
-            ?? throw new NotFoundException(
-                $"[{nameof(ConstructBuildingCommandHandler)}] " +
-                $"Поселение {city.Id} принадлежит {city.Faction}, " +
-                $"но эта фракция не зарегистрирована в текущей игре."
-            );
+        var faction = await unitOfWork.FactionRepository.GetAsync(city.Faction, ct);
+        Guard.Against.NotFound(city.Faction, faction);
 
-        var template = buildingTemplates.FirstOrDefault(b => b.Type == request.BuildingType)
-            ?? throw new NotFoundException(
-                $"[{nameof(ConstructBuildingCommandHandler)}] " +
-                $"Шаблон здания для типа {request.BuildingType} не содержится"
-           );
+        var template = catalog.GetBuilding(request.BuildingType);
 
-        city.StartConstruction(template);
-        faction.SpendGold(template.Cost);
+        var factionResult = faction.SpendGold(template.Cost);
+        if (factionResult.IsFailure) return factionResult.Error;
+
+        var cityResult = city.StartConstruction(template);
+        if (cityResult.IsFailure)
+        {
+            faction.RefundGold(template.Cost);
+        }
 
         await unitOfWork.SaveChangesAsync(ct);
+
+        return cityResult;
     }
 }

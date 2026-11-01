@@ -1,21 +1,24 @@
 using MediatR;
 
-using RTSCore.Domain.Common.Repositories;
-using RTSCore.Domain.Entities.Campaign;
+using RTSCore.Application.Repositories;
+using RTSCore.Domain.Configurations.Cities;
+using RTSCore.Domain.Configurations.Factions;
+using RTSCore.Domain.Entities.Campaigns;
 
 namespace RTSCore.Application.Campaign.Lifecycle;
 
-public class StartCampaignCommanHandler(
+public sealed class StartCampaignCommanHandler(
     IUnitOfWork unitOfWork,
-    StartCampaignService campaignService
+    FactionCatalog factionCatalog,
+    CityCatalog cityCatalog
 ) : IRequestHandler<StartCampaignCommand>
 {
     public async Task Handle(StartCampaignCommand request, CancellationToken ct)
     {
-        var (factions, cities) = campaignService.InitializeWorld(CampaignId.New(), request.PlayersFactions);
+        var result = WorldInitializer.Initialize(CampaignId.New(), request.PlayersFactions, factionCatalog, cityCatalog);
 
-        unitOfWork.FactionRepository.AddRange(factions);
-        unitOfWork.CityRepository.AddRange(cities);
+        unitOfWork.FactionRepository.AddRange(result.Factions);
+        unitOfWork.CityRepository.AddRange(result.Cities);
 
         await unitOfWork.SaveChangesAsync(ct);
     }

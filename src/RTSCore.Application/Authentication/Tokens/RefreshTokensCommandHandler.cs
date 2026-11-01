@@ -5,9 +5,9 @@ using MediatR;
 using Microsoft.IdentityModel.JsonWebTokens;
 
 using RTSCore.Application.Authentication.Common;
+using RTSCore.Application.Repositories;
 using RTSCore.Domain.Common;
 using RTSCore.Domain.Common.Exceptions;
-using RTSCore.Domain.Common.Repositories;
 using RTSCore.Domain.Entities;
 using RTSCore.Domain.Entities.Identity;
 using RTSCore.Domain.Exeptions;

@@ -1,18 +1,19 @@
+using Ardalis.GuardClauses;
+
 using MediatR;
 
-using RTSCore.Domain.Common.Exceptions;
-using RTSCore.Domain.Common.Repositories;
+using RTSCore.Application.Repositories;
 
 namespace RTSCore.Application.Campaign.CityConstruction.CancelConstruction;
 
-public class CancelConstructBuildingCommandHandler(
+public sealed class CancelConstructBuildingCommandHandler(
     IUnitOfWork unitOfWork
 ) : IRequestHandler<CancelConstructBuildingCommand>
 {
     public async Task Handle(CancelConstructBuildingCommand request, CancellationToken ct)
     {
         var city = await unitOfWork.CityRepository.GetAsync(request.CityId, ct);
-        Guard.Against.NotFound(city, request.CityId);
+        Guard.Against.NotFound(request.CityId, city);
 
         city.CancelConstruction(request.BuildingId);
 

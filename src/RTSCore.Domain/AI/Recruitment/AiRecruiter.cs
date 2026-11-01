@@ -61,7 +61,7 @@ public sealed class AiRecruiter
                 while (faction.Gold >= availableUnit.Cost)
                 {
                     faction.SpendGold(availableUnit.Cost);
-                    army.RecruitUnit(_unitCatalog.GetUnit(availableUnit.Type));
+                    army.RecruitUnit(_unitCatalog.GetTemplate(availableUnit.Type));
                 }
             }
         }

@@ -1,15 +1,14 @@
 using FluentValidation;
 
-using RTSCore.Domain;
-
 namespace RTSCore.Application.Campaign.Diplomacy.WarDeclaration;
 
-public class DeclareWarCommandValidator : AbstractValidator<DeclareWarCommand>
+public sealed class DeclareWarCommandValidator : AbstractValidator<DeclareWarCommand>
 {
     public DeclareWarCommandValidator()
     {
-        RuleFor(c => c.Initiator).IsInEnum().NotEqual(FactionType.None);
-        RuleFor(c => c.Target).IsInEnum().NotEqual(FactionType.None);
+        RuleFor(c => c.CampaignId).NotEmpty();
+        RuleFor(c => c.Initiator).IsInEnum();
+        RuleFor(c => c.Target).IsInEnum();
         RuleFor(c => c).Must(c => c.Initiator != c.Target);
     }
 }

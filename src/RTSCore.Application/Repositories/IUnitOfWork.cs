@@ -1,9 +1,7 @@
-namespace RTSCore.Domain.Common.Repositories;
+namespace RTSCore.Application.Repositories;
 
 public interface IUnitOfWork
 {
-    IBuildingRepository BuildingRepository { get; }
-    IUnitRepository UnitRepository { get; }
     IFactionRepository FactionRepository { get; }
     ICityRepository CityRepository { get; }
     IDiplomacyRelationRepository DiplomacyRelationRepository { get; }
@@ -12,5 +10,5 @@ public interface IUnitOfWork
     IRefreshTokenRepository RefreshTokenRepository { get; }
     IArmyRepository ArmyRepository { get; }
 
-    Task SaveChangesAsync(CancellationToken cancellationToken);
+    Task SaveChangesAsync(CancellationToken ct);
 }

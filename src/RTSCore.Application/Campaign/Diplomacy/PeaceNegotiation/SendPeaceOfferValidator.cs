@@ -1,15 +1,14 @@
 using FluentValidation;
 
-using RTSCore.Domain;
-
 namespace RTSCore.Application.Campaign.Diplomacy.PeaceNegotiation;
 
-public class SendPeaceOfferCommandValidator : AbstractValidator<SendPeaceOfferCommand>
+public sealed class SendPeaceOfferCommandValidator : AbstractValidator<SendPeaceOfferCommand>
 {
     public SendPeaceOfferCommandValidator()
     {
-        RuleFor(c => c.Initiator).IsInEnum().NotEqual(FactionType.None);
-        RuleFor(c => c.Target).IsInEnum().NotEqual(FactionType.None);
+        RuleFor(c => c.CampaignId).NotEmpty();
+        RuleFor(c => c.Initiator).IsInEnum();
+        RuleFor(c => c.Target).IsInEnum();
         RuleFor(c => c).Must(c => c.Initiator != c.Target);
     }
 }

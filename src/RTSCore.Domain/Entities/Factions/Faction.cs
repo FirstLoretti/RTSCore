@@ -30,8 +30,7 @@ public sealed class Faction : AggregateRoot
 
     public Result SpendGold(int amount)
     {
-        if (Gold < amount)
-            return GameErrors.NotEnoughGold;
+        if (Gold < amount) return GameErrors.NotEnoughGold;
 
         Gold -= amount;
 

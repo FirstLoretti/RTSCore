@@ -1,20 +1,24 @@
+using Ardalis.GuardClauses;
+
 using MediatR;
 
-using RTSCore.Domain.Common.Exceptions;
-using RTSCore.Domain.Common.Repositories;
+using RTSCore.Application.Repositories;
+using RTSCore.Domain.Configurations.Diplomacy;
 
 namespace RTSCore.Application.Campaign.Diplomacy.WarDeclaration;
 
-public class DeclareWarCommandHandler(IUnitOfWork unitOfWork) : IRequestHandler<DeclareWarCommand>
+public sealed class DeclareWarCommandHandler(
+    IUnitOfWork unitOfWork,
+    DiplomacyConfiguration config
+) : IRequestHandler<DeclareWarCommand>
 {
-    public async Task Handle(DeclareWarCommand request, CancellationToken cancellationToken)
+    public async Task Handle(DeclareWarCommand request, CancellationToken ct)
     {
-        var relation = await unitOfWork.DiplomacyRelationRepository.GetAsync(
-            request.Initiator, request.Target, cancellationToken
-        );
-        Guard.Against.NotFoundRelation(relation, request.Initiator, request.Target);
+        var relation = await unitOfWork.DiplomacyRelationRepository.GetAsync(request.CampaignId, request.Initiator, request.Target, ct);
+        Guard.Against.NotFound(request.Initiator, relation);
 
-        relation.DeclareWar();
-        await unitOfWork.SaveChangesAsync(cancellationToken);
+        relation.DeclareWar(config.DeclareWarPenalty);
+
+        await unitOfWork.SaveChangesAsync(ct);
     }
 }

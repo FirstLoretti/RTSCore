@@ -48,55 +48,39 @@ public sealed class City : AggregateRoot
         Vector2 coordinates
     ) => new(campaignId, CityId.New(), template, faction, coordinates);
 
+    public Result CanRecruit(UnitTemplate unit) =>
+        !IsConstructed(unit.RequiredBuilding)
+            ? (Result)GameErrors.CantRecruitBuildingNotConstructed
+            : Result.Success();
+
     public ImmutableArray<ProductionOption<UnitType>> GetRecruitableUnits(
         IReadOnlyCollection<UnitTemplate> unitTemplates
-    )
-    {
-        var isConstructed = IsConstructed();
-
-        return [.. unitTemplates
-            .Where(u => isConstructed[(int)u.RequiredBuilding])
+    ) => [.. unitTemplates
+            .Where(u => IsConstructed(u.RequiredBuilding))
             .Select(u => new ProductionOption<UnitType>(
                 u.DisplayName,
                 u.Type,
                 u.Cost,
                 u.TurnsToRecruit,
                 u.ProductionCategory,
-                u.AiUtility))];
-    }
+                u.AiUtility))
+        ];
 
     public ImmutableArray<ProductionOption<BuildingType>> GetConstructableBuildings(
         IReadOnlyCollection<BuildingTemplate> buildingTemplates
-    )
-    {
-        var isConstructed = IsConstructed();
-
-        return [.. buildingTemplates
+    ) => [.. buildingTemplates
             .Where(b =>
                 b.AllowedCityTypes.Contains(Type) &&
-                !isConstructed[(int)b.Type] &&
-                b.RequiredBuildings.All(type => isConstructed[(int)type]))
+                !IsConstructed(b.Type) &&
+                b.RequiredBuildings.All(type => IsConstructed(type)))
             .Select(b => new ProductionOption<BuildingType>(
                 b.DisplayName,
                 b.Type,
                 b.Cost,
                 b.TurnsToConstruct,
                 b.ProductionCategory,
-                b.AiUtility))];
-    }
-
-    private bool[] IsConstructed()
-    {
-        bool[] isConstructed = new bool[Enum.GetValues<BuildingType>().Length];
-
-        foreach (var building in _buildings)
-        {
-            if (building.IsConstructed)
-                isConstructed[(int)building.Type] = true;
-        }
-
-        return isConstructed;
-    }
+                b.AiUtility))
+        ];
 
     public Army CreateArmy(UnitTemplate general) => Army.Create(CampaignId, Faction, Coordinates, general);
 
@@ -107,7 +91,8 @@ public sealed class City : AggregateRoot
 
         foreach (var building in _buildings)
         {
-            building.AdvanceConstruction();
+            if (!building.IsConstructed)
+                building.AdvanceConstruction();
 
             if (!building.IsConstructed) continue;
 
@@ -172,7 +157,7 @@ public sealed class City : AggregateRoot
     internal Result CanConstruct(BuildingTemplate building)
     {
         if (!building.AllowedCityTypes.Contains(Type))
-            return Result.Failure(GameErrors.CityCantConstructThisBuildingType);
+            return Result.Failure(GameErrors.CantConstructThisBuildingType);
 
         if (_buildings.Any(b => b.Type == building.Type))
             return Result.Failure(GameErrors.CantConstructBuildingDuplicate);
@@ -184,6 +169,8 @@ public sealed class City : AggregateRoot
             ? Result.Failure(GameErrors.ChainUnavailableConstructionOption)
             : Result.Success();
     }
+
+    private bool IsConstructed(BuildingType type) => _buildings.Exists(b => b.Type == type && b.IsConstructed);
 
     private Building GetBuildingOrThrow(BuildingId id) => _buildings.SingleOrDefault(b => b.Id == id)
         ?? throw new InvalidOperationException($"City:{Id} does not contain it's own building:{id}");

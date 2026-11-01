@@ -1,18 +1,14 @@
 using FluentValidation;
 
-using RTSCore.Domain;
-using RTSCore.Domain.Entities.Armies;
-
 namespace RTSCore.Application.Campaign.UnitRecruitment;
 
-public class RecruitRegularUnitCommandValidator : AbstractValidator<RecruitRegularUnitCommand>
+public sealed class RecruitRegularUnitCommandValidator : AbstractValidator<RecruitUnitCommand>
 {
     public RecruitRegularUnitCommandValidator()
     {
-        RuleFor(c => c.ArmyId.Value).MaximumLength(256);
+        RuleFor(c => c.ArmyId).NotEmpty();
+        RuleFor(c => c.CityId).NotEmpty();
 
-        RuleFor(c => c.Faction).IsInEnum().NotEqual(FactionType.None);
-
-        RuleFor(c => c.Type).IsInEnum().NotEqual(UnitType.None);
+        RuleFor(c => c.UnitType).IsInEnum();
     }
 }

@@ -1,24 +1,27 @@
 using MediatR;
 
-using RTSCore.Domain.Configurations;
-using RTSCore.Domain.Common.Repositories;
-using RTSCore.Domain.Common.Exceptions;
+using Ardalis.GuardClauses;
+
+using RTSCore.Domain.Configurations.Armies;
 using RTSCore.Domain.Entities.Armies;
+using RTSCore.Application.Repositories;
+
 
 namespace RTSCore.Application.Campaign.ArmyCreation;
 
-public class CreateArmyCommandHandler(
+public sealed class CreateArmyCommandHandler(
     IUnitOfWork unitOfWork,
-    UnitConfig unitConfiguration
+    UnitCatalog unitCatalog
 ) : IRequestHandler<CreateArmyCommand, ArmyId>
 {
     public async Task<ArmyId> Handle(CreateArmyCommand request, CancellationToken ct)
     {
-        var city = await unitOfWork.CityRepository.GetAsync(request.CityId, ct);
-        Guard.Against.NotFound(city, request.CityId);
+        var city = await unitOfWork.CityRepository.GetAsync(request.CityId, ct, trackChanges: false);
+        Guard.Against.NotFound(request.CityId, city);
 
-        var army = city.CreateArmy(unitConfiguration.Templates);
+        var army = city.CreateArmy(unitCatalog.GetTemplate(request.GeneralType));
 
+        unitOfWork.ArmyRepository.Add(army);
         await unitOfWork.SaveChangesAsync(ct);
 
         return army.Id;

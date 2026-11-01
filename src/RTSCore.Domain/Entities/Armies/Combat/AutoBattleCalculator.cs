@@ -14,14 +14,14 @@ public sealed class AutoBattleCalculator(
         var attackerPower = attaсkers
             .Sum(u =>
             {
-                var template = catalog.GetUnit(u.Type);
+                var template = catalog.GetTemplate(u.Type);
                 return statsCalculator.Power(template, u.Level, u.Health);
             });
 
         var defenderPower = defenders
             .Sum(u =>
             {
-                var template = catalog.GetUnit(u.Type);
+                var template = catalog.GetTemplate(u.Type);
                 return statsCalculator.Power(template, u.Level, u.Health);
             });
 
@@ -51,7 +51,7 @@ public sealed class AutoBattleCalculator(
 
         foreach (var unit in units)
         {
-            var template = catalog.GetUnit(unit.Type);
+            var template = catalog.GetTemplate(unit.Type);
 
             var damage = (int)(template.MaxHealth * damageTaken);
 

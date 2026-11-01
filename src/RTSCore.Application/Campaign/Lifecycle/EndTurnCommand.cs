@@ -4,4 +4,4 @@ using RTSCore.Domain;
 
 namespace RTSCore.Application.Campaign.Lifecycle;
 
-public record EndTurnCommand(FactionType FactionType) : IRequest;
+public sealed record EndTurnCommand(FactionType Faction) : IRequest;

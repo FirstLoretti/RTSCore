@@ -1,24 +1,26 @@
+using Ardalis.GuardClauses;
+
 using MediatR;
 
-using RTSCore.Domain.Common.Repositories;
-using RTSCore.Domain.Exeptions;
+using RTSCore.Application.Repositories;
+using RTSCore.Domain.Common;
 
 namespace RTSCore.Application.Campaign.DisbandUnit;
 
-public class DisbandUnitCommandHandler(
+public sealed class DisbandUnitCommandHandler(
     IUnitOfWork unitOfWork
-) : IRequestHandler<DisbandUnitCommand>
+) : IRequestHandler<DisbandUnitCommand, Result>
 {
-    public async Task Handle(DisbandUnitCommand request, CancellationToken ct)
+    public async Task<Result> Handle(DisbandUnitCommand request, CancellationToken ct)
     {
-        var unit = await unitOfWork.UnitRepository.GetAsync(request.Id, ct)
-            ?? throw new NotFoundException($"[{nameof(DisbandUnitCommand)}]Юнита {request.Id} нет в базе данных");
+        var army = await unitOfWork.ArmyRepository.GetAsync(request.ArmyId, ct);
+        Guard.Against.NotFound(request.ArmyId, army);
 
-        var army = await unitOfWork.ArmyRepository.GetAsync(unit.ArmyId, ct)
-            ?? throw new NotFoundException("Армии нет в базе данных");
-
-        army.DisbandUnit(unit);
+        var result = army.DisbandUnit(request.UnitId);
+        if (result.IsFailure) return result;
 
         await unitOfWork.SaveChangesAsync(ct);
+
+        return Result.Success();
     }
 }

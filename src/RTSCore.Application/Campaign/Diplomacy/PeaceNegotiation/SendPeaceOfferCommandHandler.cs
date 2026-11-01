@@ -1,32 +1,23 @@
+using Ardalis.GuardClauses;
+
 using MediatR;
 
-using RTSCore.Domain.Common.Exceptions;
-using RTSCore.Domain.Common.Repositories;
-using RTSCore.Domain.Entities;
-using RTSCore.Domain.Enums;
+using RTSCore.Application.Repositories;
+using RTSCore.Domain.Entities.Diplomacy;
 
 namespace RTSCore.Application.Campaign.Diplomacy.PeaceNegotiation;
 
-public class SendPeaceOfferCommanHandler(IUnitOfWork unitOfWork) : IRequestHandler<SendPeaceOfferCommand, Guid>
+public sealed class SendPeaceOfferCommanHandler(IUnitOfWork unitOfWork) : IRequestHandler<SendPeaceOfferCommand, DiplomacyOfferId>
 {
-    public async Task<Guid> Handle(SendPeaceOfferCommand request, CancellationToken cancellationToken)
+    public async Task<DiplomacyOfferId> Handle(SendPeaceOfferCommand request, CancellationToken ct)
     {
-        var relation = await unitOfWork.DiplomacyRelationRepository.GetAsync(
-            request.Initiator, request.Target, cancellationToken
-        );
-        Guard.Against.NotFoundRelation(relation, request.Initiator, request.Target);
+        var relation = await unitOfWork.DiplomacyRelationRepository.GetAsync(request.CampaignId, request.Initiator, request.Target, ct);
+        Guard.Against.NotFound(request.Initiator, relation);
 
-        relation.ThrowIfCannotProposePeaceOffer();
-
-        var factionUnderNegotiation = await unitOfWork.DiplomacyOfferRepository.GetFactionsUnderNegotiationAsync(
-            request.Initiator, cancellationToken
-        );
-        Guard.Against.DuplicateOffer(factionUnderNegotiation, request.Target);
-
-        var offer = new DiplomacyOffer(request.Initiator, request.Target, OfferType.PeaceTreaty);
+        var offer = new DiplomacyOffer(request.CampaignId, request.Initiator, request.Target, OfferType.PeaceTreaty);
 
         unitOfWork.DiplomacyOfferRepository.Add(offer);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
+        await unitOfWork.SaveChangesAsync(ct);
 
         return offer.Id;
     }

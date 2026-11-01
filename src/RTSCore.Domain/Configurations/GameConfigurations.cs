@@ -4,11 +4,14 @@ using RTSCore.Domain.Configurations.Armies.Combat;
 using RTSCore.Domain.Configurations.Cities;
 using RTSCore.Domain.Configurations.Diplomacy;
 using RTSCore.Domain.Configurations.Factions;
+using RTSCore.Domain.Configurations.World;
 
 namespace RTSCore.Domain.Configurations;
 
 public sealed record GameConfigurations
 {
+    public required WorldConfiguration WorldConfiguration { get; init; }
+
     public required UnitCatalog Units { get; init; }
     public required FactionCatalog Factions { get; init; }
     public required BuildingCatalog Buildings { get; init; }

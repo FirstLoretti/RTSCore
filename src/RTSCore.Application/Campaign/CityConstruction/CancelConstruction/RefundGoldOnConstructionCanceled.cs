@@ -1,25 +1,26 @@
+using Ardalis.GuardClauses;
+
 using MediatR;
 
 using RTSCore.Application.Common;
-using RTSCore.Domain.Common.Exceptions;
-using RTSCore.Domain.Common.Repositories;
+using RTSCore.Application.Repositories;
 using RTSCore.Domain.Entities.Cities;
 
 namespace RTSCore.Application.Campaign.CityConstruction.CancelConstruction;
 
-public class RefundGoldOnConstructionCanceled(
+public sealed class RefundGoldOnConstructionCanceled(
     IUnitOfWork unitOfWork
-) : INotificationHandler<DomainEventNotification<BuildingConstructionCanceledEvent>>
+) : INotificationHandler<DomainEventNotification<ConstructionCanceledEvent>>
 {
     public async Task Handle(
-        DomainEventNotification<BuildingConstructionCanceledEvent> notification,
+        DomainEventNotification<ConstructionCanceledEvent> notification,
         CancellationToken ct
     )
     {
-        var (cost, factionType) = notification.DomainEvent;
+        var (factionType, cost) = notification.DomainEvent;
 
         var faction = await unitOfWork.FactionRepository.GetAsync(factionType, ct);
-        Guard.Against.NotFound(faction, factionType);
+        Guard.Against.NotFound(factionType, faction);
 
         faction.RefundGold(cost);
     }

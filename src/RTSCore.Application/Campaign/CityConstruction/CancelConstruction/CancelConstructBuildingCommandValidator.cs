@@ -2,10 +2,11 @@ using FluentValidation;
 
 namespace RTSCore.Application.Campaign.CityConstruction.CancelConstruction;
 
-public class CancelConstructBuildingCommandValidator : AbstractValidator<CancelConstructBuildingCommand>
+public sealed class CancelConstructBuildingCommandValidator : AbstractValidator<CancelConstructBuildingCommand>
 {
     public CancelConstructBuildingCommandValidator()
     {
-        RuleFor(b => b.BuildingId.Value).NotEmpty().MaximumLength(256);
+        RuleFor(c => c.BuildingId.Value).NotEmpty();
+        RuleFor(c => c.CityId.Value).NotEmpty();
     }
 }

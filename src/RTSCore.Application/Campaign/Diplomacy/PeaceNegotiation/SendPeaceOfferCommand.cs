@@ -1,7 +1,14 @@
 using MediatR;
 
 using RTSCore.Domain;
+using RTSCore.Domain.Entities.Campaigns;
+using RTSCore.Domain.Entities.Diplomacy;
 
 namespace RTSCore.Application.Campaign.Diplomacy.PeaceNegotiation;
 
-public record SendPeaceOfferCommand(FactionType Initiator, FactionType Target) : IRequest<Guid>;
+public sealed record SendPeaceOfferCommand(
+    CampaignId CampaignId,
+    FactionType Initiator,
+    FactionType Target
+)
+: IRequest<DiplomacyOfferId>;

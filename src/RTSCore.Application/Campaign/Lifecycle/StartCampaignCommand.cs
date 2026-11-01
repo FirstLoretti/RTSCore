@@ -4,4 +4,4 @@ using RTSCore.Domain;
 
 namespace RTSCore.Application.Campaign.Lifecycle;
 
-public record StartCampaignCommand(FactionType[] PlayersFactions) : IRequest;
+public sealed record StartCampaignCommand(HashSet<FactionType> PlayersFactions) : IRequest;
