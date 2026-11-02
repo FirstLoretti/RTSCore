@@ -8,6 +8,4 @@ public interface IDiplomacyOfferRepository
     void Add(DiplomacyOffer offer);
 
     Task<DiplomacyOffer?> GetAsync(DiplomacyOfferId id, CancellationToken ct);
-    Task<HashSet<FactionType>> GetFactionsUnderNegotiationAsync(FactionType initiator, CancellationToken ct);
-    Task<IReadOnlyCollection<DiplomacyOffer>> GetFactionOffersAsync(FactionType faction, CancellationToken ct);
 }

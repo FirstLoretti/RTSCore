@@ -1,3 +1,5 @@
+using System.Collections.Immutable;
+
 using RTSCore.Domain;
 using RTSCore.Domain.Entities.Campaigns;
 using RTSCore.Domain.Entities.Diplomacy;
@@ -9,5 +11,5 @@ public interface IDiplomacyRelationRepository
     void Add(DiplomacyRelation relation);
 
     Task<DiplomacyRelation?> GetAsync(CampaignId campaignId, FactionType faction1, FactionType faction2, CancellationToken ct);
-    Task<IReadOnlyCollection<DiplomacyRelation>> GetAsync(CampaignId campaignId, FactionType faction, CancellationToken ct);
+    Task<ImmutableArray<DiplomacyRelation>> GetAsync(CampaignId campaignId, FactionType faction, CancellationToken ct);
 }

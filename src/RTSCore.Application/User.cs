@@ -1,19 +1,16 @@
-namespace RTSCore.Domain.Entities;
+namespace RTSCore.Application;
 
-public class User
+public sealed class User
 {
-    public Guid Id { get; private set; }
+    public UserId Id { get; }
     public string Name { get; private set; } = string.Empty;
     public string PasswordHash { get; private set; } = string.Empty;
 
-    public User(string name, string passwordHash)
+    public User(string name, string password)
     {
-        if (string.IsNullOrWhiteSpace(name)) throw new ArgumentException("Имя пользователя не может быть пустым.");
-        if (string.IsNullOrWhiteSpace(passwordHash)) throw new ArgumentException("Хэш пароля не может быть пустым.");
-
-        Id = Guid.NewGuid();
-        Name = name.Trim();
-        PasswordHash = passwordHash;
+        Id = UserId.New();
+        Name = name;
+        PasswordHash = BCrypt.Net.BCrypt.HashPassword(password);
     }
 
     private User() { }

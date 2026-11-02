@@ -1,23 +1,19 @@
 using MediatR;
 
-using RTSCore.Application.Authentication.Common;
+using RTSCore.Application.Common.Exceptions;
 using RTSCore.Application.Repositories;
-using RTSCore.Domain.Common;
-using RTSCore.Domain.Entities;
-using RTSCore.Domain.Exeptions;
 
 namespace RTSCore.Application.Authentication.Register;
 
-public class RegisterUserCommandHandler(
+public sealed class RegisterUserCommandHandler(
     IUnitOfWork unitOfWork,
     IJwtTokenGenerator jwtTokenGenerator,
     IRefreshTokenGenerator refreshTokenGenerator
-)
-: IRequestHandler<RegisterUserCommand, AuthResponse>
+) : IRequestHandler<RegisterUserCommand, AuthResponse>
 {
-    public async Task<AuthResponse> Handle(RegisterUserCommand request, CancellationToken cancellationToken)
+    public async Task<AuthResponse> Handle(RegisterUserCommand request, CancellationToken ct)
     {
-        var user = await CreateUser(request, cancellationToken);
+        var user = await CreateUser(request, ct);
         var accessToken = jwtTokenGenerator.Generate(user);
         var refreshToken = refreshTokenGenerator.Generate();
 
@@ -25,16 +21,16 @@ public class RegisterUserCommandHandler(
 
         unitOfWork.RefreshTokenRepository.Add(refreshTokenEntity);
         unitOfWork.UserRepository.Add(user);
-        await unitOfWork.SaveChangesAsync(cancellationToken);
+        await unitOfWork.SaveChangesAsync(ct);
 
         return new AuthResponse(accessToken, refreshToken);
     }
 
-    private async Task<User> CreateUser(RegisterUserCommand request, CancellationToken cancellationToken)
+    private async Task<User> CreateUser(RegisterUserCommand request, CancellationToken ct)
     {
-        var isUserExist = await unitOfWork.UserRepository.ExistAsync(request.Name, cancellationToken);
+        var isUserExist = await unitOfWork.UserRepository.ExistAsync(request.Name, ct);
 
-        if (isUserExist) throw new GameRuleException("Игрок с таким именем уже существует.");
+        if (isUserExist) throw new ConflictException("Username already exists.");
 
         string passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
 

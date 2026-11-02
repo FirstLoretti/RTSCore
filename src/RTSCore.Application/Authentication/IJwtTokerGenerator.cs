@@ -1,8 +1,6 @@
 using System.Security.Claims;
 
-using RTSCore.Domain.Entities;
-
-namespace RTSCore.Domain.Common;
+namespace RTSCore.Application.Authentication;
 
 public interface IJwtTokenGenerator
 {

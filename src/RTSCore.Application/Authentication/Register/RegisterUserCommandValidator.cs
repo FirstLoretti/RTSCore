@@ -2,7 +2,7 @@ using FluentValidation;
 
 namespace RTSCore.Application.Authentication.Register;
 
-public class RegisterUserCommandValidator : AbstractValidator<RegisterUserCommand>
+public sealed class RegisterUserCommandValidator : AbstractValidator<RegisterUserCommand>
 {
     public RegisterUserCommandValidator()
     {

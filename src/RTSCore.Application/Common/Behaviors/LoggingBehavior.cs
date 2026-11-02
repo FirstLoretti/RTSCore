@@ -6,14 +6,14 @@ using Microsoft.Extensions.Logging;
 
 namespace RTSCore.Application.Common.Behaviors;
 
-public partial class LoggingBehavior<TRequest, TResponse>(
+public sealed partial class LoggingBehavior<TRequest, TResponse>(
     ILogger<LoggingBehavior<TRequest, TResponse>> logger
-) : IPipelineBehavior<TRequest, TResponse> where TRequest : IRequest<TResponse>
+) : IPipelineBehavior<TRequest, TResponse> where TRequest : notnull
 {
     public async Task<TResponse> Handle(
         TRequest request,
         RequestHandlerDelegate<TResponse> next,
-        CancellationToken cancellationToken
+        CancellationToken ct
     )
     {
         var timer = Stopwatch.StartNew();
@@ -21,7 +21,7 @@ public partial class LoggingBehavior<TRequest, TResponse>(
 
         LoggingExtensions.LogProcessStart(logger, requestName, request);
 
-        var response = await next(cancellationToken);
+        var response = await next(ct);
 
         timer.Stop();
 
