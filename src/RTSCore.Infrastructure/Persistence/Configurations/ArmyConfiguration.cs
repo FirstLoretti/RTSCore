@@ -2,15 +2,23 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 using RTSCore.Domain.Entities.Armies;
-using RTSCore.Domain.ValueObjects.Identifiers;
+using RTSCore.Domain.Entities.Campaigns;
 
 namespace RTSCore.Infrastructure.Persistence.Configurations;
 
-public class ArmyConfiguration : IEntityTypeConfiguration<Army>
+public sealed class ArmyConfiguration : IEntityTypeConfiguration<Army>
 {
     public void Configure(EntityTypeBuilder<Army> builder)
     {
-        builder.HasKey(a => a.Id);
+        builder.Property(a => a.CampaignId).HasConversion(
+            id => id.Value,
+            dbValue => new CampaignId(dbValue)
+        );
+
+        builder.Property(a => a.Id).HasConversion(
+            id => id.Value,
+            dbValue => new ArmyId(dbValue)
+        );
 
         builder.Property(a => a.GeneralId).HasConversion(
             id => id.Value,
@@ -24,7 +32,6 @@ public class ArmyConfiguration : IEntityTypeConfiguration<Army>
         builder.HasMany(a => a.Units)
             .WithOne()
             .HasForeignKey(u => u.ArmyId)
-            .IsRequired()
             .OnDelete(DeleteBehavior.Cascade);
     }
 }

@@ -45,7 +45,7 @@ public sealed class RefreshTokensCommandHanlder(
         ClaimsPrincipal principal;
         try
         {
-            principal = jwtTokenGenerator.GetPrincipalFromExpiredToken(request.AccessToken);
+            principal = jwtTokenGenerator.GetClaimsFromExpiredToken(request.AccessToken);
         }
         catch
         {

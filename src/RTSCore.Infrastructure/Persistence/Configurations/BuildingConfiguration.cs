@@ -1,16 +1,19 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
+using RTSCore.Domain.Entities.Campaigns;
 using RTSCore.Domain.Entities.Cities;
-using RTSCore.Domain.ValueObjects.Identifiers;
 
 namespace RTSCore.Infrastructure.Persistence.Configurations;
 
-public class BuildingConfiguration : IEntityTypeConfiguration<Building>
+public sealed class BuildingConfiguration : IEntityTypeConfiguration<Building>
 {
     public void Configure(EntityTypeBuilder<Building> builder)
     {
-        builder.HasKey(b => b.Id);
+        builder.Property(b => b.CampaignId).HasConversion(
+            id => id.Value,
+            dbValue => new CampaignId(dbValue)
+        );
 
         builder.Property(b => b.Id).HasConversion(
             id => id.Value,
@@ -21,6 +24,8 @@ public class BuildingConfiguration : IEntityTypeConfiguration<Building>
             id => id.Value,
             dbValue => new CityId(dbValue)
         );
+
+        builder.HasIndex(b => b.CityId);
 
         builder.Property(b => b.Type).HasConversion<string>();
         builder.Property(b => b.Faction).HasConversion<string>();

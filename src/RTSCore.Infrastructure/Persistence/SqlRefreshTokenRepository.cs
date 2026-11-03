@@ -1,23 +1,20 @@
 using Microsoft.EntityFrameworkCore;
 
-using RTSCore.Domain.Common.Repositories;
-using RTSCore.Domain.Entities;
+using RTSCore.Application;
+using RTSCore.Application.Authentication;
+using RTSCore.Application.Repositories;
 
 namespace RTSCore.Infrastructure.Persistence;
 
-public class SqlRefreshTokenRepository(AppDbContext context) : IRefreshTokenRepository
+public sealed class SqlRefreshTokenRepository(AppDbContext context) : IRefreshTokenRepository
 {
     public void Add(RefreshToken token) => context.RefreshTokens.Add(token);
 
-    public async Task RemoveTokensAsync(Guid userId, CancellationToken cancellationToken)
-    {
+    public async Task RemoveTokensAsync(UserId userId, CancellationToken ct) =>
         await context.RefreshTokens
-                .Where(t => t.UserId == userId)
-                .ExecuteDeleteAsync(cancellationToken);
-    }
+            .Where(t => t.UserId == userId)
+            .ExecuteDeleteAsync(ct);
 
-    public async Task<RefreshToken?> GetTokenAsync(string refreshToken, CancellationToken cancellationToken)
-    {
-        return await context.RefreshTokens.FirstOrDefaultAsync(t => t.Token == refreshToken, cancellationToken);
-    }
+    public async Task<RefreshToken?> GetAsync(string token, CancellationToken ct) =>
+        await context.RefreshTokens.FindAsync([token], ct);
 }

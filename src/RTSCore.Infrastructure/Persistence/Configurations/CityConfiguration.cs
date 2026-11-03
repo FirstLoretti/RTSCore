@@ -1,16 +1,19 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
+using RTSCore.Domain.Entities.Campaigns;
 using RTSCore.Domain.Entities.Cities;
-using RTSCore.Domain.ValueObjects.Identifiers;
 
 namespace RTSCore.Infrastructure.Persistence.Configurations;
 
-public class CityConfiguration : IEntityTypeConfiguration<City>
+public sealed class CityConfiguration : IEntityTypeConfiguration<City>
 {
     public void Configure(EntityTypeBuilder<City> builder)
     {
-        builder.HasKey(c => c.Id);
+        builder.Property(c => c.CampaignId).HasConversion(
+            id => id.Value,
+            dbValue => new CampaignId(dbValue)
+        );
 
         builder.Property(c => c.Id).HasConversion(
             id => id.Value,
@@ -21,13 +24,10 @@ public class CityConfiguration : IEntityTypeConfiguration<City>
 
         builder.Property(c => c.Type).HasConversion<string>();
         builder.Property(c => c.Faction).HasConversion<string>();
-        builder.Property(c => c.Population).HasConversion<int>();
-        builder.Property(c => c.Governor).HasConversion<string>();
 
         builder.HasMany(c => c.Buildings)
             .WithOne()
             .HasForeignKey(b => b.CityId)
-            .IsRequired()
             .OnDelete(DeleteBehavior.Cascade);
     }
 }

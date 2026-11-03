@@ -1,15 +1,13 @@
 using MediatR;
 
 using RTSCore.Application.Common;
-using RTSCore.Domain.Common.Repositories;
+using RTSCore.Application.Repositories;
 using RTSCore.Domain.Entities;
 
 namespace RTSCore.Infrastructure.Persistence;
 
-public class EfUnitOfWork(AppDbContext context, IMediator mediator) : IUnitOfWork
+public sealed class EfUnitOfWork(AppDbContext context, IMediator mediator) : IUnitOfWork
 {
-    public IBuildingRepository BuildingRepository { get; } = new SqlBuildingRepository(context);
-    public IUnitRepository UnitRepository { get; } = new SqlUnitRepository(context);
     public ICityRepository CityRepository { get; } = new SqlCityRepository(context);
     public IFactionRepository FactionRepository { get; } = new SqlFactionRepository(context);
     public IDiplomacyRelationRepository DiplomacyRelationRepository { get; } = new SqlDiplomacyRelationRepository(context);

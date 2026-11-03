@@ -5,13 +5,13 @@ using System.Text;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
+using RTSCore.Application;
+using RTSCore.Application.Authentication;
 using RTSCore.Application.Common;
-using RTSCore.Domain.Common;
-using RTSCore.Domain.Entities;
 
 namespace RTSCore.Infrastructure.Authentication;
 
-public class JwtTokenGenerator(IOptions<JwtSettings> jwtSettings) : IJwtTokenGenerator
+public sealed class JwtTokenGenerator(IOptions<JwtSettings> jwtSettings) : IJwtTokenGenerator
 {
     private readonly JwtSettings _jwtSettings = jwtSettings.Value;
 
@@ -28,7 +28,7 @@ public class JwtTokenGenerator(IOptions<JwtSettings> jwtSettings) : IJwtTokenGen
 
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-        var token = new SecurityTokenDescriptor
+        var descriptor = new SecurityTokenDescriptor
         {
             Subject = new ClaimsIdentity(claims),
             Expires = DateTime.UtcNow.AddMinutes(_jwtSettings.ExpiryInMinutes),
@@ -38,12 +38,12 @@ public class JwtTokenGenerator(IOptions<JwtSettings> jwtSettings) : IJwtTokenGen
         };
 
         var tokenHandler = new JwtSecurityTokenHandler();
-        var securityToken = tokenHandler.CreateToken(token);
+        var token = tokenHandler.CreateToken(descriptor);
 
-        return tokenHandler.WriteToken(securityToken);
+        return tokenHandler.WriteToken(token);
     }
 
-    public ClaimsPrincipal GetPrincipalFromExpiredToken(string token)
+    public ClaimsPrincipal GetClaimsFromExpiredToken(string token)
     {
         var tokenHandler = new JwtSecurityTokenHandler();
 
@@ -61,11 +61,11 @@ public class JwtTokenGenerator(IOptions<JwtSettings> jwtSettings) : IJwtTokenGen
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Secret))
         };
 
-        var principal = tokenHandler.ValidateToken(token, validationParameters, out SecurityToken securityToken);
+        var claims = tokenHandler.ValidateToken(token, validationParameters, out SecurityToken securityToken);
 
         return securityToken is not JwtSecurityToken jwtToken ||
             !jwtToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase)
-            ? throw new SecurityTokenException("Invalid token")
-            : principal;
+                ? throw new SecurityTokenException("Invalid token.")
+                : claims;
     }
 }

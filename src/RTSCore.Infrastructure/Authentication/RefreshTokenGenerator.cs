@@ -1,10 +1,10 @@
 using System.Security.Cryptography;
 
-using RTSCore.Domain.Common;
+using RTSCore.Application.Authentication;
 
 namespace RTSCore.Infrastructure.Authentication;
 
-public class RefreshTokenGenerator : IRefreshTokenGenerator
+public sealed class RefreshTokenGenerator : IRefreshTokenGenerator
 {
     public string Generate()
     {

@@ -1,39 +1,28 @@
+using System.Collections.Immutable;
+using System.Collections.ObjectModel;
 using System.Numerics;
 
 using Microsoft.EntityFrameworkCore;
 
+using RTSCore.Application.Repositories;
 using RTSCore.Domain;
-using RTSCore.Domain.Common.Repositories;
 using RTSCore.Domain.Entities.Cities;
 
 namespace RTSCore.Infrastructure.Persistence;
 
-public class SqlCityRepository(AppDbContext context) : ICityRepository
+public sealed class SqlCityRepository(AppDbContext context) : ICityRepository
 {
     public void Add(City city) => context.Cities.Add(city);
     public void AddRange(IEnumerable<City> cities) => context.Cities.AddRange(cities);
-    public void Remove(City city) => context.Cities.Remove(city);
 
-    public async Task<City?> GetAsync(CityId id, CancellationToken ct)
-        => await context.Cities
+    public async Task<City?> GetAsync(CityId id, CancellationToken ct, bool trackChanges = true) =>
+        await context.Cities
             .Include(c => c.Buildings)
             .FirstOrDefaultAsync(c => c.Id == id, ct);
 
-    public async Task<IReadOnlyCollection<City>> GetAsync(FactionType factionType, CancellationToken ct)
-        => await context.Cities
-            .Where(c => c.Faction == factionType)
+    public async Task<ReadOnlyCollection<City>> GetAsync(FactionType faction, CancellationToken ct) =>
+        (await context.Cities
+            .Where(c => c.Faction == faction)
             .Include(c => c.Buildings)
-            .ToListAsync(ct);
-
-    public async Task<City?> GetReadOnlyAsync(CityId id, CancellationToken ct)
-       => await context.Cities
-           .AsNoTracking()
-           .Include(c => c.Buildings)
-           .FirstOrDefaultAsync(c => c.Id == id, ct);
-
-    public async Task<City?> GetByCoordAsync(Vector2 coordinates, CancellationToken ct)
-        => await context.Cities
-            .Where(c => c.Coordinates == coordinates)
-            .Include(c => c.Buildings)
-            .FirstOrDefaultAsync(ct);
+            .ToListAsync(ct)).AsReadOnly();
 }

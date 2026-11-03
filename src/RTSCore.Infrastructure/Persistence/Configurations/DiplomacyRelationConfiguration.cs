@@ -1,19 +1,29 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-using RTSCore.Domain.Entities.Campaign;
+using RTSCore.Domain.Entities.Campaigns;
+using RTSCore.Domain.Entities.Diplomacy;
 
 namespace RTSCore.Infrastructure.Persistence.Configurations;
 
-public class DiplomacyRelationConfiguration() : IEntityTypeConfiguration<DiplomacyRelation>
+public sealed class DiplomacyRelationConfiguration() : IEntityTypeConfiguration<DiplomacyRelation>
 {
     public void Configure(EntityTypeBuilder<DiplomacyRelation> builder)
     {
-        builder.HasKey(r => r.Id);
+        builder.Property(c => c.CampaignId).HasConversion(
+            id => id.Value,
+            dbValue => new CampaignId(dbValue)
+        );
 
-        builder.HasIndex(r => new { r.FactionA, r.FactionB }).IsUnique();
+        builder.Property(c => c.Id).HasConversion(
+            id => id.Value,
+            dbValue => new DiplomacyRelationId(dbValue)
+        );
 
-        builder.Property(r => r.FactionA).HasConversion<string>().IsRequired();
-        builder.Property(r => r.FactionB).HasConversion<string>().IsRequired();
+        builder.HasIndex(r => new { r.CampaignId, r.FactionA, r.FactionB }).IsUnique();
+        builder.HasIndex(r => new { r.CampaignId, r.FactionB, r.FactionA });
+
+        builder.Property(r => r.FactionA).HasConversion<string>();
+        builder.Property(r => r.FactionB).HasConversion<string>();
     }
 }

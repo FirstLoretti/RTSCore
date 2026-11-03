@@ -1,25 +1,31 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-using RTSCore.Domain.Entities;
+using RTSCore.Application;
+using RTSCore.Application.Authentication;
 
 namespace RTSCore.Infrastructure.Persistence.Configurations;
 
-public class RefreshTokenConfiguration : IEntityTypeConfiguration<RefreshToken>
+public sealed class RefreshTokenConfiguration : IEntityTypeConfiguration<RefreshToken>
 {
     public void Configure(EntityTypeBuilder<RefreshToken> builder)
     {
-        builder.HasKey(t => t.Id);
-        builder.HasIndex(t => t.Token).IsUnique();
+        builder.Property(f => f.Id).HasConversion(
+            id => id.Value,
+            value => new RefreshTokenId(value)
+        );
 
-        builder.Property(t => t.Token)
-            .HasMaxLength(1024)
-            .IsRequired();
+        builder.Property(f => f.UserId).HasConversion(
+            id => id.Value,
+            value => new UserId(value)
+        );
+
+        builder.HasIndex(t => t.Token).IsUnique();
+        builder.HasIndex(t => t.UserId);
 
         builder.HasOne<User>()
             .WithMany()
-            .HasForeignKey(t => t.UserId)
-            .IsRequired()
+            .HasForeignKey(f => f.UserId)
             .OnDelete(DeleteBehavior.Cascade);
     }
 }

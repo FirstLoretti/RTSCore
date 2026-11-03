@@ -6,5 +6,5 @@ public interface IJwtTokenGenerator
 {
     string Generate(User user);
 
-    ClaimsPrincipal GetPrincipalFromExpiredToken(string token);
+    ClaimsPrincipal GetClaimsFromExpiredToken(string token);
 }

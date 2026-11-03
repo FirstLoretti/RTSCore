@@ -1,4 +1,4 @@
-using System.Collections.Immutable;
+using System.Collections.ObjectModel;
 
 using RTSCore.Domain;
 using RTSCore.Domain.Entities.Cities;
@@ -11,5 +11,5 @@ public interface ICityRepository
     void AddRange(IEnumerable<City> cities);
 
     Task<City?> GetAsync(CityId id, CancellationToken ct, bool trackChanges = true);
-    Task<ImmutableArray<City>> GetAsync(FactionType faction, CancellationToken ct);
+    Task<ReadOnlyCollection<City>> GetAsync(FactionType faction, CancellationToken ct);
 }

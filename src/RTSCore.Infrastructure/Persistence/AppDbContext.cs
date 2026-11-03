@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 
-using RTSCore.Domain.Entities;
+using RTSCore.Application;
+using RTSCore.Application.Authentication;
 using RTSCore.Domain.Entities.Armies;
 using RTSCore.Domain.Entities.Cities;
 using RTSCore.Domain.Entities.Diplomacy;
@@ -8,10 +9,8 @@ using RTSCore.Domain.Entities.Factions;
 
 namespace RTSCore.Infrastructure.Persistence;
 
-public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
+public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
 {
-    public DbSet<Unit> Units { get; set; }
-    public DbSet<Building> Buildings { get; set; }
     public DbSet<City> Cities { get; set; }
     public DbSet<Faction> Factions { get; set; }
     public DbSet<DiplomacyRelation> DiplomacyRelations { get; set; }
@@ -20,17 +19,15 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<RefreshToken> RefreshTokens { get; set; }
     public DbSet<Army> Armies { get; set; }
 
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    protected override void OnModelCreating(ModelBuilder builder)
     {
-        base.OnModelCreating(modelBuilder);
+        base.OnModelCreating(builder);
 
-        modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
+        builder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
     }
 
-    protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
+    protected override void ConfigureConventions(ModelConfigurationBuilder builder)
     {
-        configurationBuilder
-            .Properties<string>()
-            .HaveMaxLength(256);
+        builder.Properties<string>().HaveMaxLength(256);
     }
 }
