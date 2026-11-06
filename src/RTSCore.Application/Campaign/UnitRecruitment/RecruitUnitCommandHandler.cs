@@ -24,8 +24,9 @@ public sealed class RecruitRegularUnitCommandHandler(
         Guard.Against.NotFound(request.CityId, city);
 
         ThrowIfDifferentFactions(army, city);
+        ThrowIfDifferentCampaignId(army, city);
 
-        var faction = await unitOfWork.FactionRepository.GetAsync(army.Faction, ct);
+        var faction = await unitOfWork.FactionRepository.GetAsync(army.CampaignId, army.Faction, ct);
         Guard.Against.NotFound(army.Faction, faction);
 
         var template = catalog.GetTemplate(request.UnitType);
@@ -52,5 +53,11 @@ public sealed class RecruitRegularUnitCommandHandler(
     {
         if (army.Faction != city.Faction)
             throw new InvalidOperationException("Cannot recruit unit of a different factions");
+    }
+
+    private static void ThrowIfDifferentCampaignId(Army army, City city)
+    {
+        if (army.CampaignId != city.CampaignId)
+            throw new InvalidOperationException("Cannot recruit unit when army and city have different campaignId");
     }
 }

@@ -5,9 +5,9 @@ using RTSCore.Domain.Entities.Campaigns;
 using RTSCore.Domain.Entities.Diplomacy;
 using RTSCore.Domain.Errors;
 
-using static DomainUnitTests.TestData;
+using static Tests.TestData;
 
-namespace DomainUnitTests.Entities.Diplomacy;
+namespace Tests.Domain.Entities.Diplomacy;
 
 public class DiplomacyRelationTests
 {

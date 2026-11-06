@@ -5,7 +5,7 @@ using RTSCore.Domain.Configurations.Armies.Combat;
 using RTSCore.Domain.Entities.Armies;
 using RTSCore.Domain.Entities.Armies.Combat;
 
-namespace DomainUnitTests.Entities.Armies.Combat;
+namespace Tests.Domain.Entities.Armies.Combat;
 
 public class AutoBattleCalculatorTests
 {

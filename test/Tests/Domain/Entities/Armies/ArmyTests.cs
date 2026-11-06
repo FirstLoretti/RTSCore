@@ -6,7 +6,7 @@ using RTSCore.Domain.Entities.Armies;
 using RTSCore.Domain.Entities.Armies.Combat;
 using RTSCore.Domain.Errors;
 
-namespace DomainUnitTests.Entities.Armies;
+namespace Tests.Domain.Entities.Armies;
 
 public partial class ArmyTests
 {

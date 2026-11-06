@@ -12,7 +12,11 @@ public sealed class CityTurnEndEventHandler(IUnitOfWork unitOfWork) : INotificat
 {
     public async Task Handle(DomainEventNotification<CityTurnEndEvent> notification, CancellationToken ct)
     {
-        var faction = await unitOfWork.FactionRepository.GetAsync(notification.DomainEvent.Faction, ct);
+        var faction = await unitOfWork.FactionRepository.GetAsync(
+            notification.DomainEvent.CampaignId,
+            notification.DomainEvent.Faction,
+            ct
+        );
         Guard.Against.NotFound(notification.DomainEvent.Faction, faction);
 
         faction.EarnGold(notification.DomainEvent.BuildingsIncome + notification.DomainEvent.TaxesIncome);

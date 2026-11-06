@@ -4,7 +4,7 @@ using RTSCore.Domain;
 using RTSCore.Domain.Entities.Armies;
 using RTSCore.Domain.Entities.Campaigns;
 
-namespace DomainUnitTests.Entities.Armies;
+namespace Tests.Domain.Entities.Armies;
 
 public class UnitTests
 {

@@ -5,9 +5,9 @@ using RTSCore.Domain.AI.Diplomacy;
 using RTSCore.Domain.Entities.Campaigns;
 using RTSCore.Domain.Entities.Diplomacy;
 
-using static DomainUnitTests.TestData;
+using static Tests.TestData;
 
-namespace DomainUnitTests.AI.Diplomacy;
+namespace Tests.Domain.AI.Diplomacy;
 
 public class AiOfferEvaluatorTests
 {

@@ -9,16 +9,18 @@ using RTSCore.Domain.AI.Diplomacy;
 using RTSCore.Domain.AI.Personality;
 using RTSCore.Domain.AI.Recruitment;
 using RTSCore.Domain.Configurations.Armies;
+using RTSCore.Domain.Configurations.Armies.Combat;
 using RTSCore.Domain.Configurations.Cities;
 using RTSCore.Domain.Configurations.Diplomacy;
 using RTSCore.Domain.Configurations.Factions;
+using RTSCore.Domain.Configurations.World;
 using RTSCore.Domain.Entities.Armies;
 using RTSCore.Domain.Entities.Campaigns;
 using RTSCore.Domain.Entities.Cities;
 using RTSCore.Domain.Entities.Diplomacy;
 using RTSCore.Domain.Entities.Factions;
 
-namespace DomainUnitTests;
+namespace Tests;
 
 public static class TestData
 {
@@ -49,6 +51,8 @@ public static class TestData
     );
 
     public static UnitStatsWeights UnitStatsWeights { get; } = new(Damage: 1f, Health: 1f);
+
+    public static UnitConfiguration UnitConfiguration { get; } = new([0, 1, 2], UnitStatsWeights);
 
     public static MovementConfiguration MovementConfiguration { get; } = new(BaseUnitDistanceCost: 10, MaxMovementPoints: 100);
 
@@ -94,16 +98,16 @@ public static class TestData
         Building.CreateUnderConstruction(CampaignId.New(), template, FactionType.England, CityId.Empty);
 
     public static City CreateCity(CityTemplate template) =>
-        City.Create(CampaignId.New(), template, FactionType.England, Vector2.Zero);
+        City.Create(CampaignId.New(), template, FactionType.England, Vector2.One);
 
     private static ImmutableArray<CityPreset> EnglandCityPresets { get; } =
     [
-        new(CityType.Settlement, DisplayName: "York", Vector2.Zero),
+        new(CityType.Settlement, DisplayName: "York", Vector2.One),
     ];
 
     private static ImmutableArray<CityPreset> FranceCityPresets { get; } =
     [
-        new(CityType.Settlement, DisplayName: "Paris", Vector2.One),
+        new(CityType.Settlement, DisplayName: "Paris", new Vector2(2f,2f)),
     ];
 
     private static ImmutableArray<CityPreset> SpainCityPresets { get; } =
@@ -239,4 +243,8 @@ public static class TestData
             ProductionCategory: ProductionCategory.Military,
             AiUtility: 1
         );
+
+    public static WorldConfiguration WorldConfiguration { get; } = new(100f, 100f, 100f, 100f);
+
+    public static AutoBattleConfiguration AutoBattleConfiguration { get; } = new(0.5f, 0.5f, 0.5f);
 }

@@ -113,7 +113,7 @@ public sealed class City : AggregateRoot
 
         var taxesIncome = (int)(Population * configuration.TaxPerCitizen);
 
-        AddDomainEvent(new CityTurnEndEvent(Faction, (int)buildingsIncome, taxesIncome));
+        AddDomainEvent(new CityTurnEndEvent(CampaignId, Faction, (int)buildingsIncome, taxesIncome));
     }
 
     public Result<BuildingId> StartConstruction(BuildingTemplate template)
@@ -149,7 +149,7 @@ public sealed class City : AggregateRoot
 
         _buildings.Remove(building);
 
-        AddDomainEvent(new ConstructionCanceledEvent(Faction, building.Cost));
+        AddDomainEvent(new ConstructionCanceledEvent(CampaignId, Faction, building.Cost));
 
         return Result.Success();
     }

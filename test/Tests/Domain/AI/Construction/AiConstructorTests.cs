@@ -4,9 +4,9 @@ using RTSCore.Domain.AI.Construction;
 using RTSCore.Domain.Configurations.Cities;
 using RTSCore.Domain.Entities.Cities;
 
-using static DomainUnitTests.TestData;
+using static Tests.TestData;
 
-namespace DomainUnitTests.AI.Construction;
+namespace Tests.Domain.AI.Construction;
 
 public class AiConstructorTests
 {

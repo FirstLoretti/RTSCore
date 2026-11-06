@@ -4,7 +4,7 @@ using RTSCore.Domain;
 using RTSCore.Domain.Entities.Campaigns;
 using RTSCore.Domain.Entities.Cities;
 
-namespace DomainUnitTests.Entities.Cities;
+namespace Tests.Domain.Entities.Cities;
 
 public class BuildingTests
 {

@@ -40,7 +40,7 @@ public sealed class Army : AggregateRoot
 
     }
 
-    public static Army Create(
+    internal static Army Create(
         CampaignId campaignId,
         FactionType faction,
         Vector2 coordinates,
@@ -55,6 +55,8 @@ public sealed class Army : AggregateRoot
 
         return army;
     }
+
+    private Army() { }
 
     public IReadOnlyCollection<Unit> GetReadyCombatants() => [.. _units.Where(u => u.IsAlive && u.IsRecruited)];
 
@@ -88,7 +90,7 @@ public sealed class Army : AggregateRoot
 
         _units.Remove(unit);
 
-        AddDomainEvent(new CancelRecruitmentEvent(Faction, unit.Cost));
+        AddDomainEvent(new CancelRecruitmentEvent(CampaignId, Faction, unit.Cost));
 
         return unit.Id;
     }

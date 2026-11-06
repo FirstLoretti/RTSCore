@@ -5,7 +5,7 @@ using RTSCore.Domain.AI.Diplomacy;
 using RTSCore.Domain.Entities.Campaigns;
 using RTSCore.Domain.Entities.Diplomacy;
 
-namespace DomainUnitTests.AI.Diplomacy;
+namespace Tests.Domain.AI.Diplomacy;
 
 public class AiDiplomacyTests
 {

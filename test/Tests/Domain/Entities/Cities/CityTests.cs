@@ -7,7 +7,7 @@ using RTSCore.Domain.Configurations.Cities;
 using RTSCore.Domain.Entities.Cities;
 using RTSCore.Domain.Errors;
 
-namespace DomainUnitTests.Entities.Cities;
+namespace Tests.Domain.Entities.Cities;
 
 public class CityTests
 {

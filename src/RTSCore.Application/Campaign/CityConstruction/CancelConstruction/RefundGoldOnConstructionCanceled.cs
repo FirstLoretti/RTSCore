@@ -17,9 +17,9 @@ public sealed class RefundGoldOnConstructionCanceled(
         CancellationToken ct
     )
     {
-        var (factionType, cost) = notification.DomainEvent;
+        var (campaignId, factionType, cost) = notification.DomainEvent;
 
-        var faction = await unitOfWork.FactionRepository.GetAsync(factionType, ct);
+        var faction = await unitOfWork.FactionRepository.GetAsync(campaignId, factionType, ct);
         Guard.Against.NotFound(factionType, faction);
 
         faction.RefundGold(cost);

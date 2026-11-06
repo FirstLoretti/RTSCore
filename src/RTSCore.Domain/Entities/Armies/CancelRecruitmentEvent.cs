@@ -1,5 +1,10 @@
 using RTSCore.Domain.Common;
+using RTSCore.Domain.Entities.Campaigns;
 
 namespace RTSCore.Domain.Entities.Armies;
 
-public record CancelRecruitmentEvent(FactionType Faction, int Cost) : IDomainEvent;
+public sealed record CancelRecruitmentEvent(
+    CampaignId CampaignId,
+    FactionType Faction,
+    int Cost
+) : IDomainEvent;

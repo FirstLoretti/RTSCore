@@ -1,10 +1,9 @@
 using FluentAssertions;
 
 using RTSCore.Domain;
-using RTSCore.Domain.Configurations.Factions;
 using RTSCore.Domain.Entities.Campaigns;
 
-namespace DomainUnitTests.Entities.Campaigns;
+namespace Tests.Domain.Entities.Campaigns;
 
 public class WorldInitializerTests
 {
@@ -16,10 +15,10 @@ public class WorldInitializerTests
         var result = WorldInitializer.Initialize(CampaignId.New(), playersFactions, TestData.FactionCatalog, TestData.CityCatalog);
 
         result.Campaign.Id.Should().NotBe(CampaignId.Empty);
-        result.Cities.Count.Should().Be(TestData.FactionCatalog.Templates.SelectMany(f => f.CityPresets).Count());
-        result.Factions.Count.Should().Be(TestData.FactionCatalog.Templates.Length);
+        result.Cities.Length.Should().Be(TestData.FactionCatalog.Templates.SelectMany(f => f.CityPresets).Count());
+        result.Factions.Length.Should().Be(TestData.FactionCatalog.Templates.Length);
 
-        result.AiAgents.Count.Should().Be(TestData.FactionCatalog.Templates.Length - playersFactions.Count);
+        result.AiAgents.Length.Should().Be(TestData.FactionCatalog.Templates.Length - playersFactions.Count);
         result.AiAgents.Select(a => a.Faction).Should().Contain(FactionType.Spain);
         result.AiAgents.Select(a => a.Faction).Should().NotContain(playersFactions);
     }

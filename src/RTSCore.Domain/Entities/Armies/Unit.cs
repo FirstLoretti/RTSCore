@@ -53,6 +53,8 @@ public sealed class Unit
         ArmyId armyId
     ) => new(campaignId, UnitId.New(), faction, template, armyId, template.TurnsToRecruit);
 
+    private Unit() { }
+
     internal void TakeDamage(int amount) => Health = int.Max(0, Health - amount);
 
     internal void AdvanceRecruitment() => TurnsToRecruit = int.Max(0, TurnsToRecruit - 1);

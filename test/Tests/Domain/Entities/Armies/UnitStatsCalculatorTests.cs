@@ -2,7 +2,7 @@ using FluentAssertions;
 
 using RTSCore.Domain.Entities.Armies;
 
-namespace DomainUnitTests.Entities.Armies;
+namespace Tests.Domain.Entities.Armies;
 
 public class UnitStatsCalculatorTests
 {

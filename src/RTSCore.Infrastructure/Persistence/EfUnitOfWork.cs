@@ -8,13 +8,21 @@ namespace RTSCore.Infrastructure.Persistence;
 
 public sealed class EfUnitOfWork(AppDbContext context, IMediator mediator) : IUnitOfWork
 {
-    public ICityRepository CityRepository { get; } = new SqlCityRepository(context);
-    public IFactionRepository FactionRepository { get; } = new SqlFactionRepository(context);
-    public IDiplomacyRelationRepository DiplomacyRelationRepository { get; } = new SqlDiplomacyRelationRepository(context);
-    public IDiplomacyOfferRepository DiplomacyOfferRepository { get; } = new SqlDiplomacyOfferRepository(context);
-    public IUserRepository UserRepository { get; } = new SqlUserRepository(context);
-    public IRefreshTokenRepository RefreshTokenRepository { get; } = new SqlRefreshTokenRepository(context);
-    public IArmyRepository ArmyRepository { get; } = new SqlArmyRepository(context);
+    public ICityRepository CityRepository => _cityRepository ??= new SqlCityRepository(context);
+    public IFactionRepository FactionRepository => _factionRepository ??= new SqlFactionRepository(context);
+    public IDiplomacyRelationRepository DiplomacyRelationRepository => _relationRepository ??= new SqlDiplomacyRelationRepository(context);
+    public IDiplomacyOfferRepository DiplomacyOfferRepository => _offerRepository ??= new SqlDiplomacyOfferRepository(context);
+    public IUserRepository UserRepository => _userRepository ??= new SqlUserRepository(context);
+    public IRefreshTokenRepository RefreshTokenRepository => _tokenRepository ??= new SqlRefreshTokenRepository(context);
+    public IArmyRepository ArmyRepository => _armyRepository ??= new SqlArmyRepository(context);
+
+    private SqlCityRepository? _cityRepository;
+    private SqlFactionRepository? _factionRepository;
+    private SqlDiplomacyRelationRepository? _relationRepository;
+    private SqlDiplomacyOfferRepository? _offerRepository;
+    private SqlUserRepository? _userRepository;
+    private SqlRefreshTokenRepository? _tokenRepository;
+    private SqlArmyRepository? _armyRepository;
 
     public async Task SaveChangesAsync(CancellationToken ct)
     {

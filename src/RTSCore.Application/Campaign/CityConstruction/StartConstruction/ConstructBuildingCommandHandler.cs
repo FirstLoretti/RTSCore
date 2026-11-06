@@ -19,7 +19,7 @@ public sealed class ConstructBuildingCommandHandler(
         var city = await unitOfWork.CityRepository.GetAsync(request.CityId, ct);
         Guard.Against.NotFound(request.CityId, city);
 
-        var faction = await unitOfWork.FactionRepository.GetAsync(city.Faction, ct);
+        var faction = await unitOfWork.FactionRepository.GetAsync(city.CampaignId, city.Faction, ct);
         Guard.Against.NotFound(city.Faction, faction);
 
         var template = catalog.GetBuilding(request.BuildingType);

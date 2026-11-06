@@ -4,9 +4,9 @@ using RTSCore.Domain.AI.Personality;
 using RTSCore.Domain.AI.Recruitment;
 using RTSCore.Domain.Entities.Armies;
 
-using static DomainUnitTests.TestData;
+using static Tests.TestData;
 
-namespace DomainUnitTests.AI.Recruitment;
+namespace Tests.Domain.AI.Recruitment;
 
 public class AiRecruiterTests
 {
