@@ -246,5 +246,5 @@ public static class TestData
 
     public static WorldConfiguration WorldConfiguration { get; } = new(100f, 100f, 100f, 100f);
 
-    public static AutoBattleConfiguration AutoBattleConfiguration { get; } = new(0.5f, 0.5f, 0.5f);
+    public static AutoBattleConfiguration AutoBattleConfiguration { get; } = new(0.5f, 1f, 0.5f);
 }

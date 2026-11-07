@@ -69,7 +69,7 @@ public class AutoBattleCalculatorTests
         var catalog = new UnitCatalog([unitTemplate]);
         var config = new AutoBattleConfiguration(DamageToWinner: 0.5f, DamageToLoser: 1f, DrawDamage: 0.5f);
 
-        var statsCalculator = new UnitStatsCalculator(TestData.UnitStatsWeights);
+        var statsCalculator = new UnitStatsCalculator(TestData.UnitConfiguration);
         var battleCalculator = new AutoBattleCalculator(catalog, config, statsCalculator);
 
         return (unitTemplate, battleCalculator);

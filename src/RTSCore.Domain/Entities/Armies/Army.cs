@@ -64,7 +64,8 @@ public sealed class Army : AggregateRoot
 
     public Result MoveTo(Vector2 destination, int movementCost)
     {
-        if (MovementPoints < movementCost) return Result.Failure(GameErrors.NotEnoughMovementPoints);
+        if (MovementPoints < movementCost) return GameErrors.NotEnoughMovementPoints;
+        if (GeneralId == UnitId.Empty) return GameErrors.CantMoveWithoutGeneral;
 
         MovementPoints -= movementCost;
         Coordinates = destination;
@@ -122,7 +123,8 @@ public sealed class Army : AggregateRoot
     {
         if (id == GeneralId) return GameErrors.CantDisbandGeneral;
 
-        var unit = GetUnitOrThrow(id);
+        var unit = _units.FirstOrDefault(u => u.Id == id);
+        if (unit == null) return GameErrors.CantDisbandUnitNotInThisArmy(unitId: id, armyId: Id);
 
         _units.Remove(unit);
 

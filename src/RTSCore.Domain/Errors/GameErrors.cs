@@ -1,3 +1,5 @@
+using RTSCore.Domain.Entities.Armies;
+
 namespace RTSCore.Domain.Errors;
 
 public static class GameErrors
@@ -8,6 +10,10 @@ public static class GameErrors
         = new("Army.DoesNotHaveFreeSlots", "Army does not have free slots.");
     public static GameError CantDisbandGeneral { get; }
         = new("Army.CantDisbandGeneral", "General cannot be disbanded.");
+    public static GameError CantMoveWithoutGeneral { get; }
+        = new("Army.CantMoveWithoutGeneral", "Army cannot move without general.");
+    public static GameError CantDisbandUnitNotInThisArmy(UnitId unitId, ArmyId armyId) =>
+        new("Army.CantDisbandUnitNotInThisArmy", $"Cannot disband unit: {unitId}. Unit is not in this army: {armyId}.");
 
     public static GameError CantConstructThisBuildingType { get; }
         = new("City.CityCantConstructThisBuildingType", "This building do not allowed for construction in this city type.");

@@ -1,3 +1,5 @@
+using Ardalis.GuardClauses;
+
 using FluentAssertions;
 
 using MediatR;
@@ -7,19 +9,20 @@ using Microsoft.Extensions.DependencyInjection;
 
 using RTSCore.Application.Campaign.ArmyCreation;
 using RTSCore.Domain.Entities.Armies;
+using RTSCore.Domain.Entities.Cities;
 using RTSCore.Infrastructure.Persistence;
 
 namespace Tests.Application.Campaign;
 
-[Collection("DbCollection")]
-public sealed class CreateArmyTests(DbTestFixture dbFixture) : IAsyncLifetime
+[Collection("TestCollection")]
+public sealed class CreateArmyTests(TestFixture fixture) : IAsyncLifetime
 {
     [Fact]
     public async Task Handle_ShouldCreateArmyInCity_AndSaveToDb()
     {
         var city = TestData.CreateCity(TestData.CreateCityTemplate());
 
-        using (var scope = dbFixture.ServiceProvider.CreateScope())
+        using (var scope = fixture.ServiceProvider.CreateScope())
         {
             var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
             context.Cities.Add(city);
@@ -27,28 +30,38 @@ public sealed class CreateArmyTests(DbTestFixture dbFixture) : IAsyncLifetime
         }
 
         ArmyId armyId;
-        using (var scope = dbFixture.ServiceProvider.CreateScope())
+        using (var scope = fixture.ServiceProvider.CreateScope())
         {
             var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
             armyId = await mediator.Send(new CreateArmyCommand(city.Id, UnitType.Peasant));
             armyId.Should().NotBe(ArmyId.Empty);
         }
 
-        using (var scope = dbFixture.ServiceProvider.CreateScope())
+        using (var scope = fixture.ServiceProvider.CreateScope())
         {
             var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
             Army? army = await context.Armies
                 .AsNoTracking()
                 .Include(a => a.Units)
-                .FirstOrDefaultAsync(a => a.Id == armyId);
+                .FirstAsync(a => a.Id == armyId);
 
-            army.Should().NotBeNull();
             army.Units.Should().ContainSingle();
             army.Coordinates.Should().Be(city.Coordinates);
         }
     }
 
-    public Task InitializeAsync() => dbFixture.ResetDatabaseAsync();
+    [Fact]
+    public async Task Handle_ShouldThrow_WhenCityDoesNotExistInDb()
+    {
+        using var scope = fixture.ServiceProvider.CreateScope();
+        var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+
+        var action = () => mediator.Send(new CreateArmyCommand(CityId.New(), UnitType.Peasant));
+
+        await action.Should().ThrowAsync<NotFoundException>();
+    }
+
+    public Task InitializeAsync() => fixture.ResetDatabaseAsync();
 
     public Task DisposeAsync() => Task.CompletedTask;
 }

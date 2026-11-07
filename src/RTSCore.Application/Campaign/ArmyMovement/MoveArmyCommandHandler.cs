@@ -5,6 +5,7 @@ using Ardalis.GuardClauses;
 using MediatR;
 
 using RTSCore.Application.Repositories;
+using RTSCore.Domain.Common;
 using RTSCore.Domain.Configurations.Armies;
 using RTSCore.Domain.Entities.Armies;
 
@@ -13,9 +14,9 @@ namespace RTSCore.Application.Campaign.ArmyMovement;
 public sealed class MoveArmyCommandHandler(
     IUnitOfWork unitOfWork,
     MovementConfiguration movementConfig
-) : IRequestHandler<MoveArmyCommand>
+) : IRequestHandler<MoveArmyCommand, Result>
 {
-    public async Task Handle(MoveArmyCommand request, CancellationToken ct)
+    public async Task<Result> Handle(MoveArmyCommand request, CancellationToken ct)
     {
         var army = await unitOfWork.ArmyRepository.GetAsync(request.Id, ct);
         Guard.Against.NotFound(request.Id, army);
@@ -27,8 +28,10 @@ public sealed class MoveArmyCommandHandler(
             movementConfig.BaseUnitDistanceCost
         );
 
-        army.MoveTo(destination, movementCost);
+        var result = army.MoveTo(destination, movementCost);
+        if (result.IsFailure) return result;
 
         await unitOfWork.SaveChangesAsync(ct);
+        return Result.Success();
     }
 }

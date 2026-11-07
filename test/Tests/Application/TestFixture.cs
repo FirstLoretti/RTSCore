@@ -8,13 +8,15 @@ using Respawn;
 using RTSCore.Application.Campaign.Lifecycle;
 using RTSCore.Application.Repositories;
 using RTSCore.Domain.Configurations;
+using RTSCore.Domain.Entities.Armies;
+using RTSCore.Domain.Entities.Armies.Combat;
 using RTSCore.Infrastructure.Persistence;
 
 using Testcontainers.PostgreSql;
 
 namespace Tests.Application;
 
-public sealed class DbTestFixture : IAsyncLifetime
+public sealed class TestFixture : IAsyncLifetime
 {
     public IServiceProvider ServiceProvider { get; private set; } = null!;
 
@@ -38,6 +40,8 @@ public sealed class DbTestFixture : IAsyncLifetime
         services.AddLogging();
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(StartCampaignCommanHandler).Assembly));
         services.AddScoped<IUnitOfWork, EfUnitOfWork>();
+        services.AddSingleton<AutoBattleCalculator>();
+        services.AddSingleton<UnitStatsCalculator>();
         RegisterGameConfigs(services);
 
         ServiceProvider = services.BuildServiceProvider();

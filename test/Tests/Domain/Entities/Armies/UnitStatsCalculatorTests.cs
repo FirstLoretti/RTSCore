@@ -22,7 +22,7 @@ public class UnitStatsCalculatorTests
     {
         var template = TestData.CreateUnitTemplate(maxHealth: 100) with { Damage = 10 };
         var statsWeights = TestData.UnitStatsWeights with { Health = 1.5f, Damage = 1f };
-        var calculator = new UnitStatsCalculator(statsWeights);
+        var calculator = new UnitStatsCalculator(TestData.UnitConfiguration with { StatsWeights = statsWeights });
 
         var power = calculator.Power(template, level: 0, health: 100);
 
