@@ -203,8 +203,29 @@ public static class TestData
         ]
     );
 
-    public static DiplomacyRelation CreateDiplomacyRelation() =>
-        new(CampaignId.New(), FactionType.England, FactionType.France, DiplomacyConfig.InitialStanding);
+    public static DiplomacyRelation CreateDiplomacyRelation(
+        CampaignId? campaignId = null,
+        FactionType? factionA = null,
+        FactionType? factionB = null,
+        int? standing = null
+    ) => new(
+        campaignId ?? CampaignId.New(),
+        factionA ?? FactionType.England,
+        factionB ?? FactionType.France,
+        standing ?? DiplomacyConfig.InitialStanding
+    );
+
+    public static DiplomacyOffer CreateDiplomacyOffer(
+        CampaignId? campaignId = null,
+        FactionType? initiator = null,
+        FactionType? target = null,
+        OfferType? offerType = null
+    ) => new(
+        campaignId ?? CampaignId.New(),
+        initiator ?? FactionType.England,
+        target ?? FactionType.France,
+        offerType ?? OfferType.TradeAgreement
+    );
 
     public static DiplomacyConfiguration DiplomacyConfig { get; } = new()
     {

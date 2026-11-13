@@ -19,7 +19,12 @@ public sealed class SqlDiplomacyRelationRepository(AppDbContext context) : IDipl
             ? (factionA, factionB)
             : (factionB, factionA);
 
-        return await context.DiplomacyRelations.FindAsync([campaignId, first, second], ct);
+        return await context.DiplomacyRelations.FirstOrDefaultAsync(r =>
+            r.CampaignId == campaignId &&
+            r.FactionA == first &&
+            r.FactionB == second,
+            ct
+        );
     }
 
     public async Task<ReadOnlyCollection<DiplomacyRelation>> GetAsync(CampaignId campaignId, FactionType faction, CancellationToken ct) =>

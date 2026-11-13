@@ -2,15 +2,13 @@ using FluentAssertions;
 
 using RTSCore.Domain.AI.Personality;
 using RTSCore.Domain.AI.Recruitment;
+using RTSCore.Domain.Configurations.Armies;
 using RTSCore.Domain.Entities.Armies;
-
-using static Tests.TestData;
 
 namespace Tests.Domain.AI.Recruitment;
 
 public class AiRecruiterTests
 {
-
     [Fact]
     public void New_ShouldEvaluateUnitsAndOrder()
     {
@@ -23,10 +21,10 @@ public class AiRecruiterTests
     [Fact]
     public void RecruitUnit_ShouldEvaulateAndRecruitUsefulest()
     {
-        var faction = CreateFaction();
-        var army = CreateArmy();
-        var unit1 = CreateProductionOption(UnitType.PeasantArcher) with { Cost = 2 };
-        var unit2 = CreateProductionOption(UnitType.Peasant) with { Cost = (int)((faction.Gold - 1) / 2f) };
+        var faction = TestData.CreateFaction();
+        var army = TestData.CreateArmy();
+        var unit1 = TestData.CreateProductionOption(UnitType.PeasantArcher) with { Cost = 2 };
+        var unit2 = TestData.CreateProductionOption(UnitType.Peasant) with { Cost = (int)((faction.Gold - 1) / 2f) };
         var aiRecruiter = new AiRecruiter(UnitCatalog, TestData.AiCatalog);
 
         aiRecruiter.RecruitUnits(faction, army, AiPersonalityType.Conqueror, [unit1, unit2]);
@@ -37,4 +35,19 @@ public class AiRecruiterTests
         army.Units[3].Type.Should().Be(UnitType.PeasantArcher);
         faction.Gold.Should().Be(0);
     }
+
+    private UnitCatalog UnitCatalog { get; } = new(
+        [
+           TestData.CreateUnitTemplate(maxHealth: 100) with
+            {
+                Type = UnitType.Peasant,
+                Category = UnitCategory.Infantry
+            },
+            TestData.CreateUnitTemplate(maxHealth: 100) with
+            {
+                Type = UnitType.PeasantArcher,
+                Category = UnitCategory.RangeInfantry
+            }
+        ]
+    );
 }

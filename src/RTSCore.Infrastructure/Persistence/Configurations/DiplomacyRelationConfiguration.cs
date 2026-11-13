@@ -21,7 +21,6 @@ public sealed class DiplomacyRelationConfiguration() : IEntityTypeConfiguration<
         );
 
         builder.HasIndex(r => new { r.CampaignId, r.FactionA, r.FactionB }).IsUnique();
-        builder.HasIndex(r => new { r.CampaignId, r.FactionB, r.FactionA });
 
         builder.Property(r => r.FactionA).HasConversion<string>();
         builder.Property(r => r.FactionB).HasConversion<string>();
