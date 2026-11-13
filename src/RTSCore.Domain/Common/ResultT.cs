@@ -7,13 +7,15 @@ namespace RTSCore.Domain.Common;
 public readonly record struct Result<T>
 {
     public bool IsSuccess { get; }
+
+    [MemberNotNullWhen(true, nameof(Error))]
     public bool IsFailure => !IsSuccess;
     public GameError? Error { get; }
 
     [AllowNull]
     public T Value => IsSuccess
         ? field!
-        : throw new InvalidOperationException("Cannot access Value on a failed result. Check IsSuccess first.");
+        : throw new InvalidOperationException("Cannot access Value on a failed result");
 
     private Result(bool isSuccess, T? result, GameError? error)
     {

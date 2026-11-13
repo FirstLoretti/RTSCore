@@ -12,8 +12,13 @@ public static class GameErrors
         = new("Army.CantDisbandGeneral", "General cannot be disbanded.");
     public static GameError CantMoveWithoutGeneral { get; }
         = new("Army.CantMoveWithoutGeneral", "Army cannot move without general.");
-    public static GameError CantDisbandUnitNotInThisArmy(UnitId unitId, ArmyId armyId) =>
-        new("Army.CantDisbandUnitNotInThisArmy", $"Cannot disband unit: {unitId}. Unit is not in this army: {armyId}.");
+    public static GameError UnitNotInTargetArmy(UnitId unitId, ArmyId armyId) =>
+        new("Army.UnitNotInThisArmy", $"Unit: {unitId} is not in army: {armyId}.");
+    public static GameError CantCancelRecruitmentUnitUnsuitableCondition(bool isAlive, bool isRecruited) =>
+        new(
+            "Army.CantCancelRecruitmentUnitUnsuitableCondition",
+            $"Cannot cancel recruitment, unit in unsuitable condition isAlive: {isAlive}, isRecruited {isRecruited}."
+        );
 
     public static GameError CantConstructThisBuildingType { get; }
         = new("City.CityCantConstructThisBuildingType", "This building do not allowed for construction in this city type.");

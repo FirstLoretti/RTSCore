@@ -15,14 +15,14 @@ using RTSCore.Infrastructure.Persistence;
 namespace Tests.Application.Campaign;
 
 [Collection("TestCollection")]
-public sealed class CreateArmyTests(TestFixture fixture) : IAsyncLifetime
+public sealed class CreateArmyTests(TestFixture testFixture) : IAsyncLifetime
 {
     [Fact]
     public async Task Handle_ShouldCreateArmyInCity_AndSaveToDb()
     {
-        var city = TestData.CreateCity(TestData.CreateCityTemplate());
+        var city = TestData.CreateCity(template: TestData.CreateCityTemplate());
 
-        using (var scope = fixture.ServiceProvider.CreateScope())
+        using (var scope = testFixture.ServiceProvider.CreateScope())
         {
             var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
             context.Cities.Add(city);
@@ -30,14 +30,14 @@ public sealed class CreateArmyTests(TestFixture fixture) : IAsyncLifetime
         }
 
         ArmyId armyId;
-        using (var scope = fixture.ServiceProvider.CreateScope())
+        using (var scope = testFixture.ServiceProvider.CreateScope())
         {
             var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
             armyId = await mediator.Send(new CreateArmyCommand(city.Id, UnitType.Peasant));
             armyId.Should().NotBe(ArmyId.Empty);
         }
 
-        using (var scope = fixture.ServiceProvider.CreateScope())
+        using (var scope = testFixture.ServiceProvider.CreateScope())
         {
             var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
             Army? army = await context.Armies
@@ -53,7 +53,7 @@ public sealed class CreateArmyTests(TestFixture fixture) : IAsyncLifetime
     [Fact]
     public async Task Handle_ShouldThrow_WhenCityDoesNotExistInDb()
     {
-        using var scope = fixture.ServiceProvider.CreateScope();
+        using var scope = testFixture.ServiceProvider.CreateScope();
         var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
 
         var action = () => mediator.Send(new CreateArmyCommand(CityId.New(), UnitType.Peasant));
@@ -61,7 +61,7 @@ public sealed class CreateArmyTests(TestFixture fixture) : IAsyncLifetime
         await action.Should().ThrowAsync<NotFoundException>();
     }
 
-    public Task InitializeAsync() => fixture.ResetDatabaseAsync();
+    public Task InitializeAsync() => testFixture.ResetDatabaseAsync();
 
     public Task DisposeAsync() => Task.CompletedTask;
 }

@@ -12,7 +12,7 @@ using RTSCore.Application.Repositories;
 
 namespace RTSCore.Application.Authentication.Refresh;
 
-public sealed class RefreshTokensCommandHanlder(
+public sealed class RefreshTokensCommandHandler(
     IUnitOfWork unitOfWork,
     IRefreshTokenGenerator refreshTokenGenerator,
     IJwtTokenGenerator jwtTokenGenerator

@@ -9,5 +9,5 @@ public sealed record CityCatalog(ImmutableArray<CityTemplate> Templates)
 {
     private readonly FrozenDictionary<CityType, CityTemplate> _cities = Templates.ToFrozenDictionary(t => t.Type);
 
-    public CityTemplate GetCity(CityType cityType) => _cities[cityType];
+    public CityTemplate GetTemplate(CityType cityType) => _cities[cityType];
 }

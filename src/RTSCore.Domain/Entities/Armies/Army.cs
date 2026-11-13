@@ -83,17 +83,19 @@ public sealed class Army : AggregateRoot
         return unit.Id;
     }
 
-    public Result<UnitId> CancelRecruitUnit(UnitId id)
+    public Result CancelRecruitUnit(UnitId id)
     {
-        var unit = GetUnitOrThrow(id);
+        var unit = _units.FirstOrDefault(u => u.Id == id);
+        if (unit == null) return GameErrors.UnitNotInTargetArmy(unitId: id, armyId: Id);
 
-        ThrowIfInvalidState(unit);
+        if (!unit.IsAlive || unit.IsRecruited)
+            return GameErrors.CantCancelRecruitmentUnitUnsuitableCondition(unit.IsAlive, unit.IsRecruited);
 
         _units.Remove(unit);
 
         AddDomainEvent(new CancelRecruitmentEvent(CampaignId, Faction, unit.Cost));
 
-        return unit.Id;
+        return Result.Success();
     }
 
     public Result<UnitId> AddReadyUnit(UnitTemplate template)
@@ -124,7 +126,7 @@ public sealed class Army : AggregateRoot
         if (id == GeneralId) return GameErrors.CantDisbandGeneral;
 
         var unit = _units.FirstOrDefault(u => u.Id == id);
-        if (unit == null) return GameErrors.CantDisbandUnitNotInThisArmy(unitId: id, armyId: Id);
+        if (unit == null) return GameErrors.UnitNotInTargetArmy(unitId: id, armyId: Id);
 
         _units.Remove(unit);
 

@@ -35,7 +35,7 @@ public static class WorldInitializer
 
             foreach (var preset in template.CityPresets)
             {
-                var cityTemplate = cityCatalog.GetCity(preset.Type);
+                var cityTemplate = cityCatalog.GetTemplate(preset.Type);
                 var city = faction.FoundCity(cityTemplate, preset.Coordinates);
 
                 cities.Add(city);

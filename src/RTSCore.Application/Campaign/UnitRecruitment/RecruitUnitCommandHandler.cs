@@ -10,7 +10,7 @@ using RTSCore.Domain.Entities.Cities;
 
 namespace RTSCore.Application.Campaign.UnitRecruitment;
 
-public sealed class RecruitRegularUnitCommandHandler(
+public sealed class RecruitUnitCommandHandler(
     IUnitOfWork unitOfWork,
     UnitCatalog catalog
 ) : IRequestHandler<RecruitUnitCommand, Result<UnitId>>
@@ -23,9 +23,6 @@ public sealed class RecruitRegularUnitCommandHandler(
         var city = await unitOfWork.CityRepository.GetAsync(request.CityId, ct, false);
         Guard.Against.NotFound(request.CityId, city);
 
-        ThrowIfDifferentFactions(army, city);
-        ThrowIfDifferentCampaignId(army, city);
-
         var faction = await unitOfWork.FactionRepository.GetAsync(army.CampaignId, army.Faction, ct);
         Guard.Against.NotFound(army.Faction, faction);
 
@@ -34,15 +31,11 @@ public sealed class RecruitRegularUnitCommandHandler(
         var cityResult = city.CanRecruit(template);
         if (cityResult.IsFailure) return cityResult.Error;
 
+        var armyResult = army.RecruitUnit(template);
+        if (armyResult.IsFailure) return armyResult.Error;
+
         var factionResult = faction.SpendGold(template.Cost);
         if (factionResult.IsFailure) return factionResult.Error;
-
-        var armyResult = army.RecruitUnit(template);
-        if (armyResult.IsFailure)
-        {
-            faction.RefundGold(template.Cost);
-            return armyResult;
-        }
 
         await unitOfWork.SaveChangesAsync(ct);
 

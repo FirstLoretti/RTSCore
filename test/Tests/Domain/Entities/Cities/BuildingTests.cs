@@ -17,7 +17,7 @@ public class BuildingTests
             var building = Building.CreateUnderConstruction(CampaignId.New(), template, FactionType.England, CityId.Empty);
 
             building.TurnsToConstruct.Should().Be(template.TurnsToConstruct);
-            building.IsConstructed.Should().Be(false);
+            building.IsConstructed.Should().BeFalse();
         }
 
         [Fact]
@@ -28,7 +28,7 @@ public class BuildingTests
             var building = Building.CreateConstructed(CampaignId.New(), template, FactionType.England, CityId.Empty);
 
             building.TurnsToConstruct.Should().Be(0);
-            building.IsConstructed.Should().Be(true);
+            building.IsConstructed.Should().BeTrue();
         }
     }
 

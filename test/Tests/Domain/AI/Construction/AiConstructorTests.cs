@@ -14,7 +14,7 @@ public class AiConstructorTests
     public void StartConstruction_ShouldConstructOnlyHighestUtilityBuilding()
     {
         var faction = CreateFaction();
-        var city = CreateCity(CreateCityTemplate());
+        var city = CreateCity(template: CreateCityTemplate());
         var building1 = CreateBuildingTemplate() with { Type = BuildingType.ReqruitBarrack, AiUtility = 1 };
         var building2 = CreateBuildingTemplate() with { Type = BuildingType.Market, Cost = faction.Gold, AiUtility = 2 };
         var catalog = new BuildingCatalog([building1, building2]);
@@ -29,8 +29,8 @@ public class AiConstructorTests
     public void StartConstruction_ShouldSkipHighestUtilityBuildingWhenGoldNotEnough()
     {
         var faction = CreateFaction();
-        var city1 = CreateCity(CreateCityTemplate());
-        var city2 = CreateCity(CreateCityTemplate());
+        var city1 = CreateCity(template: CreateCityTemplate());
+        var city2 = CreateCity(template: CreateCityTemplate());
         var building1 = CreateBuildingTemplate() with { Type = BuildingType.ReqruitBarrack, AiUtility = 1 };
         var building2 = CreateBuildingTemplate() with { Type = BuildingType.Market, Cost = faction.Gold + 1, AiUtility = 2 };
         var catalog = new BuildingCatalog([building1, building2]);

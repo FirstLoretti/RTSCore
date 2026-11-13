@@ -57,7 +57,7 @@ public class CityTests
             {
                 ConstructableBuildings = [BuildingType.ReqruitBarrack, BuildingType.MilitiaBarrack, BuildingType.Market]
             };
-            var city = TestData.CreateCity(cityTemplate);
+            var city = TestData.CreateCity(template: cityTemplate);
 
             return (unitTemplates, reqruitBarrack, militiaBarrack, city);
         }
@@ -68,9 +68,9 @@ public class CityTests
         [Fact]
         public void ShouldReturnAvailableProductionOptions()
         {
-            var city = TestData.CreateCity(TestData.CreateCityTemplate());
+            var city = TestData.CreateCity(template: TestData.CreateCityTemplate());
 
-            city.ConstructInstally(TestData.BuildingCatalog.GetBuilding(BuildingType.ReqruitBarrack));
+            city.ConstructInstantly(TestData.BuildingCatalog.GetBuilding(BuildingType.ReqruitBarrack));
 
             var options = city.GetConstructableBuildings(TestData.BuildingCatalog.Templates);
 
@@ -84,7 +84,7 @@ public class CityTests
         [Fact]
         public void ShouldCreateCorrect()
         {
-            var city = TestData.CreateCity(TestData.CreateCityTemplate());
+            var city = TestData.CreateCity(template: TestData.CreateCityTemplate());
 
             var army = city.CreateArmy(TestData.CreateUnitTemplate(maxHealth: 100));
 
@@ -99,14 +99,14 @@ public class CityTests
         public void Should_GrowPopulation_CalculateIncome_AdvanceConstruction_AndRaiseTurnEndEvent()
         {
             var template = TestData.CreateCityTemplate() with { StartingPopulation = 1000 };
-            var city = TestData.CreateCity(template);
+            var city = TestData.CreateCity(template: template);
             var market = TestData.BuildingCatalog.GetBuilding(BuildingType.Market);
             var bigMarket = TestData.BuildingCatalog.GetBuilding(BuildingType.BigMarket);
             var field = TestData.BuildingCatalog.GetBuilding(BuildingType.CultivatedField);
             var fieldComplex = TestData.BuildingCatalog.GetBuilding(BuildingType.CultivatedFieldsComplex) with { TurnsToConstruct = 2 };
 
-            city.ConstructInstally(market);
-            city.ConstructInstally(field);
+            city.ConstructInstantly(market);
+            city.ConstructInstantly(field);
             city.StartConstruction(bigMarket);
             city.StartConstruction(fieldComplex);
 
@@ -139,7 +139,7 @@ public class CityTests
         {
             var cityTemplate = TestData.CreateCityTemplate() with { Type = CityType.Village };
             var buildingTemplate = TestData.CreateBuildingTemplate() with { AllowedCityTypes = [CityType.Settlement] };
-            var city = TestData.CreateCity(cityTemplate);
+            var city = TestData.CreateCity(template: cityTemplate);
 
             var result = city.CanConstruct(buildingTemplate);
 
@@ -150,7 +150,7 @@ public class CityTests
         [Fact]
         public void ShouldFailWhenBuildingTypeAlreadyAdded()
         {
-            var city = TestData.CreateCity(TestData.CreateCityTemplate());
+            var city = TestData.CreateCity(template: TestData.CreateCityTemplate());
             var building = TestData.CreateBuildingTemplate() with { Type = BuildingType.Market };
             city.StartConstruction(building);
 
@@ -163,7 +163,7 @@ public class CityTests
         [Fact]
         public void ShouldFailWhenChainRulesNotMet()
         {
-            var city = TestData.CreateCity(TestData.CreateCityTemplate());
+            var city = TestData.CreateCity(template: TestData.CreateCityTemplate());
             var building = TestData.CreateBuildingTemplate() with { RequiredBuildings = [BuildingType.Market] };
 
             var result = city.CanConstruct(building);
@@ -179,7 +179,7 @@ public class CityTests
         public void ShouldConstructWhenAllConditionsMet()
         {
             var template = TestData.CreateBuildingTemplate() with { Type = BuildingType.Market, RequiredBuildings = [] };
-            var city = TestData.CreateCity(TestData.CreateCityTemplate());
+            var city = TestData.CreateCity(template: TestData.CreateCityTemplate());
 
             var result = city.StartConstruction(template);
 
@@ -195,9 +195,9 @@ public class CityTests
         public void ShouldConstructWhenAllConditionsMet()
         {
             var template = TestData.CreateBuildingTemplate() with { Type = BuildingType.Market, RequiredBuildings = [] };
-            var city = TestData.CreateCity(TestData.CreateCityTemplate());
+            var city = TestData.CreateCity(template: TestData.CreateCityTemplate());
 
-            var result = city.ConstructInstally(template);
+            var result = city.ConstructInstantly(template);
 
             result.IsSuccess.Should().BeTrue();
             result.Value.Should().NotBe(BuildingId.Empty);
@@ -210,8 +210,8 @@ public class CityTests
         [Fact]
         public void ShouldFailIfBuildingConstructed()
         {
-            var city = TestData.CreateCity(TestData.CreateCityTemplate());
-            var buildingId = city.ConstructInstally(TestData.CreateBuildingTemplate()).Value;
+            var city = TestData.CreateCity(template: TestData.CreateCityTemplate());
+            var buildingId = city.ConstructInstantly(TestData.CreateBuildingTemplate()).Value;
 
             var result = city.CancelConstruction(buildingId);
 
@@ -223,7 +223,7 @@ public class CityTests
         [Fact]
         public void ShouldCancelWhenAllConditionsMet()
         {
-            var city = TestData.CreateCity(TestData.CreateCityTemplate());
+            var city = TestData.CreateCity(template: TestData.CreateCityTemplate());
             var buildingId = city.StartConstruction(TestData.CreateBuildingTemplate()).Value;
 
             var result = city.CancelConstruction(buildingId);

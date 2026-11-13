@@ -17,12 +17,12 @@ using RTSCore.Infrastructure.Persistence;
 namespace Tests.Application.Campaign;
 
 [Collection("TestCollection")]
-public sealed class MoveArmyTests(TestFixture fixture) : IAsyncLifetime
+public sealed class MoveArmyTests(TestFixture testFixture) : IAsyncLifetime
 {
     [Fact]
     public async Task Handle_ShouldThrow_WhenArmyNotFoundInDb()
     {
-        using var scope = fixture.ServiceProvider.CreateScope();
+        using var scope = testFixture.ServiceProvider.CreateScope();
         var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
 
         var action = () => mediator.Send(new MoveArmyCommand(ArmyId.New(), 0f, 0f));
@@ -35,14 +35,14 @@ public sealed class MoveArmyTests(TestFixture fixture) : IAsyncLifetime
     {
         var army = TestData.CreateArmy();
 
-        using (var scope = fixture.ServiceProvider.CreateScope())
+        using (var scope = testFixture.ServiceProvider.CreateScope())
         {
             var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
             context.Armies.Add(army);
             await context.SaveChangesAsync();
         }
 
-        using (var scope = fixture.ServiceProvider.CreateScope())
+        using (var scope = testFixture.ServiceProvider.CreateScope())
         {
             var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
             var result = await mediator.Send(new MoveArmyCommand(army.Id, 100f, 100f));
@@ -51,7 +51,7 @@ public sealed class MoveArmyTests(TestFixture fixture) : IAsyncLifetime
             result.Error.Should().Be(GameErrors.NotEnoughMovementPoints);
         }
 
-        using (var scope = fixture.ServiceProvider.CreateScope())
+        using (var scope = testFixture.ServiceProvider.CreateScope())
         {
             var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
             var dbArmy = await context.Armies
@@ -69,14 +69,14 @@ public sealed class MoveArmyTests(TestFixture fixture) : IAsyncLifetime
         var destination = new Vector2(5f, 5f);
         army.RestoreMovementPoints(TestData.MovementConfiguration);
 
-        using (var scope = fixture.ServiceProvider.CreateScope())
+        using (var scope = testFixture.ServiceProvider.CreateScope())
         {
             var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
             context.Armies.Add(army);
             await context.SaveChangesAsync();
         }
 
-        using (var scope = fixture.ServiceProvider.CreateScope())
+        using (var scope = testFixture.ServiceProvider.CreateScope())
         {
             var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
             var result = await mediator.Send(new MoveArmyCommand(army.Id, destination.X, destination.Y));
@@ -84,7 +84,7 @@ public sealed class MoveArmyTests(TestFixture fixture) : IAsyncLifetime
             result.IsSuccess.Should().BeTrue();
         }
 
-        using (var scope = fixture.ServiceProvider.CreateScope())
+        using (var scope = testFixture.ServiceProvider.CreateScope())
         {
             var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
             var dbArmy = await context.Armies.AsNoTracking().FirstAsync(a => a.Id == army.Id);
@@ -94,7 +94,7 @@ public sealed class MoveArmyTests(TestFixture fixture) : IAsyncLifetime
         }
     }
 
-    public Task InitializeAsync() => fixture.ResetDatabaseAsync();
+    public Task InitializeAsync() => testFixture.ResetDatabaseAsync();
 
     public Task DisposeAsync() => Task.CompletedTask;
 }

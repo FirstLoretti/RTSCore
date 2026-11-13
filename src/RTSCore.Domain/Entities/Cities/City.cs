@@ -128,7 +128,7 @@ public sealed class City : AggregateRoot
         return building.Id;
     }
 
-    public Result<BuildingId> ConstructInstally(BuildingTemplate template)
+    public Result<BuildingId> ConstructInstantly(BuildingTemplate template)
     {
         var result = CanConstruct(template);
 

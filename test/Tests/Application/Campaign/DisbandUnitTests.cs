@@ -15,12 +15,12 @@ using RTSCore.Infrastructure.Persistence;
 namespace Tests.Application.Campaign;
 
 [Collection("TestCollection")]
-public sealed class DisbandUnitTests(TestFixture fixture) : IAsyncLifetime
+public sealed class DisbandUnitTests(TestFixture testFixture) : IAsyncLifetime
 {
     [Fact]
     public async Task Handle_ShouldThrow_WhenArmyDoesNotExistInDb()
     {
-        using var scope = fixture.ServiceProvider.CreateScope();
+        using var scope = testFixture.ServiceProvider.CreateScope();
         var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
 
         var action = () => mediator.Send(new DisbandUnitCommand(ArmyId.New(), UnitId.New()));
@@ -33,21 +33,21 @@ public sealed class DisbandUnitTests(TestFixture fixture) : IAsyncLifetime
     {
         var army = TestData.CreateArmy();
 
-        using (var scope = fixture.ServiceProvider.CreateScope())
+        using (var scope = testFixture.ServiceProvider.CreateScope())
         {
             var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
             context.Armies.Add(army);
             await context.SaveChangesAsync();
         }
 
-        using (var scope = fixture.ServiceProvider.CreateScope())
+        using (var scope = testFixture.ServiceProvider.CreateScope())
         {
             var unitId = UnitId.New();
             var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
             var result = await mediator.Send(new DisbandUnitCommand(army.Id, unitId));
 
             result.IsFailure.Should().BeTrue();
-            result.Error.Should().Be(GameErrors.CantDisbandUnitNotInThisArmy(unitId, army.Id));
+            result.Error.Should().Be(GameErrors.UnitNotInTargetArmy(unitId, army.Id));
         }
     }
 
@@ -57,14 +57,14 @@ public sealed class DisbandUnitTests(TestFixture fixture) : IAsyncLifetime
         var army = TestData.CreateArmy();
         var unitId = army.AddReadyUnit(TestData.CreateUnitTemplate(maxHealth: 100)).Value;
 
-        using (var scope = fixture.ServiceProvider.CreateScope())
+        using (var scope = testFixture.ServiceProvider.CreateScope())
         {
             var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
             context.Armies.Add(army);
             await context.SaveChangesAsync();
         }
 
-        using (var scope = fixture.ServiceProvider.CreateScope())
+        using (var scope = testFixture.ServiceProvider.CreateScope())
         {
             var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
             var result = await mediator.Send(new DisbandUnitCommand(army.Id, unitId));
@@ -72,7 +72,7 @@ public sealed class DisbandUnitTests(TestFixture fixture) : IAsyncLifetime
             result.IsSuccess.Should().BeTrue();
         }
 
-        using (var scope = fixture.ServiceProvider.CreateScope())
+        using (var scope = testFixture.ServiceProvider.CreateScope())
         {
             var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
             var dbArmy = await context.Armies
@@ -84,7 +84,7 @@ public sealed class DisbandUnitTests(TestFixture fixture) : IAsyncLifetime
         }
     }
 
-    public Task InitializeAsync() => fixture.ResetDatabaseAsync();
+    public Task InitializeAsync() => testFixture.ResetDatabaseAsync();
 
     public Task DisposeAsync() => Task.CompletedTask;
 }

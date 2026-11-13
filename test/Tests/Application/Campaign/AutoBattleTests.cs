@@ -15,12 +15,12 @@ using RTSCore.Infrastructure.Persistence;
 namespace Tests.Application.Campaign;
 
 [Collection("TestCollection")]
-public sealed class AutoBattleTests(TestFixture fixture) : IAsyncLifetime
+public sealed class AutoBattleTests(TestFixture testFixture) : IAsyncLifetime
 {
     [Fact]
     public async Task Handle_ShouldThrow_WhenArmyNotFoundInDb()
     {
-        using var scope = fixture.ServiceProvider.CreateScope();
+        using var scope = testFixture.ServiceProvider.CreateScope();
         var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
 
         var action = () => mediator.Send(new AutoBattleCommand(ArmyId.New(), ArmyId.New()));
@@ -36,7 +36,7 @@ public sealed class AutoBattleTests(TestFixture fixture) : IAsyncLifetime
         var unit = TestData.CreateUnitTemplate(maxHealth: 100);
         attacker.AddReadyUnit(unit);
 
-        using (var scope = fixture.ServiceProvider.CreateScope())
+        using (var scope = testFixture.ServiceProvider.CreateScope())
         {
             var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
             context.Armies.Add(attacker);
@@ -46,13 +46,13 @@ public sealed class AutoBattleTests(TestFixture fixture) : IAsyncLifetime
         }
 
         BattleResult battleResult = default;
-        using (var scope = fixture.ServiceProvider.CreateScope())
+        using (var scope = testFixture.ServiceProvider.CreateScope())
         {
             var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
             battleResult = await mediator.Send(new AutoBattleCommand(attacker.Id, defender.Id));
         }
 
-        using (var scope = fixture.ServiceProvider.CreateScope())
+        using (var scope = testFixture.ServiceProvider.CreateScope())
         {
             var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
             var dbAttacker = context.Armies
@@ -69,7 +69,7 @@ public sealed class AutoBattleTests(TestFixture fixture) : IAsyncLifetime
         }
     }
 
-    public Task InitializeAsync() => fixture.ResetDatabaseAsync();
+    public Task InitializeAsync() => testFixture.ResetDatabaseAsync();
 
     public Task DisposeAsync() => Task.CompletedTask;
 }

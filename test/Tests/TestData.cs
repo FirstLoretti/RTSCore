@@ -28,12 +28,12 @@ public static class TestData
     {
         MaxHealth = maxHealth,
         AiUtility = 1,
-        Armor = 0,
+        Armor = 1,
         Category = UnitCategory.Infantry,
         Cost = 1,
         Damage = 1,
         DamageGrowthRate = 1f,
-        DisplayName = "Military",
+        DisplayName = "Peasant",
         ExpKillReward = 1,
         HealthGrowthRate = 1f,
         ProductionCategory = ProductionCategory.Military,
@@ -45,8 +45,20 @@ public static class TestData
 
     public static UnitCatalog UnitCatalog { get; } = new(
         [
-           CreateUnitTemplate(maxHealth: 100) with {Type = UnitType.Peasant, Category = UnitCategory.Infantry},
-           CreateUnitTemplate(maxHealth: 100) with {Type = UnitType.PeasantArcher, Category = UnitCategory.RangeInfantry}
+           CreateUnitTemplate(maxHealth: 100) with
+            {
+                Type = UnitType.Peasant,
+                Category = UnitCategory.Infantry,
+                RequiredBuilding = BuildingType.ReqruitBarrack,
+                Cost = 50
+            },
+            CreateUnitTemplate(maxHealth: 100) with
+            {
+                Type = UnitType.MilitiaArcher,
+                Category = UnitCategory.RangeInfantry,
+                RequiredBuilding = BuildingType.MilitiaBarrack,
+                Cost = 100
+            }
         ]
     );
 
@@ -59,8 +71,17 @@ public static class TestData
     public static Unit CreateUnit(UnitTemplate template) =>
         Unit.CreateTraining(CampaignId.Empty, FactionType.England, template, ArmyId.Empty);
 
-    public static Army CreateArmy() =>
-        Army.Create(CampaignId.New(), FactionType.England, Vector2.Zero, CreateUnitTemplate(maxHealth: 100));
+    public static Army CreateArmy(
+        CampaignId? campaignId = null,
+        FactionType? factionType = null,
+        Vector2? coordinates = null,
+        UnitTemplate? unitTemplate = null
+    ) => Army.Create(
+        campaignId ?? CampaignId.New(),
+        factionType ?? FactionType.England,
+        coordinates ?? Vector2.Zero,
+        unitTemplate ?? CreateUnitTemplate(maxHealth: 100)
+    );
 
     public static BuildingTemplate CreateBuildingTemplate() => new()
     {
@@ -97,8 +118,17 @@ public static class TestData
     public static Building CreateBuilding(BuildingTemplate template) =>
         Building.CreateUnderConstruction(CampaignId.New(), template, FactionType.England, CityId.Empty);
 
-    public static City CreateCity(CityTemplate template) =>
-        City.Create(CampaignId.New(), template, FactionType.England, Vector2.One);
+    public static City CreateCity(
+        CampaignId? campaignId = null,
+        CityTemplate? template = null,
+        FactionType? factionType = null,
+        Vector2? coordinates = null) =>
+        City.Create(
+            campaignId ?? CampaignId.New(),
+            template ?? CreateCityTemplate(),
+            factionType ?? FactionType.England,
+            coordinates ?? Vector2.Zero
+        );
 
     private static ImmutableArray<CityPreset> EnglandCityPresets { get; } =
     [
@@ -112,8 +142,8 @@ public static class TestData
 
     private static ImmutableArray<CityPreset> SpainCityPresets { get; } =
     [
-        new(CityType.Village, DisplayName: "Madrid", new(2f, 2f)),
-        new(CityType.Village, DisplayName: "Seville", new(3f, 3f))
+        new(CityType.Village, DisplayName: "Madrid", new(3f, 3f)),
+        new(CityType.Village, DisplayName: "Seville", new(4f, 4f))
     ];
 
     public static FactionCatalog FactionCatalog { get; } = new(
@@ -193,7 +223,8 @@ public static class TestData
         AiPersonalityType.Conqueror
     );
 
-    public static Faction CreateFaction() => new(CampaignId.New(), FactionTemplate);
+    public static Faction CreateFaction(CampaignId? campaignId = null, FactionTemplate? template = null) =>
+        new(campaignId ?? CampaignId.New(), template ?? FactionTemplate);
 
     public static AiBudgetWeights AiBudgetWeights { get; } = new(Construction: 0.5f, Recruitment: 0.5f);
     public static AiUnitWeights AiUnitWeights { get; } = new(InfantryMultiplier: 1f, RangeInfantryMultiplier: 1f);
