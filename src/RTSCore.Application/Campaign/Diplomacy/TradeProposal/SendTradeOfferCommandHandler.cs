@@ -3,22 +3,26 @@ using Ardalis.GuardClauses;
 using MediatR;
 
 using RTSCore.Application.Repositories;
+using RTSCore.Domain.Common;
 using RTSCore.Domain.Entities.Diplomacy;
 
 namespace RTSCore.Application.Campaign.Diplomacy.TradeProposal;
 
-public sealed class SendTradeOfferCommandHandler(IUnitOfWork unitOfWork) : IRequestHandler<SendTradeOfferCommand, DiplomacyOfferId>
+public sealed class SendTradeOfferCommandHandler(
+    IUnitOfWork unitOfWork
+) : IRequestHandler<SendTradeOfferCommand, Result<DiplomacyOfferId>>
 {
-    public async Task<DiplomacyOfferId> Handle(SendTradeOfferCommand request, CancellationToken ct)
+    public async Task<Result<DiplomacyOfferId>> Handle(SendTradeOfferCommand request, CancellationToken ct)
     {
         var relation = await unitOfWork.DiplomacyRelationRepository.GetAsync(request.CampaignId, request.Initiator, request.Target, ct);
         Guard.Against.NotFound(request.Initiator, relation);
 
-        var offer = new DiplomacyOffer(relation.CampaignId, request.Initiator, request.Target, OfferType.TradeAgreement);
+        var result = relation.CreateTradeOffer(request.Initiator, request.Target);
+        if (result.IsFailure) return result.Error;
 
-        unitOfWork.DiplomacyOfferRepository.Add(offer);
+        unitOfWork.DiplomacyOfferRepository.Add(result.Value);
         await unitOfWork.SaveChangesAsync(ct);
 
-        return offer.Id;
+        return result.Value.Id;
     }
 }

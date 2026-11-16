@@ -1,3 +1,5 @@
+using System.Net.Http.Headers;
+
 using RTSCore.Domain.Common;
 using RTSCore.Domain.Entities.Campaigns;
 using RTSCore.Domain.Errors;
@@ -31,13 +33,30 @@ public sealed class DiplomacyRelation
 
     private DiplomacyRelation() { }
 
+    public Result<DiplomacyOffer> CreateTradeOffer(FactionType initiator, FactionType target)
+    {
+        ThrowIfWrongFactionType(initiator, target);
+
+        var canTrade = CanTrade();
+        if (canTrade.IsFailure) return canTrade.Error;
+
+        return new DiplomacyOffer(CampaignId, initiator, target, OfferType.TradeAgreement);
+    }
+
+    public Result<DiplomacyOffer> CreatePeaceOffer(FactionType initiator, FactionType target)
+    {
+        ThrowIfWrongFactionType(initiator, target);
+
+        var canPeace = CanPeace();
+        if (canPeace.IsFailure) return canPeace.Error;
+
+        return new DiplomacyOffer(CampaignId, initiator, target, OfferType.PeaceTreaty);
+    }
+
     public Result OpenTrade(int standingBonus)
     {
-        if (InWar)
-            return Result.Failure(GameErrors.CantTradeWithEnemy);
-
-        if (HasTradeAgreement)
-            return Result.Failure(GameErrors.CantTradeAlreadyExist);
+        var canTrade = CanTrade();
+        if (canTrade.IsFailure) return canTrade;
 
         HasTradeAgreement = true;
         ChangeStanding(standingBonus);
@@ -47,8 +66,7 @@ public sealed class DiplomacyRelation
 
     public Result DeclareWar(int standingPenalty)
     {
-        if (InWar)
-            return Result.Failure(GameErrors.CantWarFactionsAlreadyWar);
+        if (InWar) return Result.Failure(GameErrors.CantWarFactionsAlreadyWar);
 
         HasTradeAgreement = false;
         InWar = true;
@@ -59,8 +77,8 @@ public sealed class DiplomacyRelation
 
     public Result MakePeace(int standingBonus)
     {
-        if (!InWar)
-            return Result.Failure(GameErrors.CantPeaceFactionsNotWar);
+        var canPeace = CanPeace();
+        if (canPeace.IsFailure) return canPeace;
 
         InWar = false;
         ChangeStanding(standingBonus);
@@ -70,8 +88,7 @@ public sealed class DiplomacyRelation
 
     public Result CancelTrade(int standingPenalty)
     {
-        if (!HasTradeAgreement)
-            return Result.Failure(GameErrors.CantCancelTradeNotExist);
+        if (!HasTradeAgreement) return Result.Failure(GameErrors.CantCancelTradeNotExist);
 
         HasTradeAgreement = false;
         ChangeStanding(standingPenalty);
@@ -79,6 +96,26 @@ public sealed class DiplomacyRelation
         return Result.Success();
     }
 
-    private void ChangeStanding(int amount)
-        => Standing = int.Clamp(Standing + amount, MinStanding, MaxStanding);
+    private void ChangeStanding(int amount) => Standing = int.Clamp(Standing + amount, MinStanding, MaxStanding);
+
+    private Result CanTrade()
+    {
+        if (InWar) return Result.Failure(GameErrors.CantTradeWithEnemy);
+        if (HasTradeAgreement) return Result.Failure(GameErrors.CantTradeAlreadyExist);
+
+        return Result.Success();
+    }
+
+    private Result CanPeace()
+    {
+        if (!InWar) return Result.Failure(GameErrors.CantPeaceFactionsNotWar);
+
+        return Result.Success();
+    }
+
+    private void ThrowIfWrongFactionType(FactionType initiator, FactionType target)
+    {
+        if ((initiator != FactionA && initiator != FactionB) || (target != FactionA && target != FactionB))
+            throw new InvalidOperationException($"Faction: {initiator} is not part of target relation: {Id}");
+    }
 }

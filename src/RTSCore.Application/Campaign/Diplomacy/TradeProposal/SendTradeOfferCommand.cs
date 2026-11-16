@@ -1,6 +1,7 @@
 using MediatR;
 
 using RTSCore.Domain;
+using RTSCore.Domain.Common;
 using RTSCore.Domain.Entities.Campaigns;
 using RTSCore.Domain.Entities.Diplomacy;
 
@@ -10,4 +11,4 @@ public sealed record SendTradeOfferCommand(
     CampaignId CampaignId,
     FactionType Initiator,
     FactionType Target
-) : IRequest<DiplomacyOfferId>;
+) : IRequest<Result<DiplomacyOfferId>>;

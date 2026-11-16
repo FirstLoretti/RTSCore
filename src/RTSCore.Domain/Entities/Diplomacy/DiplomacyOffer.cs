@@ -12,7 +12,7 @@ public sealed class DiplomacyOffer
 
     public OfferStatus Status { get; private set; }
 
-    public DiplomacyOffer(
+    internal DiplomacyOffer(
         CampaignId campaignId,
         FactionType initiator,
         FactionType target,

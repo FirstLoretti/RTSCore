@@ -40,6 +40,7 @@ public sealed class TestFixture : IAsyncLifetime
         services.AddLogging();
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(StartCampaignCommanHandler).Assembly));
         services.AddScoped<IUnitOfWork, EfUnitOfWork>();
+        services.AddScoped<ICityRepository, SqlCityRepository>();
         services.AddSingleton<AutoBattleCalculator>();
         services.AddSingleton<UnitStatsCalculator>();
         RegisterGameConfigs(services);
