@@ -11,15 +11,18 @@ public sealed class StartCampaignCommanHandler(
     IUnitOfWork unitOfWork,
     FactionCatalog factionCatalog,
     CityCatalog cityCatalog
-) : IRequestHandler<StartCampaignCommand>
+) : IRequestHandler<StartCampaignCommand, CampaignId>
 {
-    public async Task Handle(StartCampaignCommand request, CancellationToken ct)
+    public async Task<CampaignId> Handle(StartCampaignCommand request, CancellationToken ct)
     {
         var result = WorldInitializer.Initialize(CampaignId.New(), request.PlayersFactions, factionCatalog, cityCatalog);
 
+        unitOfWork.CampaignRepository.Add(result.Campaign);
         unitOfWork.FactionRepository.AddRange(result.Factions);
         unitOfWork.CityRepository.AddRange(result.Cities);
+        unitOfWork.AiAgentRepository.AddRange(result.AiAgents);
 
         await unitOfWork.SaveChangesAsync(ct);
+        return result.Campaign.Id;
     }
 }

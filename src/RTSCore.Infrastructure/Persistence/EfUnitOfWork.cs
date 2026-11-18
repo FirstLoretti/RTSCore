@@ -2,6 +2,7 @@ using MediatR;
 
 using RTSCore.Application.Common;
 using RTSCore.Application.Repositories;
+using RTSCore.Domain.AI;
 using RTSCore.Domain.Entities;
 
 namespace RTSCore.Infrastructure.Persistence;
@@ -15,6 +16,8 @@ public sealed class EfUnitOfWork(AppDbContext context, IMediator mediator) : IUn
     public IUserRepository UserRepository => _userRepository ??= new SqlUserRepository(context);
     public IRefreshTokenRepository RefreshTokenRepository => _tokenRepository ??= new SqlRefreshTokenRepository(context);
     public IArmyRepository ArmyRepository => _armyRepository ??= new SqlArmyRepository(context);
+    public IAiAgentRepository AiAgentRepository => _aiFactionAgent ??= new AiAgentRepository(context);
+    public ICampaignRepository CampaignRepository => _campaignRepository ??= new CampaignRepository(context);
 
     private SqlCityRepository? _cityRepository;
     private SqlFactionRepository? _factionRepository;
@@ -23,6 +26,8 @@ public sealed class EfUnitOfWork(AppDbContext context, IMediator mediator) : IUn
     private SqlUserRepository? _userRepository;
     private SqlRefreshTokenRepository? _tokenRepository;
     private SqlArmyRepository? _armyRepository;
+    private AiAgentRepository? _aiFactionAgent;
+    private CampaignRepository? _campaignRepository;
 
     public async Task SaveChangesAsync(CancellationToken ct)
     {

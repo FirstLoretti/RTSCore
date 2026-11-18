@@ -9,6 +9,8 @@ public interface IUnitOfWork
     IUserRepository UserRepository { get; }
     IRefreshTokenRepository RefreshTokenRepository { get; }
     IArmyRepository ArmyRepository { get; }
+    IAiAgentRepository AiAgentRepository { get; }
+    ICampaignRepository CampaignRepository { get; }
 
     Task SaveChangesAsync(CancellationToken ct);
 }

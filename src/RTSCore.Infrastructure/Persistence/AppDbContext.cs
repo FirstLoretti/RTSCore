@@ -2,7 +2,9 @@ using Microsoft.EntityFrameworkCore;
 
 using RTSCore.Application;
 using RTSCore.Application.Authentication;
+using RTSCore.Domain.AI;
 using RTSCore.Domain.Entities.Armies;
+using RTSCore.Domain.Entities.Campaigns;
 using RTSCore.Domain.Entities.Cities;
 using RTSCore.Domain.Entities.Diplomacy;
 using RTSCore.Domain.Entities.Factions;
@@ -18,6 +20,8 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
     public DbSet<User> Users { get; set; }
     public DbSet<RefreshToken> RefreshTokens { get; set; }
     public DbSet<Army> Armies { get; set; }
+    public DbSet<AiFactionAgent> AiFactionAgents { get; set; }
+    public DbSet<Campaign> Campaigns { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
