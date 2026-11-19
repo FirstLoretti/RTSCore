@@ -1,22 +1,21 @@
-using System.Diagnostics.CodeAnalysis;
-
 using MediatR;
 
-using RTSCore.Application.Common.Exceptions;
 using RTSCore.Application.Repositories;
+using RTSCore.Domain.Common;
 
 namespace RTSCore.Application.Authentication.Login;
 
-public class LoginUserCommandHandler(
+public sealed class LoginUserCommandHandler(
     IUnitOfWork unitOfWork,
     IJwtTokenGenerator jwtTokenGenerator,
     IRefreshTokenGenerator refreshTokenGenerator
-) : IRequestHandler<LoginUserCommand, AuthResponse>
+) : IRequestHandler<LoginUserCommand, Result<AuthResponse>>
 {
-    public async Task<AuthResponse> Handle(LoginUserCommand request, CancellationToken ct)
+    public async Task<Result<AuthResponse>> Handle(LoginUserCommand request, CancellationToken ct)
     {
         var user = await unitOfWork.UserRepository.GetAsync(request.Name, ct);
-        ThrowIfInvalidUserData(user, request.Password);
+        if (user == null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
+            return AuthErrors.InvalidCredentials;
 
         var refreshToken = refreshTokenGenerator.Generate();
         var accessToken = jwtTokenGenerator.Generate(user);
@@ -29,11 +28,5 @@ public class LoginUserCommandHandler(
         await unitOfWork.SaveChangesAsync(ct);
 
         return new AuthResponse(accessToken, refreshToken);
-    }
-
-    private static void ThrowIfInvalidUserData([NotNull] User? user, string password)
-    {
-        if (user == null || !BCrypt.Net.BCrypt.Verify(password, user.PasswordHash))
-            throw new UnauthorizedException("Wrong username or password.");
     }
 }

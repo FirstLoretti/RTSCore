@@ -66,7 +66,7 @@ public sealed class DiplomacyRelation
 
     public Result DeclareWar(int standingPenalty)
     {
-        if (InWar) return Result.Failure(GameErrors.CantWarFactionsAlreadyWar);
+        if (InWar) return Result.Failure(Errors.GameErrors.CantWarFactionsAlreadyWar);
 
         HasTradeAgreement = false;
         InWar = true;
@@ -88,7 +88,7 @@ public sealed class DiplomacyRelation
 
     public Result CancelTrade(int standingPenalty)
     {
-        if (!HasTradeAgreement) return Result.Failure(GameErrors.CantCancelTradeNotExist);
+        if (!HasTradeAgreement) return Result.Failure(Errors.GameErrors.CantCancelTradeNotExist);
 
         HasTradeAgreement = false;
         ChangeStanding(standingPenalty);
@@ -100,15 +100,15 @@ public sealed class DiplomacyRelation
 
     private Result CanTrade()
     {
-        if (InWar) return Result.Failure(GameErrors.CantTradeWithEnemy);
-        if (HasTradeAgreement) return Result.Failure(GameErrors.CantTradeAlreadyExist);
+        if (InWar) return Result.Failure(Errors.GameErrors.CantTradeWithEnemy);
+        if (HasTradeAgreement) return Result.Failure(Errors.GameErrors.CantTradeAlreadyExist);
 
         return Result.Success();
     }
 
     private Result CanPeace()
     {
-        if (!InWar) return Result.Failure(GameErrors.CantPeaceFactionsNotWar);
+        if (!InWar) return Result.Failure(Errors.GameErrors.CantPeaceFactionsNotWar);
 
         return Result.Success();
     }

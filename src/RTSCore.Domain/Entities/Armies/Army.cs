@@ -64,8 +64,8 @@ public sealed class Army : AggregateRoot
 
     public Result MoveTo(Vector2 destination, int movementCost)
     {
-        if (MovementPoints < movementCost) return GameErrors.NotEnoughMovementPoints;
-        if (GeneralId == UnitId.Empty) return GameErrors.CantMoveWithoutGeneral;
+        if (MovementPoints < movementCost) return Errors.GameErrors.NotEnoughMovementPoints;
+        if (GeneralId == UnitId.Empty) return Errors.GameErrors.CantMoveWithoutGeneral;
 
         MovementPoints -= movementCost;
         Coordinates = destination;
@@ -75,7 +75,7 @@ public sealed class Army : AggregateRoot
 
     public Result<UnitId> RecruitUnit(UnitTemplate template)
     {
-        if (!HasFreeSlots) return GameErrors.ArmyDoesNotHaveFreeSlots;
+        if (!HasFreeSlots) return Errors.GameErrors.ArmyDoesNotHaveFreeSlots;
 
         var unit = Unit.CreateTraining(CampaignId, Faction, template, Id);
         _units.Add(unit);
@@ -86,10 +86,10 @@ public sealed class Army : AggregateRoot
     public Result CancelRecruitUnit(UnitId id)
     {
         var unit = _units.FirstOrDefault(u => u.Id == id);
-        if (unit == null) return GameErrors.UnitNotInTargetArmy(unitId: id, armyId: Id);
+        if (unit == null) return Errors.GameErrors.UnitNotInTargetArmy(unitId: id, armyId: Id);
 
         if (!unit.IsAlive || unit.IsRecruited)
-            return GameErrors.CantCancelRecruitmentUnitUnsuitableCondition(unit.IsAlive, unit.IsRecruited);
+            return Errors.GameErrors.CantCancelRecruitmentUnitUnsuitableCondition(unit.IsAlive, unit.IsRecruited);
 
         _units.Remove(unit);
 
@@ -100,7 +100,7 @@ public sealed class Army : AggregateRoot
 
     public Result<UnitId> AddReadyUnit(UnitTemplate template)
     {
-        if (!HasFreeSlots) return GameErrors.ArmyDoesNotHaveFreeSlots;
+        if (!HasFreeSlots) return Errors.GameErrors.ArmyDoesNotHaveFreeSlots;
 
         var unit = Unit.CreateReady(CampaignId, Faction, template, Id);
         _units.Add(unit);
@@ -123,10 +123,10 @@ public sealed class Army : AggregateRoot
 
     public Result DisbandUnit(UnitId id)
     {
-        if (id == GeneralId) return GameErrors.CantDisbandGeneral;
+        if (id == GeneralId) return Errors.GameErrors.CantDisbandGeneral;
 
         var unit = _units.FirstOrDefault(u => u.Id == id);
-        if (unit == null) return GameErrors.UnitNotInTargetArmy(unitId: id, armyId: Id);
+        if (unit == null) return Errors.GameErrors.UnitNotInTargetArmy(unitId: id, armyId: Id);
 
         _units.Remove(unit);
 

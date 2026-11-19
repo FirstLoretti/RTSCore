@@ -14,7 +14,6 @@ public sealed class UserConfiguration : IEntityTypeConfiguration<User>
             dbValue => new UserId(dbValue)
         );
 
-        builder.HasIndex(u => u.Id);
         builder.HasIndex(u => u.Name).IsUnique();
         builder.Property(u => u.PasswordHash).IsRequired();
     }

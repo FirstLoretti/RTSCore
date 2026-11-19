@@ -4,43 +4,43 @@ namespace RTSCore.Domain.Errors;
 
 public static class GameErrors
 {
-    public static GameError NotEnoughMovementPoints { get; }
+    public static Error NotEnoughMovementPoints { get; }
         = new("Army.NotEnoughMovementPoints", "Not enough movement points.");
-    public static GameError ArmyDoesNotHaveFreeSlots { get; }
+    public static Error ArmyDoesNotHaveFreeSlots { get; }
         = new("Army.DoesNotHaveFreeSlots", "Army does not have free slots.");
-    public static GameError CantDisbandGeneral { get; }
+    public static Error CantDisbandGeneral { get; }
         = new("Army.CantDisbandGeneral", "General cannot be disbanded.");
-    public static GameError CantMoveWithoutGeneral { get; }
+    public static Error CantMoveWithoutGeneral { get; }
         = new("Army.CantMoveWithoutGeneral", "Army cannot move without general.");
-    public static GameError UnitNotInTargetArmy(UnitId unitId, ArmyId armyId) =>
+    public static Error UnitNotInTargetArmy(UnitId unitId, ArmyId armyId) =>
         new("Army.UnitNotInThisArmy", $"Unit: {unitId} is not in army: {armyId}.");
-    public static GameError CantCancelRecruitmentUnitUnsuitableCondition(bool isAlive, bool isRecruited) =>
+    public static Error CantCancelRecruitmentUnitUnsuitableCondition(bool isAlive, bool isRecruited) =>
         new(
             "Army.CantCancelRecruitmentUnitUnsuitableCondition",
             $"Cannot cancel recruitment, unit in unsuitable condition isAlive: {isAlive}, isRecruited {isRecruited}."
         );
 
-    public static GameError CantConstructThisBuildingType { get; }
+    public static Error CantConstructThisBuildingType { get; }
         = new("City.CityCantConstructThisBuildingType", "This building do not allowed for construction in this city type.");
-    public static GameError CantRecruitBuildingNotConstructed { get; }
+    public static Error CantRecruitBuildingNotConstructed { get; }
         = new("City.CityCantRecruitBuildingNotConstructed", "Cannot recruit unit, construct required building first.");
-    public static GameError CantConstructBuildingDuplicate { get; }
+    public static Error CantConstructBuildingDuplicate { get; }
         = new("City.CantConstructBuildingDuplicate", "Cannot construct a duplicate building.");
-    public static GameError ChainUnavailableConstructionOption { get; }
+    public static Error ChainUnavailableConstructionOption { get; }
         = new("City.ChainUnavailableConstructionOption", "Building chain conditions are not met.");
-    public static GameError CantCancelAlreadyConstructed { get; }
+    public static Error CantCancelAlreadyConstructed { get; }
         = new("City.CantCancelAlreadyConstructed", "Cannot cancel an already constructed building.");
 
-    public static GameError CantTradeWithEnemy { get; }
+    public static Error CantTradeWithEnemy { get; }
         = new("Diplomacy.CantTradeWithEnemy", "Cannot trade with an enemy faction.");
-    public static GameError CantTradeAlreadyExist { get; }
+    public static Error CantTradeAlreadyExist { get; }
         = new("Diplomacy.CantTradeAlreadyExist", "Trade agreement already exists.");
-    public static GameError CantWarFactionsAlreadyWar { get; }
+    public static Error CantWarFactionsAlreadyWar { get; }
         = new("Diplomacy.CantWarFactionsAlreadyWar", "Factions are already at war.");
-    public static GameError CantPeaceFactionsNotWar { get; }
+    public static Error CantPeaceFactionsNotWar { get; }
         = new("Diplomacy.CantPeaceFactionsNotWar", "Factions are not at war.");
-    public static GameError CantCancelTradeNotExist { get; }
+    public static Error CantCancelTradeNotExist { get; }
         = new("Diplomacy.CantCancelTradeNotExist", "Trade agreement does not exist.");
 
-    public static GameError NotEnoughGold { get; } = new("NotEnoughGold", "Not enough gold");
+    public static Error NotEnoughGold { get; } = new("NotEnoughGold", "Not enough gold");
 }

@@ -50,7 +50,7 @@ public sealed class City : AggregateRoot
 
     public Result CanRecruit(UnitTemplate unit) =>
         !IsConstructed(unit.RequiredBuilding)
-            ? (Result)GameErrors.CantRecruitBuildingNotConstructed
+            ? (Result)Errors.GameErrors.CantRecruitBuildingNotConstructed
             : Result.Success();
 
     public ImmutableArray<ProductionOption<UnitType>> GetRecruitableUnits(
@@ -145,7 +145,7 @@ public sealed class City : AggregateRoot
         var building = GetBuildingOrThrow(id);
 
         if (building.IsConstructed)
-            return Result.Failure(GameErrors.CantCancelAlreadyConstructed);
+            return Result.Failure(Errors.GameErrors.CantCancelAlreadyConstructed);
 
         _buildings.Remove(building);
 
@@ -157,16 +157,16 @@ public sealed class City : AggregateRoot
     internal Result CanConstruct(BuildingTemplate building)
     {
         if (!building.AllowedCityTypes.Contains(Type))
-            return Result.Failure(GameErrors.CantConstructThisBuildingType);
+            return Result.Failure(Errors.GameErrors.CantConstructThisBuildingType);
 
         if (_buildings.Any(b => b.Type == building.Type))
-            return Result.Failure(GameErrors.CantConstructBuildingDuplicate);
+            return Result.Failure(Errors.GameErrors.CantConstructBuildingDuplicate);
 
         var hasRequiredBuildings = building.RequiredBuildings.All(reqType =>
             _buildings.Any(b => b.Type == reqType));
 
         return !hasRequiredBuildings
-            ? Result.Failure(GameErrors.ChainUnavailableConstructionOption)
+            ? Result.Failure(Errors.GameErrors.ChainUnavailableConstructionOption)
             : Result.Success();
     }
 

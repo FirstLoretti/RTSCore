@@ -10,16 +10,16 @@ public readonly record struct Result
 
     [MemberNotNullWhen(true, nameof(Error))]
     public bool IsFailure => !IsSuccess;
-    public GameError? Error { get; }
+    public Error? Error { get; }
 
-    private Result(bool isSuccess, GameError? error)
+    private Result(bool isSuccess, Error? error)
     {
         IsSuccess = isSuccess;
         Error = error;
     }
 
     public static Result Success() => new(true, null);
-    public static Result Failure(GameError error) => new(false, error);
+    public static Result Failure(Error error) => new(false, error);
 
-    public static implicit operator Result(GameError error) => Failure(error);
+    public static implicit operator Result(Error error) => Failure(error);
 }

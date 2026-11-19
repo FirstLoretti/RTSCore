@@ -1,15 +1,19 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 using Npgsql;
 
 using Respawn;
 
+using RTSCore.Application.Authentication;
 using RTSCore.Application.Campaign.Lifecycle;
+using RTSCore.Application.Common;
 using RTSCore.Application.Repositories;
 using RTSCore.Domain.Configurations;
 using RTSCore.Domain.Entities.Armies;
 using RTSCore.Domain.Entities.Armies.Combat;
+using RTSCore.Infrastructure.Authentication;
 using RTSCore.Infrastructure.Persistence;
 
 using Testcontainers.PostgreSql;
@@ -41,9 +45,20 @@ public sealed class TestFixture : IAsyncLifetime
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(StartCampaignCommanHandler).Assembly));
         services.AddScoped<IUnitOfWork, EfUnitOfWork>();
         services.AddScoped<ICityRepository, SqlCityRepository>();
+        services.AddScoped<IRefreshTokenRepository, SqlRefreshTokenRepository>();
+        services.AddScoped<IRefreshTokenGenerator, RefreshTokenGenerator>();
+        services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
         services.AddSingleton<AutoBattleCalculator>();
         services.AddSingleton<UnitStatsCalculator>();
         RegisterGameConfigs(services);
+        var jwtSettings = new JwtSettings
+        {
+            Secret = "1000aSS+FFFFvZA...nrP122222-1Urg-vpppnoxmdkbplfkgob,z",
+            Issuer = "TBStrategyServer",
+            Audience = "TBStrategyPlayer",
+            ExpiryInMinutes = 60
+        };
+        services.AddSingleton(Options.Create(jwtSettings));
 
         ServiceProvider = services.BuildServiceProvider();
 

@@ -2,6 +2,8 @@ using System.Collections.Frozen;
 using System.Collections.Immutable;
 using System.Numerics;
 
+using RTSCore.Application;
+using RTSCore.Application.Authentication;
 using RTSCore.Domain;
 using RTSCore.Domain.AI;
 using RTSCore.Domain.AI.Construction;
@@ -299,4 +301,15 @@ public static class TestData
     public static WorldConfiguration WorldConfiguration { get; } = new(100f, 100f, 100f, 100f);
 
     public static AutoBattleConfiguration AutoBattleConfiguration { get; } = new(0.5f, 1f, 0.5f);
+
+    public static RefreshToken CreateRefreshToken(
+        UserId? userId = null,
+        string? token = null,
+        DateTime? expiryTime = null
+    ) => new(userId ?? UserId.New(), token ?? "token", expiryTime ?? DateTime.UtcNow.AddDays(1));
+
+    public static User CreateUser(
+        string? name = null,
+        string? password = null
+    ) => new(name ?? "testName", password ?? "testPass");
 }
