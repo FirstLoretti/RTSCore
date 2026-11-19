@@ -16,5 +16,5 @@ public sealed class SqlRefreshTokenRepository(AppDbContext context) : IRefreshTo
             .ExecuteDeleteAsync(ct);
 
     public async Task<RefreshToken?> GetAsync(string token, CancellationToken ct) =>
-        await context.RefreshTokens.FindAsync([token], ct);
+        await context.RefreshTokens.FirstOrDefaultAsync(t => t.Token == token, ct);
 }

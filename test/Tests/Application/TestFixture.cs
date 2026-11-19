@@ -47,7 +47,7 @@ public sealed class TestFixture : IAsyncLifetime
         services.AddScoped<ICityRepository, SqlCityRepository>();
         services.AddScoped<IRefreshTokenRepository, SqlRefreshTokenRepository>();
         services.AddScoped<IRefreshTokenGenerator, RefreshTokenGenerator>();
-        services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
+        services.AddScoped<IJwtTokenProvider, JwtTokenProvider>();
         services.AddSingleton<AutoBattleCalculator>();
         services.AddSingleton<UnitStatsCalculator>();
         RegisterGameConfigs(services);

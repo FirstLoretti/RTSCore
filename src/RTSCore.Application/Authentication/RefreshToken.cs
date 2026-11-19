@@ -1,3 +1,5 @@
+using RTSCore.Domain.Common;
+
 namespace RTSCore.Application.Authentication;
 
 public sealed class RefreshToken
@@ -5,7 +7,7 @@ public sealed class RefreshToken
     public RefreshTokenId Id { get; }
     public string Token { get; } = string.Empty;
     public UserId UserId { get; }
-    public DateTime ExpiryTime { get; }
+    public DateTime ExpiryTime { get; init; }
 
     public bool IsUsed { get; private set; }
     public bool IsRevoked { get; private set; }
@@ -22,6 +24,14 @@ public sealed class RefreshToken
 
     private RefreshToken() { }
 
-    public void Use() => IsUsed = true;
-    public void Revoke() => IsRevoked = true;
+    public Result Use(UserId userId)
+    {
+        if (UserId != userId || IsUsed || IsRevoked) return AuthErrors.RefreshTokenCompromized;
+
+        if (IsExpired) return AuthErrors.Unauthorized("Session expired. Please log in again.");
+
+        IsUsed = true;
+
+        return Result.Success();
+    }
 }

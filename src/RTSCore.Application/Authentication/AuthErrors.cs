@@ -8,4 +8,14 @@ public static class AuthErrors
         "Auth.InvalidCredentials",
         "Invalid username or password."
     );
+
+    public static Error Unauthorized(string message) => new(
+        "Auth.UnatorizedError",
+        message
+    );
+
+    public static Error RefreshTokenCompromized { get; } = new(
+        "Auth.RefreshTokenCompromized",
+        "Refresh token is compromized. Please log in again."
+    );
 }

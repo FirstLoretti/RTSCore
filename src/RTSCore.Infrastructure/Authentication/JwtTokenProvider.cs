@@ -8,10 +8,11 @@ using Microsoft.IdentityModel.Tokens;
 using RTSCore.Application;
 using RTSCore.Application.Authentication;
 using RTSCore.Application.Common;
+using RTSCore.Domain.Common;
 
 namespace RTSCore.Infrastructure.Authentication;
 
-public sealed class JwtTokenGenerator(IOptions<JwtSettings> jwtSettings) : IJwtTokenGenerator
+public sealed class JwtTokenProvider(IOptions<JwtSettings> jwtSettings) : IJwtTokenProvider
 {
     private readonly JwtSettings _jwtSettings = jwtSettings.Value;
 
@@ -19,7 +20,7 @@ public sealed class JwtTokenGenerator(IOptions<JwtSettings> jwtSettings) : IJwtT
     {
         var claims = new[]
         {
-            new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
+            new Claim(JwtRegisteredClaimNames.Sub, user.Id.Value.ToString()),
             new Claim(JwtRegisteredClaimNames.UniqueName, user.Name),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };
@@ -43,7 +44,19 @@ public sealed class JwtTokenGenerator(IOptions<JwtSettings> jwtSettings) : IJwtT
         return tokenHandler.WriteToken(token);
     }
 
-    public ClaimsPrincipal GetClaimsFromExpiredToken(string token)
+    public Result<UserId> ValidateExpiredToken(string token)
+    {
+        var result = GetClaimsFromExpiredToken(token);
+        if (result.IsFailure) return result.Error;
+
+        var userIdClaim = result.Value.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+
+        return !Guid.TryParse(userIdClaim, out var userId)
+            ? AuthErrors.Unauthorized("Invalid token payload.")
+            : new UserId(userId);
+    }
+
+    private Result<ClaimsPrincipal> GetClaimsFromExpiredToken(string token)
     {
         var tokenHandler = new JwtSecurityTokenHandler();
 
@@ -61,11 +74,21 @@ public sealed class JwtTokenGenerator(IOptions<JwtSettings> jwtSettings) : IJwtT
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Secret))
         };
 
-        var claims = tokenHandler.ValidateToken(token, validationParameters, out SecurityToken securityToken);
+        SecurityToken securityToken;
+        ClaimsPrincipal claims;
 
-        return securityToken is not JwtSecurityToken jwtToken ||
-            !jwtToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase)
-                ? throw new SecurityTokenException("Invalid token.")
+        try
+        {
+            claims = tokenHandler.ValidateToken(token, validationParameters, out securityToken);
+        }
+        catch (Exception ex) when (ex is SecurityTokenException or ArgumentException)
+        {
+            return AuthErrors.Unauthorized("Invalid token.");
+        }
+
+        return securityToken is not JwtSecurityToken jwtToken
+            || !jwtToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase)
+                ? AuthErrors.Unauthorized("Invalid token.")
                 : claims;
     }
 }

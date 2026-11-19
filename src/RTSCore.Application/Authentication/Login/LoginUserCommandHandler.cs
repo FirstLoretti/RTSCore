@@ -7,7 +7,7 @@ namespace RTSCore.Application.Authentication.Login;
 
 public sealed class LoginUserCommandHandler(
     IUnitOfWork unitOfWork,
-    IJwtTokenGenerator jwtTokenGenerator,
+    IJwtTokenProvider jwtTokenGenerator,
     IRefreshTokenGenerator refreshTokenGenerator
 ) : IRequestHandler<LoginUserCommand, Result<AuthResponse>>
 {

@@ -7,7 +7,7 @@ namespace RTSCore.Application.Authentication.Register;
 
 public sealed class RegisterUserCommandHandler(
     IUnitOfWork unitOfWork,
-    IJwtTokenGenerator jwtTokenGenerator,
+    IJwtTokenProvider jwtTokenGenerator,
     IRefreshTokenGenerator refreshTokenGenerator
 ) : IRequestHandler<RegisterUserCommand, AuthResponse>
 {

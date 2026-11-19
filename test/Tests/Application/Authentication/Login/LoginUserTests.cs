@@ -11,7 +11,7 @@ namespace Tests.Application.Authentication.Login;
 
 public sealed class LoginUserTests
 {
-    private readonly IJwtTokenGenerator _jwtTokenGenerator = Substitute.For<IJwtTokenGenerator>();
+    private readonly IJwtTokenProvider _jwtTokenGenerator = Substitute.For<IJwtTokenProvider>();
     private readonly IRefreshTokenGenerator _refreshTokenGenerator = Substitute.For<IRefreshTokenGenerator>();
     private readonly IUnitOfWork _unitOfWork = Substitute.For<IUnitOfWork>();
 
