@@ -1,7 +1,7 @@
 using MediatR;
 
-using RTSCore.Application.Common.Exceptions;
 using RTSCore.Application.Repositories;
+using RTSCore.Domain.Common;
 
 namespace RTSCore.Application.Authentication.Register;
 
@@ -9,31 +9,30 @@ public sealed class RegisterUserCommandHandler(
     IUnitOfWork unitOfWork,
     IJwtTokenProvider jwtTokenGenerator,
     IRefreshTokenGenerator refreshTokenGenerator
-) : IRequestHandler<RegisterUserCommand, AuthResponse>
+) : IRequestHandler<RegisterUserCommand, Result<AuthResponse>>
 {
-    public async Task<AuthResponse> Handle(RegisterUserCommand request, CancellationToken ct)
+    public async Task<Result<AuthResponse>> Handle(RegisterUserCommand request, CancellationToken ct)
     {
         var user = await CreateUser(request, ct);
-        var accessToken = jwtTokenGenerator.Generate(user);
+        if (user.IsFailure) return user.Error;
+
+        var accessToken = jwtTokenGenerator.Generate(user.Value);
         var refreshToken = refreshTokenGenerator.Generate();
+        var refreshTokenEntity = new RefreshToken(user.Value.Id, refreshToken, DateTime.UtcNow.AddDays(30));
 
-        var refreshTokenEntity = new RefreshToken(user.Id, refreshToken, DateTime.UtcNow.AddDays(30));
-
+        unitOfWork.UserRepository.Add(user.Value);
         unitOfWork.RefreshTokenRepository.Add(refreshTokenEntity);
-        unitOfWork.UserRepository.Add(user);
         await unitOfWork.SaveChangesAsync(ct);
 
         return new AuthResponse(accessToken, refreshToken);
     }
 
-    private async Task<User> CreateUser(RegisterUserCommand request, CancellationToken ct)
+    private async Task<Result<User>> CreateUser(RegisterUserCommand request, CancellationToken ct)
     {
         var isUserExist = await unitOfWork.UserRepository.ExistAsync(request.Name, ct);
 
-        if (isUserExist) throw new ConflictException("Username already exists.");
+        if (isUserExist) return AuthErrors.UserAlreadyExist(request.Name);
 
-        string passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
-
-        return new User(request.Name, passwordHash);
+        return new User(request.Name, request.Password);
     }
 }

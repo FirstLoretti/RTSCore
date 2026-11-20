@@ -10,12 +10,17 @@ public static class AuthErrors
     );
 
     public static Error Unauthorized(string message) => new(
-        "Auth.UnatorizedError",
+        "Auth.Unatorized",
         message
     );
 
     public static Error RefreshTokenCompromized { get; } = new(
         "Auth.RefreshTokenCompromized",
         "Refresh token is compromized. Please log in again."
+    );
+
+    public static Error UserAlreadyExist(string name) => new(
+        "Auth.UserAlreadyExist",
+        $"User with name: {name} already exist."
     );
 }

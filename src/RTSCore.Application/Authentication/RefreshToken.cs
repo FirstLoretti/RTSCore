@@ -24,6 +24,15 @@ public sealed class RefreshToken
 
     private RefreshToken() { }
 
+    public Result Revoke(UserId userId)
+    {
+        if (UserId != userId) return AuthErrors.RefreshTokenCompromized;
+
+        IsRevoked = true;
+
+        return Result.Success();
+    }
+
     public Result Use(UserId userId)
     {
         if (UserId != userId || IsUsed || IsRevoked) return AuthErrors.RefreshTokenCompromized;
