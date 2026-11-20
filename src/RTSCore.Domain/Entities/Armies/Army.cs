@@ -64,8 +64,8 @@ public sealed class Army : AggregateRoot
 
     public Result MoveTo(Vector2 destination, int movementCost)
     {
-        if (MovementPoints < movementCost) return Errors.GameErrors.NotEnoughMovementPoints;
-        if (GeneralId == UnitId.Empty) return Errors.GameErrors.CantMoveWithoutGeneral;
+        if (MovementPoints < movementCost) return GameErrors.NotEnoughMovementPoints;
+        if (GeneralId == UnitId.Empty) return GameErrors.CantMoveWithoutGeneral;
 
         MovementPoints -= movementCost;
         Coordinates = destination;
@@ -75,7 +75,7 @@ public sealed class Army : AggregateRoot
 
     public Result<UnitId> RecruitUnit(UnitTemplate template)
     {
-        if (!HasFreeSlots) return Errors.GameErrors.ArmyDoesNotHaveFreeSlots;
+        if (!HasFreeSlots) return GameErrors.ArmyDoesNotHaveFreeSlots;
 
         var unit = Unit.CreateTraining(CampaignId, Faction, template, Id);
         _units.Add(unit);
@@ -83,13 +83,13 @@ public sealed class Army : AggregateRoot
         return unit.Id;
     }
 
-    public Result CancelRecruitUnit(UnitId id)
+    public Result CancelRecruitment(UnitId id)
     {
         var unit = _units.FirstOrDefault(u => u.Id == id);
-        if (unit == null) return Errors.GameErrors.UnitNotInTargetArmy(unitId: id, armyId: Id);
+        if (unit == null) return GameErrors.UnitNotInTargetArmy(unitId: id, armyId: Id);
 
         if (!unit.IsAlive || unit.IsRecruited)
-            return Errors.GameErrors.CantCancelRecruitmentUnitUnsuitableCondition(unit.IsAlive, unit.IsRecruited);
+            return GameErrors.CantCancelRecruitmentUnitUnsuitableCondition(unit.IsAlive, unit.IsRecruited);
 
         _units.Remove(unit);
 
@@ -100,7 +100,7 @@ public sealed class Army : AggregateRoot
 
     public Result<UnitId> AddReadyUnit(UnitTemplate template)
     {
-        if (!HasFreeSlots) return Errors.GameErrors.ArmyDoesNotHaveFreeSlots;
+        if (!HasFreeSlots) return GameErrors.ArmyDoesNotHaveFreeSlots;
 
         var unit = Unit.CreateReady(CampaignId, Faction, template, Id);
         _units.Add(unit);
@@ -108,25 +108,29 @@ public sealed class Army : AggregateRoot
         return unit.Id;
     }
 
-    public void ReplaceGeneral(UnitTemplate template)
+    public Result ReplaceGeneral(UnitTemplate template)
     {
         if (GeneralId != UnitId.Empty)
         {
-            var general = GetUnitOrThrow(GeneralId);
+            var general = _units.FirstOrDefault(u => u.Id == GeneralId);
+            if (general == null) return GameErrors.UnitNotInTargetArmy(GeneralId, Id);
+
             _units.Remove(general);
         }
 
         var unit = Unit.CreateReady(CampaignId, Faction, template, Id);
         _units.Add(unit);
         GeneralId = unit.Id;
+
+        return Result.Success();
     }
 
     public Result DisbandUnit(UnitId id)
     {
-        if (id == GeneralId) return Errors.GameErrors.CantDisbandGeneral;
+        if (id == GeneralId) return GameErrors.CantDisbandGeneral;
 
         var unit = _units.FirstOrDefault(u => u.Id == id);
-        if (unit == null) return Errors.GameErrors.UnitNotInTargetArmy(unitId: id, armyId: Id);
+        if (unit == null) return GameErrors.UnitNotInTargetArmy(unitId: id, armyId: Id);
 
         _units.Remove(unit);
 
@@ -135,12 +139,14 @@ public sealed class Army : AggregateRoot
 
     public void PurgeDeadUnits()
     {
-        var general = GetUnitOrThrow(GeneralId);
-
-        if (!general.IsAlive)
+        if (GeneralId != UnitId.Empty)
         {
-            AddDomainEvent(new RemoveGeneralEvent(CampaignId, GeneralId));
-            GeneralId = UnitId.Empty;
+            var general = _units.First(u => u.Id == GeneralId);
+            if (!general.IsAlive)
+            {
+                AddDomainEvent(new GeneralDiedEvent(CampaignId, GeneralId));
+                GeneralId = UnitId.Empty;
+            }
         }
 
         _units.RemoveAll(u => !u.IsAlive);
@@ -150,7 +156,9 @@ public sealed class Army : AggregateRoot
     {
         foreach (var log in logs)
         {
-            var unit = GetUnitOrThrow(log.UnitId);
+            var unit = _units.FirstOrDefault(u => u.Id == log.UnitId);
+            if (unit == null) continue;
+
             unit.TakeDamage(log.DamageTaken);
         }
 
@@ -163,19 +171,6 @@ public sealed class Army : AggregateRoot
         {
             if (!unit.IsRecruited)
                 unit.AdvanceRecruitment();
-        }
-    }
-
-    private Unit GetUnitOrThrow(UnitId id) => _units.FirstOrDefault(u => u.Id == id)
-        ?? throw new InvalidOperationException($"Army:{Id} does not contain it's own unit:{id}");
-
-    private static void ThrowIfInvalidState(Unit unit)
-    {
-        if (!unit.IsAlive || !unit.IsRecruited)
-        {
-            throw new InvalidOperationException(
-                $"Cannot cancel recruiting unit:{unit.Id} with wrong state alive:{unit.IsAlive}, recruited:{unit.IsRecruited}"
-            );
         }
     }
 }

@@ -69,6 +69,21 @@ public partial class ArmyTests
         }
 
         [Fact]
+        public void ShouldReturnFailure_WhenArmyWithoutGeneral()
+        {
+            var army = TestData.CreateArmy();
+            var general = army.Units[0];
+            army.RestoreMovementPoints(TestData.MovementConfiguration);
+            army.AddReadyUnit(TestData.CreateUnitTemplate(maxHealth: 1));
+            army.TakeCasualties([new(general.Id, general.Health)]);
+
+            var result = army.MoveTo(destination: Vector2.Zero, movementCost: 1);
+
+            result.IsFailure.Should().BeTrue();
+            result.Error.Should().Be(GameErrors.CantMoveWithoutGeneral);
+        }
+
+        [Fact]
         public void ShouldSuccess_WhenMovementPointsEnough()
         {
             var army = TestData.CreateArmy();
@@ -132,26 +147,45 @@ public partial class ArmyTests
     public class ReplaceGeneral
     {
         [Fact]
-        public void ShouldDisbandAndReplaceGeneral_WhenGeneralExist()
+        public void ShouldReplaceGeneral_WhenGeneralExist()
         {
             var army = TestData.CreateArmy();
             var generalId = army.GeneralId;
 
-            army.ReplaceGeneral(TestData.CreateUnitTemplate(maxHealth: 100));
+            var result = army.ReplaceGeneral(TestData.CreateUnitTemplate(maxHealth: 1));
 
+            result.IsSuccess.Should().BeTrue();
             army.Units.Count.Should().Be(1);
             army.GeneralId.Should().NotBe(generalId).And.NotBe(UnitId.Empty);
         }
 
         [Fact]
-        public void ShouldAddNewGeneral_WhenGeneralIsEmpty()
+        public void ShouldAddNewGeneral_WhenGeneralNotExist()
         {
             var army = TestData.CreateArmy();
-            army.TakeCasualties([new(army.GeneralId, army.Units.Single().Health)]);
+            army.Units[0].TakeDamage(int.MaxValue);
+            army.PurgeDeadUnits();
 
-            army.ReplaceGeneral(TestData.CreateUnitTemplate(maxHealth: 100));
+            var result = army.ReplaceGeneral(TestData.CreateUnitTemplate(maxHealth: 1));
 
+            result.IsSuccess.Should().BeTrue();
             army.Units.Count.Should().Be(1);
+            army.GeneralId.Should().NotBe(UnitId.Empty);
+        }
+
+        [Fact]
+        public void ShouldReplaceGeneral_WhenArmyIsFull()
+        {
+            var army = TestData.CreateArmy();
+            for (int i = 0; i < Army.MaxSize; i++)
+            {
+                army.AddReadyUnit(TestData.CreateUnitTemplate(maxHealth: 1));
+            }
+
+            var result = army.ReplaceGeneral(TestData.CreateUnitTemplate(maxHealth: 1));
+
+            result.IsSuccess.Should().BeTrue();
+            army.Units.Count.Should().Be(Army.MaxSize);
             army.GeneralId.Should().NotBe(UnitId.Empty);
         }
     }
@@ -185,7 +219,7 @@ public partial class ArmyTests
     public class PurgeDeadUnits
     {
         [Fact]
-        public void ShouldDeleteDeadUnits_WhenUnitsNotIsGeneral()
+        public void ShouldDeleteDeadUnits()
         {
             var army = TestData.CreateArmy();
             var template = TestData.CreateUnitTemplate(maxHealth: 100);
@@ -195,10 +229,11 @@ public partial class ArmyTests
 
             army.Units.Count.Should().Be(1);
             army.Units.Single().Id.Should().Be(army.GeneralId);
+            army.DomainEvents.Should().NotContain(e => e is GeneralDiedEvent);
         }
 
         [Fact]
-        public void ShouldDeleteDeadUnitAndRaiseEvent_WhenUnitIsGeneral()
+        public void ShouldDeleteDeadUnitAndRaiseEvent_WhenGeneralDied()
         {
             var army = TestData.CreateArmy();
 
@@ -206,7 +241,7 @@ public partial class ArmyTests
 
             army.Units.Count.Should().Be(0);
             army.GeneralId.Should().Be(UnitId.Empty);
-            army.DomainEvents.Single().Should().BeOfType<RemoveGeneralEvent>();
+            army.DomainEvents.Single().Should().BeOfType<GeneralDiedEvent>();
         }
     }
 
@@ -218,10 +253,86 @@ public partial class ArmyTests
             var army = TestData.CreateArmy();
             var unitId = army.AddReadyUnit(TestData.CreateUnitTemplate(maxHealth: 100)).Value;
 
-            army.TakeCasualties([new(unitId, 100), new(army.GeneralId, army.Units.First().Health - 1)]);
+            army.TakeCasualties([new(unitId, 100), new(army.GeneralId, army.Units[0].Health - 1)]);
 
             army.Units.Should().ContainSingle();
             army.Units.Should().NotContain(u => u.Id == unitId);
+        }
+
+        [Fact]
+        public void WhenUnitNotFound_ShouldTakeDamageAndRemoveDeadUnits()
+        {
+            var army = TestData.CreateArmy();
+            var unitId = army.AddReadyUnit(TestData.CreateUnitTemplate(maxHealth: 100)).Value;
+
+            army.TakeCasualties(
+                [
+                    new(unitId, 100),
+                    new(UnitId.New(), int.MaxValue),
+                    new(army.GeneralId, army.Units[0].Health - 1),
+                ]
+            );
+
+            army.Units.Should().ContainSingle();
+            army.Units.Should().NotContain(u => u.Id == unitId);
+        }
+    }
+
+    public class CancelRecruitmentUnit
+    {
+        [Fact]
+        public void CancelRecruitment_ShouldReturnFailure_WhenUnitDoesNotExistInArmy()
+        {
+            var army = TestData.CreateArmy();
+            var unitId = UnitId.New();
+
+            var result = army.CancelRecruitment(unitId);
+
+            result.IsFailure.Should().BeTrue();
+            result.Error.Should().Be(GameErrors.UnitNotInTargetArmy(unitId, army.Id));
+            army.DomainEvents.Should().NotContain(e => e is CancelRecruitmentEvent);
+        }
+
+        [Fact]
+        public void CancelRecruitment_ShouldReturnFailure_WhenUnitIsNotAlive()
+        {
+            var army = TestData.CreateArmy();
+            var unitId = army.RecruitUnit(TestData.CreateUnitTemplate(maxHealth: 0));
+
+            var result = army.CancelRecruitment(unitId.Value);
+
+            result.IsFailure.Should().BeTrue();
+            result.Error.Should().Be(GameErrors.CantCancelRecruitmentUnitUnsuitableCondition(false, false));
+            army.DomainEvents.Should().NotContain(e => e is CancelRecruitmentEvent);
+        }
+
+        [Fact]
+        public void CancelRecruitment_ShouldReturnFailure_WhenUnitIsRecruited()
+        {
+            var army = TestData.CreateArmy();
+            var unitId = army.AddReadyUnit(TestData.CreateUnitTemplate(maxHealth: 1));
+
+            var result = army.CancelRecruitment(unitId.Value);
+
+            result.IsFailure.Should().BeTrue();
+            result.Error.Should().Be(GameErrors.CantCancelRecruitmentUnitUnsuitableCondition(true, true));
+            army.DomainEvents.Should().NotContain(e => e is CancelRecruitmentEvent);
+        }
+
+        [Fact]
+        public void CancelRecruitment_ShouldReturnSuccess()
+        {
+            var army = TestData.CreateArmy();
+            var unit = TestData.CreateUnitTemplate(maxHealth: 1);
+            var unitId = army.RecruitUnit(unit);
+
+            var result = army.CancelRecruitment(unitId.Value);
+
+            result.IsSuccess.Should().BeTrue();
+            army.Units.FirstOrDefault(u => u.Id == unitId).Should().BeNull();
+            army.DomainEvents.Should().ContainSingle()
+                .Which.Should().BeOfType<CancelRecruitmentEvent>()
+                .Which.Cost.Should().Be(unit.Cost);
         }
     }
 }

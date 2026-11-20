@@ -3,4 +3,4 @@ using RTSCore.Domain.Entities.Campaigns;
 
 namespace RTSCore.Domain.Entities.Armies;
 
-public sealed record RemoveGeneralEvent(CampaignId CampaignId, UnitId GeneralId) : IDomainEvent;
+public sealed record GeneralDiedEvent(CampaignId CampaignId, UnitId GeneralId) : IDomainEvent;

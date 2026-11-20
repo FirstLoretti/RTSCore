@@ -16,7 +16,7 @@ public sealed class CancelRecruitCommandHandler(
         var army = await unitOfWork.ArmyRepository.GetAsync(request.ArmyId, ct);
         Guard.Against.NotFound(request.ArmyId, army);
 
-        var result = army.CancelRecruitUnit(request.UnitId);
+        var result = army.CancelRecruitment(request.UnitId);
         if (result.IsFailure) return result;
 
         await unitOfWork.SaveChangesAsync(ct);

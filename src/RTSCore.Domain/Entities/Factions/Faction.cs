@@ -25,12 +25,12 @@ public sealed class Faction : AggregateRoot
 
     private Faction() { }
 
-    public City FoundCity(CityTemplate template, Vector2 coordinates)
-        => City.Create(CampaignId, template, Type, coordinates);
+    public City FoundCity(CityTemplate template, Vector2 coordinates) =>
+        City.Create(CampaignId, template, Type, coordinates);
 
     public Result SpendGold(int amount)
     {
-        if (Gold < amount) return Errors.GameErrors.NotEnoughGold;
+        if (Gold < amount) return GameErrors.NotEnoughGold;
 
         Gold -= amount;
 
