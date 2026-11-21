@@ -1,4 +1,6 @@
+using RTSCore.Domain.Common;
 using RTSCore.Domain.Entities.Campaigns;
+using RTSCore.Domain.Errors;
 
 namespace RTSCore.Domain.Entities.Diplomacy;
 
@@ -28,23 +30,21 @@ public sealed class DiplomacyOffer
 
     private DiplomacyOffer() { }
 
-    public void Accept()
+    public Result Accept()
     {
-        ThrowIfInvalidStatus();
+        if (Status != OfferStatus.Pending) return GameErrors.InvalidOfferStatus;
 
         Status = OfferStatus.Accepted;
+
+        return Result.Success();
     }
 
-    public void Reject()
+    public Result Reject()
     {
-        ThrowIfInvalidStatus();
+        if (Status != OfferStatus.Pending) return GameErrors.InvalidOfferStatus;
 
         Status = OfferStatus.Rejeсted;
-    }
 
-    private void ThrowIfInvalidStatus()
-    {
-        if (Status != OfferStatus.Pending)
-            throw new InvalidOperationException($"Diplomacy offer:{Id} with status:{Status} cannot be accept or reject");
+        return Result.Success();
     }
 }

@@ -204,7 +204,18 @@ public partial class ArmyTests
         }
 
         [Fact]
-        public void ShouldFail_WhenUnitIsGeneral()
+        public void ShouldReturnFailure_WhenUnitNotInArmy()
+        {
+            var army = TestData.CreateArmy();
+
+            var result = army.DisbandUnit(UnitId.New());
+
+            result.IsFailure.Should().BeTrue();
+            army.Units.Should().ContainSingle();
+        }
+
+        [Fact]
+        public void ShouldReturnFailure_WhenUnitIsGeneral()
         {
             var army = TestData.CreateArmy();
 

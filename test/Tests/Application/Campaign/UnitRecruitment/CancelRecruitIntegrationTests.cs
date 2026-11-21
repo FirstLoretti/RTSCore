@@ -1,7 +1,5 @@
 using System.Numerics;
 
-using Ardalis.GuardClauses;
-
 using FluentAssertions;
 
 using MediatR;
@@ -13,50 +11,15 @@ using RTSCore.Application.Campaign.UnitRecruitment;
 using RTSCore.Domain.Entities.Armies;
 using RTSCore.Domain.Entities.Campaigns;
 using RTSCore.Domain.Entities.Factions;
-using RTSCore.Domain.Errors;
 using RTSCore.Infrastructure.Persistence;
 
-namespace Tests.Application.Campaign;
+namespace Tests.Application.Campaign.UnitRecruitment;
 
 [Collection("TestCollection")]
-public sealed class CancelRecruitTests(TestFixture testFixture) : IAsyncLifetime
+public sealed class CancelRecruitIntegrationTests(TestFixture testFixture) : IAsyncLifetime
 {
     [Fact]
-    public async Task Handle_ShouldThrow_WhenArmyNotFound()
-    {
-        using var scope = testFixture.ServiceProvider.CreateScope();
-        var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
-
-        var action = () => mediator.Send(new CancelRecruitCommand(ArmyId.New(), UnitId.New()));
-
-        await action.Should().ThrowAsync<NotFoundException>();
-    }
-
-    [Fact]
-    public async Task Handle_ShouldFailure_WhenUnitDoesNotExistInArmy()
-    {
-        var army = TestData.CreateArmy();
-
-        using (var scope = testFixture.ServiceProvider.CreateScope())
-        {
-            var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-            context.Armies.Add(army);
-            await context.SaveChangesAsync();
-        }
-
-        using (var scope = testFixture.ServiceProvider.CreateScope())
-        {
-            var unitId = UnitId.New();
-            var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
-            var result = await mediator.Send(new CancelRecruitCommand(army.Id, unitId));
-
-            result.IsFailure.Should().BeTrue();
-            result.Error.Should().Be(GameErrors.UnitNotInTargetArmy(unitId, army.Id));
-        }
-    }
-
-    [Fact]
-    public async Task Handle_ShouldCancelAndRefundGold_WhenRecruitmentCanBeCanceled()
+    public async Task Handle_ShouldCancelAndRefundGold()
     {
         var campaignId = CampaignId.New();
         var unit = TestData.CreateUnitTemplate(maxHealth: 1);

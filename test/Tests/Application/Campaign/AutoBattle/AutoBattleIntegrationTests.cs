@@ -1,5 +1,3 @@
-using Ardalis.GuardClauses;
-
 using FluentAssertions;
 
 using MediatR;
@@ -8,28 +6,16 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 using RTSCore.Application.Campaign.AutoBattle;
-using RTSCore.Domain.Entities.Armies;
 using RTSCore.Domain.Entities.Armies.Combat;
 using RTSCore.Infrastructure.Persistence;
 
-namespace Tests.Application.Campaign;
+namespace Tests.Application.Campaign.AutoBattle;
 
 [Collection("TestCollection")]
-public sealed class AutoBattleTests(TestFixture testFixture) : IAsyncLifetime
+public sealed class AutoBattleIntegrationTests(TestFixture testFixture) : IAsyncLifetime
 {
     [Fact]
-    public async Task Handle_ShouldThrow_WhenArmyNotFoundInDb()
-    {
-        using var scope = testFixture.ServiceProvider.CreateScope();
-        var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
-
-        var action = () => mediator.Send(new AutoBattleCommand(ArmyId.New(), ArmyId.New()));
-
-        await action.Should().ThrowAsync<NotFoundException>();
-    }
-
-    [Fact]
-    public async Task Handle_ShouldCalculate_ApplyCasualties_SaveToDb_AndReturnResult()
+    public async Task Handle_ShouldDoBattleAndSaveChanges()
     {
         var attacker = TestData.CreateArmy();
         var defender = TestData.CreateArmy();

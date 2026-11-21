@@ -1,5 +1,3 @@
-using Ardalis.GuardClauses;
-
 using FluentAssertions;
 
 using MediatR;
@@ -9,16 +7,15 @@ using Microsoft.Extensions.DependencyInjection;
 
 using RTSCore.Application.Campaign.ArmyCreation;
 using RTSCore.Domain.Entities.Armies;
-using RTSCore.Domain.Entities.Cities;
 using RTSCore.Infrastructure.Persistence;
 
-namespace Tests.Application.Campaign;
+namespace Tests.Application.Campaign.ArmyCreation;
 
 [Collection("TestCollection")]
-public sealed class CreateArmyTests(TestFixture testFixture) : IAsyncLifetime
+public sealed class CreateArmyIntegrationTests(TestFixture testFixture) : IAsyncLifetime
 {
     [Fact]
-    public async Task Handle_ShouldCreateArmyInCity_AndSaveToDb()
+    public async Task Handle_ShouldCreateArmy_AndSaveToDb()
     {
         var city = TestData.CreateCity(template: TestData.CreateCityTemplate());
 
@@ -48,17 +45,6 @@ public sealed class CreateArmyTests(TestFixture testFixture) : IAsyncLifetime
             army.Units.Should().ContainSingle();
             army.Coordinates.Should().Be(city.Coordinates);
         }
-    }
-
-    [Fact]
-    public async Task Handle_ShouldThrow_WhenCityDoesNotExistInDb()
-    {
-        using var scope = testFixture.ServiceProvider.CreateScope();
-        var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
-
-        var action = () => mediator.Send(new CreateArmyCommand(CityId.New(), UnitType.Peasant));
-
-        await action.Should().ThrowAsync<NotFoundException>();
     }
 
     public Task InitializeAsync() => testFixture.ResetDatabaseAsync();

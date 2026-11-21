@@ -41,6 +41,8 @@ public static class GameErrors
         = new("Diplomacy.CantPeaceFactionsNotWar", "Factions are not at war.");
     public static Error CantCancelTradeNotExist { get; }
         = new("Diplomacy.CantCancelTradeNotExist", "Trade agreement does not exist.");
+    public static Error InvalidOfferStatus { get; }
+        = new("Diplomacy.InvalidOfferStatus", "Cannot acccept or reject offer with not pending status.");
 
     public static Error NotEnoughGold { get; } = new("NotEnoughGold", "Not enough gold");
 }

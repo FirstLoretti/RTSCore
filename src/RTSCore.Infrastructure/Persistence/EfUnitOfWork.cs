@@ -2,7 +2,6 @@ using MediatR;
 
 using RTSCore.Application.Common;
 using RTSCore.Application.Repositories;
-using RTSCore.Domain.AI;
 using RTSCore.Domain.Entities;
 
 namespace RTSCore.Infrastructure.Persistence;
