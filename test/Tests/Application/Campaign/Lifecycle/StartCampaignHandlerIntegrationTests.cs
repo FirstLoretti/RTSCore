@@ -36,20 +36,20 @@ public sealed class StartCampaignHandlerIntegrationTests(TestFixture testFixture
                 .AsNoTracking()
                 .Where(f => f.CampaignId == campaignId)
                 .ToListAsync();
-            factions.Should().HaveCount(TestData.FactionCatalog.Templates.Length);
+            factions.Should().HaveCount(TestData.FactionCatalog.AllTemplates.Length);
 
             var aiAgents = await context.AiFactionAgents
                 .AsNoTracking()
                 .Where(f => f.CampaignId == campaignId)
                 .ToListAsync();
-            aiAgents.Should().HaveCount(TestData.FactionCatalog.Templates.Length - playerFactions.Count);
+            aiAgents.Should().HaveCount(TestData.FactionCatalog.AllTemplates.Length - playerFactions.Count);
             aiAgents.Select(a => a.Faction).Should().NotIntersectWith(playerFactions);
 
             var cities = await context.Cities
                 .AsNoTracking()
                 .Where(f => f.CampaignId == campaignId)
                 .ToListAsync();
-            cities.Should().HaveCount(TestData.FactionCatalog.Templates.Sum(f => f.CityPresets.Length));
+            cities.Should().HaveCount(TestData.FactionCatalog.AllTemplates.Sum(f => f.CityPresets.Length));
 
             await context.Campaigns
                 .AsNoTracking()

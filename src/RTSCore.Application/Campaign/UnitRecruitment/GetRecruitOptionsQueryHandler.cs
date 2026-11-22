@@ -24,6 +24,6 @@ public sealed class GetRecruitOptionsQueryHandler(
         var city = await repository.GetAsync(request.CityId, ct, false);
         Guard.Against.NotFound(request.CityId, city);
 
-        return city.GetRecruitableUnits(catalog.Templates);
+        return city.GetRecruitableUnits(catalog.AllTemplates);
     }
 }

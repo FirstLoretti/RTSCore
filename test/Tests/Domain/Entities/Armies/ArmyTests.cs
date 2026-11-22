@@ -335,9 +335,9 @@ public partial class ArmyTests
         {
             var army = TestData.CreateArmy();
             var unit = TestData.CreateUnitTemplate(maxHealth: 1);
-            var unitId = army.RecruitUnit(unit);
+            var unitId = army.RecruitUnit(unit).Value;
 
-            var result = army.CancelRecruitment(unitId.Value);
+            var result = army.CancelRecruitment(unitId);
 
             result.IsSuccess.Should().BeTrue();
             army.Units.FirstOrDefault(u => u.Id == unitId).Should().BeNull();

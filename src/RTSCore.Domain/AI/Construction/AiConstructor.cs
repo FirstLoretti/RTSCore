@@ -20,7 +20,7 @@ public static class AiConstructor
         {
             if (faction.Gold < option.Cost) continue;
 
-            var city = cities.Single(c => c.Id == option.CityId);
+            var city = cities.First(c => c.Id == option.CityId);
             var buildingTemplate = catalog.GetBuilding(option.BuildingType);
 
             if (city.StartConstruction(buildingTemplate).IsFailure) continue;
@@ -38,7 +38,7 @@ public static class AiConstructor
 
         foreach (var city in cities)
         {
-            var buildings = city.GetConstructableBuildings(catalog.Templates);
+            var buildings = city.GetConstructableBuildings(catalog.AllTemplates);
 
             foreach (var building in buildings)
             {

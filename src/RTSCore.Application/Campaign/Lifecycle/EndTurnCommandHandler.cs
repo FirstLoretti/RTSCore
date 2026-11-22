@@ -13,8 +13,8 @@ public sealed class EndTurnCommandHandler(
 {
     public async Task Handle(EndTurnCommand request, CancellationToken ct)
     {
-        var cities = await unitOfWork.CityRepository.GetAsync(request.Faction, ct);
-        var armies = await unitOfWork.ArmyRepository.GetAsync(request.Faction, ct);
+        var cities = await unitOfWork.CityRepository.GetAsync(request.CampaignId, request.Faction, ct);
+        var armies = await unitOfWork.ArmyRepository.GetAsync(request.CampaignId, request.Faction, ct);
 
         foreach (var city in cities)
         {

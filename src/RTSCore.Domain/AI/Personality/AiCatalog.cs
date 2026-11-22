@@ -3,22 +3,11 @@ using System.Collections.Immutable;
 
 namespace RTSCore.Domain.AI.Personality;
 
-public sealed record AiCatalog
+public sealed class AiCatalog(IReadOnlyCollection<AiPersonality> personalities)
 {
-    public readonly ImmutableArray<AiPersonality> Personalities;
-    private readonly FrozenDictionary<AiPersonalityType, AiPersonality> _personalities;
+    private readonly FrozenDictionary<AiPersonalityType, AiPersonality> _personalities =
+        personalities.ToFrozenDictionary(p => p.Type);
 
+    public ImmutableArray<AiPersonality> AllPersonalities => _personalities.Values;
     public AiPersonality GetPersonality(AiPersonalityType personalityType) => _personalities[personalityType];
-
-    public AiCatalog(IReadOnlyCollection<AiPersonality> personalities)
-    {
-        Personalities = [.. personalities];
-
-        var tempDic = new Dictionary<AiPersonalityType, AiPersonality>(personalities.Count);
-        foreach (var personality in Personalities)
-        {
-            tempDic[personality.Type] = personality;
-        }
-        _personalities = tempDic.ToFrozenDictionary();
-    }
 }

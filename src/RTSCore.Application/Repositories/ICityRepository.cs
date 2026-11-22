@@ -1,4 +1,5 @@
 using RTSCore.Domain;
+using RTSCore.Domain.Entities.Campaigns;
 using RTSCore.Domain.Entities.Cities;
 
 namespace RTSCore.Application.Repositories;
@@ -9,5 +10,10 @@ public interface ICityRepository
     void AddRange(IEnumerable<City> cities);
 
     Task<City?> GetAsync(CityId id, CancellationToken ct, bool isTracking = true);
-    Task<IReadOnlyList<City>> GetAsync(FactionType faction, CancellationToken ct, bool isTracking = true);
+    Task<IReadOnlyList<City>> GetAsync(
+        CampaignId campaignId,
+        FactionType faction,
+        CancellationToken ct,
+        bool isTracking = true
+    );
 }

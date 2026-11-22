@@ -39,7 +39,7 @@ public static class AiDiplomacy
         foreach (var offer in context.IncomingOffers)
         {
             var relation = context.GetRelation(offer.Initiator);
-            var opponent = GetOpponent(context, offer.Initiator);
+            var opponent = context.GetOpponent(offer.Initiator);
 
             if (AiOfferEvaluator.IsOfferProfitable(offer, relation, context.Faction, opponent))
             {
@@ -50,20 +50,5 @@ public static class AiDiplomacy
                 decisions.OffersToReject.Add(offer);
             }
         }
-
-        context.IncomingOffers.Clear();
-    }
-
-    private static AiFactionContext GetOpponent(AiDiplomacyContext context, FactionType initiator)
-    {
-        foreach (var faction in context.AnotherFactions)
-        {
-            if (faction.FactionType == initiator)
-            {
-                return faction;
-            }
-        }
-
-        throw new KeyNotFoundException($"Faction {initiator} is missing from the world");
     }
 }

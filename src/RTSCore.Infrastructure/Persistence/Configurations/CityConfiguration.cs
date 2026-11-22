@@ -20,8 +20,9 @@ public sealed class CityConfiguration : IEntityTypeConfiguration<City>
             dbValue => new CityId(dbValue)
         );
 
-        builder.ComplexProperty(c => c.Coordinates);
+        builder.HasIndex(c => new { c.CampaignId, c.Faction });
 
+        builder.ComplexProperty(c => c.Coordinates);
         builder.Property(c => c.Type).HasConversion<string>();
         builder.Property(c => c.Faction).HasConversion<string>();
 

@@ -14,7 +14,7 @@ public class AiDiplomacyTests
     {
         var relation1 = new DiplomacyRelation(CampaignId.Empty, FactionType.England, FactionType.France, DiplomacyRelation.MinStanding);
         var relation2 = new DiplomacyRelation(CampaignId.Empty, FactionType.England, FactionType.Spain, DiplomacyRelation.MaxStanding);
-        var diplomacyContext = TestData.AiDiplomacyContext with { Relations = [relation1, relation2] };
+        var diplomacyContext = TestData.AiDiplomacyContext with { FactionRelations = [relation1, relation2] };
 
         var decisions = AiDiplomacy.ProcessDiplomacy(diplomacyContext);
 
@@ -29,7 +29,7 @@ public class AiDiplomacyTests
         var relation2 = new DiplomacyRelation(CampaignId.Empty, FactionType.England, FactionType.Spain, DiplomacyRelation.MaxStanding);
         var diplomacyContext = TestData.AiDiplomacyContext with
         {
-            Relations = [relation1, relation2],
+            FactionRelations = [relation1, relation2],
             IncomingOffers = [
                 new(CampaignId.Empty, FactionType.France, FactionType.England, OfferType.TradeAgreement),
                 new(CampaignId.Empty, FactionType.Spain, FactionType.England, OfferType.TradeAgreement)

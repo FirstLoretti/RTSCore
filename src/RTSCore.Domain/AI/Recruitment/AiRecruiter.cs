@@ -13,10 +13,11 @@ namespace RTSCore.Domain.AI.Recruitment;
 
 public sealed class AiRecruiter
 {
+    public ImmutableArray<ProductionOption<UnitType>> GetUnits(AiPersonalityType personality) =>
+        _unitsByPersonality[personality];
+
     private readonly UnitCatalog _unitCatalog;
     private readonly FrozenDictionary<AiPersonalityType, ImmutableArray<ProductionOption<UnitType>>> _unitsByPersonality;
-
-    public ImmutableArray<ProductionOption<UnitType>> GetUnits(AiPersonalityType personality) => _unitsByPersonality[personality];
 
     public AiRecruiter(UnitCatalog unitCatalog, AiCatalog aiCatalog)
     {
@@ -24,11 +25,11 @@ public sealed class AiRecruiter
 
         var tempDic = new Dictionary<AiPersonalityType, ImmutableArray<ProductionOption<UnitType>>>();
 
-        foreach (var personality in aiCatalog.Personalities)
+        foreach (var personality in aiCatalog.AllPersonalities)
         {
             var units = new List<ProductionOption<UnitType>>();
 
-            foreach (var template in unitCatalog.Templates)
+            foreach (var template in unitCatalog.AllTemplates)
             {
                 var unit = EvaluateUnitUtility(template, personality);
                 if (unit.AiUtility > 0)
@@ -47,7 +48,7 @@ public sealed class AiRecruiter
         Faction faction,
         Army army,
         AiPersonalityType personality,
-        ImmutableArray<ProductionOption<UnitType>> availableUnits
+        IReadOnlyCollection<ProductionOption<UnitType>> availableUnits
     )
     {
         var allUnits = _unitsByPersonality[personality];
@@ -58,10 +59,10 @@ public sealed class AiRecruiter
 
             if (availableUnit != default)
             {
-                while (faction.Gold >= availableUnit.Cost)
+                while (faction.Gold >= availableUnit.Cost && army.HasFreeSlots)
                 {
-                    faction.SpendGold(availableUnit.Cost);
                     army.RecruitUnit(_unitCatalog.GetTemplate(availableUnit.Type));
+                    faction.SpendGold(availableUnit.Cost);
                 }
             }
         }

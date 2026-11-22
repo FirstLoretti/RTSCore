@@ -277,7 +277,7 @@ public static class TestData
             AiFactionContext with { FactionType = FactionType.France },
             AiFactionContext with { FactionType = FactionType.Spain }
         ],
-        Relations: [],
+        FactionRelations: [],
         IncomingOffers: []
     );
 

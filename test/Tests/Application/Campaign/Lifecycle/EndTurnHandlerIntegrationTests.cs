@@ -40,7 +40,7 @@ public sealed class EndTurnHandlerIntegrationTests(TestFixture testFixture) : IA
         {
             var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
 
-            await mediator.Send(new EndTurnCommand(faction.Type));
+            await mediator.Send(new EndTurnCommand(faction.CampaignId, faction.Type));
         }
 
         using (var scope = testFixture.ServiceProvider.CreateScope())

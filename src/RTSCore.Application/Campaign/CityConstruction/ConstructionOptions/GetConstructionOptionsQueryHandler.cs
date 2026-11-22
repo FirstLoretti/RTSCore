@@ -23,6 +23,6 @@ public sealed class GetConstructionOptionsQueryHandler(
         var city = await repository.GetAsync(request.CityId, ct, isTracking: false);
         Guard.Against.NotFound(request.CityId, city);
 
-        return city.GetConstructableBuildings(catalog.Templates);
+        return city.GetConstructableBuildings(catalog.AllTemplates);
     }
 }

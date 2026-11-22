@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 using RTSCore.Application.Repositories;
 using RTSCore.Domain;
+using RTSCore.Domain.Entities.Campaigns;
 using RTSCore.Domain.Entities.Cities;
 
 namespace RTSCore.Infrastructure.Persistence;
@@ -22,12 +23,13 @@ public sealed class CityRepository(AppDbContext context) : ICityRepository
             .FirstOrDefaultAsync(c => c.Id == id, ct);
 
     public async Task<IReadOnlyList<City>> GetAsync(
+        CampaignId campaignId,
         FactionType faction,
         CancellationToken ct,
         bool isTracking = true
     ) => await context.Cities
             .WithTracking(isTracking)
-            .Where(c => c.Faction == faction)
+            .Where(c => c.CampaignId == campaignId && c.Faction == faction)
             .Include(c => c.Buildings)
             .ToListAsync(ct);
 }
