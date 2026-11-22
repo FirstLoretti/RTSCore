@@ -12,18 +12,19 @@ public static class WorldInitializer
 {
     public static InitializeWorldResult Initialize(
         CampaignId campaignId,
-        IReadOnlySet<FactionType> playersFactions,
+        IReadOnlyCollection<FactionType> playersFactions,
         FactionCatalog factionCatalog,
         CityCatalog cityCatalog
     )
     {
         var campaign = new Campaign(campaignId);
+        var totalFactions = factionCatalog.AllTemplates.Length;
 
-        var factions = ImmutableArray.CreateBuilder<Faction>();
-        var cities = ImmutableArray.CreateBuilder<City>();
-        var aiAgents = ImmutableArray.CreateBuilder<AiFactionAgent>();
+        var factions = new List<Faction>(totalFactions);
+        var aiAgents = new List<AiFactionAgent>(totalFactions - playersFactions.Count);
+        var cities = new List<City>();
 
-        foreach (var template in factionCatalog.Templates)
+        foreach (var template in factionCatalog.AllTemplates)
         {
             var faction = new Faction(campaignId, template);
             factions.Add(faction);
@@ -42,6 +43,6 @@ public static class WorldInitializer
             }
         }
 
-        return new(campaign, factions.ToImmutable(), cities.ToImmutable(), aiAgents.ToImmutable());
+        return new(campaign, factions, cities, aiAgents);
     }
 }

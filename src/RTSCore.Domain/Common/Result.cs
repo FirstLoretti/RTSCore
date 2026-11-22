@@ -4,7 +4,7 @@ using RTSCore.Domain.Errors;
 
 namespace RTSCore.Domain.Common;
 
-public readonly record struct Result
+public readonly struct Result
 {
     public bool IsSuccess { get; }
 

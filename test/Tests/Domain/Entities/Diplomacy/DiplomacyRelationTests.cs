@@ -9,9 +9,9 @@ using static Tests.TestData;
 
 namespace Tests.Domain.Entities.Diplomacy;
 
-public class DiplomacyRelationTests
+public sealed class DiplomacyRelationTests
 {
-    public class Factory
+    public sealed class Factory
     {
         [Fact]
         public void New_ShouldCreateWithCorrectFactionsOrder()
@@ -23,7 +23,7 @@ public class DiplomacyRelationTests
         }
     }
 
-    public class OpenTrade
+    public sealed class OpenTrade
     {
         [Fact]
         public void ShouldFailIfInWarState()
@@ -64,10 +64,7 @@ public class DiplomacyRelationTests
             relation.HasTradeAgreement.Should().BeTrue();
             relation.Standing.Should().Be(DiplomacyConfig.InitialStanding + DiplomacyConfig.AcceptTradeOfferBonus);
         }
-    }
 
-    public class DeclareWar
-    {
         [Fact]
         public void ShouldFailIfAlreadyInWar()
         {
@@ -98,7 +95,7 @@ public class DiplomacyRelationTests
         }
     }
 
-    public class MakePeace
+    public sealed class MakePeace
     {
         [Fact]
         public void ShouldFailWhenNotAtWarState()
@@ -127,7 +124,7 @@ public class DiplomacyRelationTests
         }
     }
 
-    public class CancelTrade
+    public sealed class CancelTrade
     {
         [Fact]
         public void ShouldFailWhenTradeNotExist()
@@ -156,10 +153,10 @@ public class DiplomacyRelationTests
         }
     }
 
-    public class Standing
+    public sealed class ChangeStanding
     {
         [Fact]
-        public void Change_ShouldNotGoBelowMinStanding()
+        public void ShouldNotGoBelowMinStanding()
         {
             var relation = new DiplomacyRelation(CampaignId.Empty, FactionType.England, FactionType.France, DiplomacyRelation.MinStanding);
 
@@ -169,13 +166,110 @@ public class DiplomacyRelationTests
         }
 
         [Fact]
-        public void Change_ShouldNotGoAboveMaxStanding()
+        public void ShouldNotGoAboveMaxStanding()
         {
             var relation = new DiplomacyRelation(CampaignId.Empty, FactionType.England, FactionType.France, DiplomacyRelation.MaxStanding);
 
             relation.OpenTrade(DiplomacyConfig.AcceptTradeOfferBonus);
 
             relation.Standing.Should().Be(DiplomacyRelation.MaxStanding);
+        }
+    }
+
+    public sealed class CreatePeaceOffer
+    {
+        [Theory]
+        [InlineData(FactionType.England, FactionType.England)]
+        [InlineData(FactionType.France, FactionType.England)]
+        [InlineData(FactionType.England, FactionType.France)]
+        public void ShouldReturnFailure_WhenInvalidFactions(FactionType initiator, FactionType target)
+        {
+            var relation = CreateDiplomacyRelation(factionA: FactionType.England, factionB: FactionType.Spain);
+
+            var result = relation.CreatePeaceOffer(initiator, target);
+
+            result.IsFailure.Should().BeTrue();
+            result.Error.Should().Be(GameErrors.RelationNotContainFactions(initiator, target, relation.Id));
+        }
+
+        [Fact]
+        public void ShouldReturnFailure_WhenNotInWar()
+        {
+            var relation = CreateDiplomacyRelation(factionA: FactionType.England, factionB: FactionType.Spain);
+
+            var result = relation.CreatePeaceOffer(relation.FactionA, relation.FactionB);
+
+            result.IsFailure.Should().BeTrue();
+            result.Error.Should().Be(GameErrors.CantPeaceFactionsNotWar);
+        }
+
+        [Fact]
+        public void ShouldReturnSuccess()
+        {
+            var relation = CreateDiplomacyRelation(factionA: FactionType.England, factionB: FactionType.Spain);
+            relation.DeclareWar(default);
+
+            var result = relation.CreatePeaceOffer(relation.FactionA, relation.FactionB);
+
+            result.IsSuccess.Should().BeTrue();
+            result.Value.Type.Should().Be(OfferType.PeaceTreaty);
+            result.Value.Initiator.Should().Be(relation.FactionA);
+            result.Value.Target.Should().Be(relation.FactionB);
+        }
+    }
+
+    public sealed class CreateTradeOffer
+    {
+        [Theory]
+        [InlineData(FactionType.England, FactionType.England)]
+        [InlineData(FactionType.France, FactionType.England)]
+        [InlineData(FactionType.England, FactionType.France)]
+        public void ShouldReturnFailure_WhenInvalidFactions(FactionType initiator, FactionType target)
+        {
+            var relation = CreateDiplomacyRelation(factionA: FactionType.England, factionB: FactionType.Spain);
+
+            var result = relation.CreateTradeOffer(initiator, target);
+
+            result.IsFailure.Should().BeTrue();
+            result.Error.Should().Be(GameErrors.RelationNotContainFactions(initiator, target, relation.Id));
+        }
+
+        [Fact]
+        public void ShouldReturnFailure_WhenAlreadyTrade()
+        {
+            var relation = CreateDiplomacyRelation(factionA: FactionType.England, factionB: FactionType.Spain);
+            relation.OpenTrade(default);
+
+            var result = relation.CreateTradeOffer(relation.FactionA, relation.FactionB);
+
+            result.IsFailure.Should().BeTrue();
+            result.Error.Should().Be(GameErrors.CantTradeAlreadyExist);
+        }
+
+        [Fact]
+        public void ShouldReturnFailure_WhenInWar()
+        {
+            var relation = CreateDiplomacyRelation(factionA: FactionType.England, factionB: FactionType.Spain);
+            relation.DeclareWar(default);
+            relation.OpenTrade(default);
+
+            var result = relation.CreateTradeOffer(relation.FactionA, relation.FactionB);
+
+            result.IsFailure.Should().BeTrue();
+            result.Error.Should().Be(GameErrors.CantTradeWithEnemy);
+        }
+
+        [Fact]
+        public void ShouldReturnSuccess()
+        {
+            var relation = CreateDiplomacyRelation(factionA: FactionType.England, factionB: FactionType.Spain);
+
+            var result = relation.CreateTradeOffer(relation.FactionA, relation.FactionB);
+
+            result.IsSuccess.Should().BeTrue();
+            result.Value.Type.Should().Be(OfferType.TradeAgreement);
+            result.Value.Initiator.Should().Be(relation.FactionA);
+            result.Value.Target.Should().Be(relation.FactionB);
         }
     }
 }

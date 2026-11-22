@@ -5,9 +5,10 @@ using RTSCore.Domain.Entities.Cities;
 
 namespace RTSCore.Domain.Configurations.Cities;
 
-public sealed record BuildingCatalog(ImmutableArray<BuildingTemplate> Templates)
+public sealed class BuildingCatalog(IReadOnlyList<BuildingTemplate> templates)
 {
-    private readonly FrozenDictionary<BuildingType, BuildingTemplate> _buildings = Templates.ToFrozenDictionary(t => t.Type);
+    private readonly FrozenDictionary<BuildingType, BuildingTemplate> _buildings = templates.ToFrozenDictionary(t => t.Type);
 
+    public ImmutableArray<BuildingTemplate> AllTemplates => _buildings.Values;
     public BuildingTemplate GetBuilding(BuildingType buildingType) => _buildings[buildingType];
 }

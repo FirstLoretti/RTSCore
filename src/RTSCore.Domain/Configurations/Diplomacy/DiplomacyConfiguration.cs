@@ -1,6 +1,6 @@
 namespace RTSCore.Domain.Configurations.Diplomacy;
 
-public sealed record DiplomacyConfiguration
+public sealed class DiplomacyConfiguration
 {
     public required int InitialStanding { get; init; }
     public required int DeclareWarPenalty { get; init; }

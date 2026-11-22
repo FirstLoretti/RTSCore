@@ -21,7 +21,7 @@ public sealed class City : AggregateRoot
     public int Population { get; private set; }
 
     private readonly List<Building> _buildings = [];
-    public IReadOnlyCollection<Building> Buildings => _buildings;
+    public IReadOnlyList<Building> Buildings => _buildings;
 
     private City(
         CampaignId campaignId,
@@ -50,7 +50,7 @@ public sealed class City : AggregateRoot
 
     public Result CanRecruit(UnitTemplate unit) =>
         !IsConstructed(unit.RequiredBuilding)
-            ? (Result)Errors.GameErrors.CantRecruitBuildingNotConstructed
+            ? (Result)GameErrors.CantRecruitBuildingNotConstructed
             : Result.Success();
 
     public ImmutableArray<ProductionOption<UnitType>> GetRecruitableUnits(
@@ -63,8 +63,7 @@ public sealed class City : AggregateRoot
                 u.Cost,
                 u.TurnsToRecruit,
                 u.ProductionCategory,
-                u.AiUtility))
-        ];
+                u.AiUtility))];
 
     public ImmutableArray<ProductionOption<BuildingType>> GetConstructableBuildings(
         IReadOnlyCollection<BuildingTemplate> buildingTemplates
@@ -79,8 +78,7 @@ public sealed class City : AggregateRoot
                 b.Cost,
                 b.TurnsToConstruct,
                 b.ProductionCategory,
-                b.AiUtility))
-        ];
+                b.AiUtility))];
 
     public Army CreateArmy(UnitTemplate general) => Army.Create(CampaignId, Faction, Coordinates, general);
 
@@ -142,10 +140,11 @@ public sealed class City : AggregateRoot
 
     public Result CancelConstruction(BuildingId id)
     {
-        var building = GetBuildingOrThrow(id);
+        var building = _buildings.FirstOrDefault(b => b.Id == id);
+        if (building == null) return GameErrors.BuildingNotInTargetCity(id, Id);
 
         if (building.IsConstructed)
-            return Result.Failure(Errors.GameErrors.CantCancelAlreadyConstructed);
+            return Result.Failure(GameErrors.CantCancelAlreadyConstructed);
 
         _buildings.Remove(building);
 
@@ -157,21 +156,18 @@ public sealed class City : AggregateRoot
     internal Result CanConstruct(BuildingTemplate building)
     {
         if (!building.AllowedCityTypes.Contains(Type))
-            return Result.Failure(Errors.GameErrors.CantConstructThisBuildingType);
+            return Result.Failure(GameErrors.CantConstructThisBuildingType);
 
         if (_buildings.Any(b => b.Type == building.Type))
-            return Result.Failure(Errors.GameErrors.CantConstructBuildingDuplicate);
+            return Result.Failure(GameErrors.CantConstructBuildingDuplicate);
 
         var hasRequiredBuildings = building.RequiredBuildings.All(reqType =>
             _buildings.Any(b => b.Type == reqType));
 
         return !hasRequiredBuildings
-            ? Result.Failure(Errors.GameErrors.ChainUnavailableConstructionOption)
+            ? Result.Failure(GameErrors.ChainUnavailableConstructionOption)
             : Result.Success();
     }
 
     private bool IsConstructed(BuildingType type) => _buildings.Exists(b => b.Type == type && b.IsConstructed);
-
-    private Building GetBuildingOrThrow(BuildingId id) => _buildings.SingleOrDefault(b => b.Id == id)
-        ?? throw new InvalidOperationException($"City:{Id} does not contain it's own building:{id}");
 }

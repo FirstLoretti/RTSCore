@@ -72,7 +72,7 @@ public class CityTests
 
             city.ConstructInstantly(TestData.BuildingCatalog.GetBuilding(BuildingType.ReqruitBarrack));
 
-            var options = city.GetConstructableBuildings(TestData.BuildingCatalog.Templates);
+            var options = city.GetConstructableBuildings(TestData.BuildingCatalog.AllTemplates);
 
             options.Select(o => o.Type).Should().NotContain([BuildingType.ReqruitBarrack, BuildingType.CultivatedFieldsComplex]);
             options.Select(o => o.Type).Should().Contain([BuildingType.MilitiaBarrack, BuildingType.CultivatedField]);
@@ -208,7 +208,7 @@ public class CityTests
     public class CancelConstruction
     {
         [Fact]
-        public void ShouldFailIfBuildingConstructed()
+        public void ShouldReturnFailure_WhenBuildingConstructed()
         {
             var city = TestData.CreateCity(template: TestData.CreateCityTemplate());
             var buildingId = city.ConstructInstantly(TestData.CreateBuildingTemplate()).Value;
@@ -221,7 +221,19 @@ public class CityTests
         }
 
         [Fact]
-        public void ShouldCancelWhenAllConditionsMet()
+        public void ShouldReturnFailure_WhenBuildingNotExistInCity()
+        {
+            var city = TestData.CreateCity(template: TestData.CreateCityTemplate());
+
+            var result = city.CancelConstruction(BuildingId.Empty);
+
+            result.IsFailure.Should().BeTrue();
+            result.Error.Should().Be(GameErrors.BuildingNotInTargetCity(BuildingId.Empty, city.Id));
+            city.Buildings.Should().NotContain(b => b.Id == BuildingId.Empty);
+        }
+
+        [Fact]
+        public void ShouldReturnSuccess()
         {
             var city = TestData.CreateCity(template: TestData.CreateCityTemplate());
             var buildingId = city.StartConstruction(TestData.CreateBuildingTemplate()).Value;

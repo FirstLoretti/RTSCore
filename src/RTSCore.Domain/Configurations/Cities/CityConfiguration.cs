@@ -1,6 +1,6 @@
 namespace RTSCore.Domain.Configurations.Cities;
 
-public record CityConfiguration(
+public sealed record CityConfiguration(
     float GrowthRate,
     float TaxPerCitizen
 );

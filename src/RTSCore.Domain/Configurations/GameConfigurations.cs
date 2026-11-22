@@ -8,7 +8,7 @@ using RTSCore.Domain.Configurations.World;
 
 namespace RTSCore.Domain.Configurations;
 
-public sealed record GameConfigurations
+public sealed class GameConfigurations
 {
     public required WorldConfiguration WorldConfiguration { get; init; }
 

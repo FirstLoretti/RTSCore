@@ -47,7 +47,7 @@ public sealed class AutoBattleCalculator(
 
     private List<UnitBattleLog> CreateLogs(IReadOnlyCollection<Unit> units, float damageTaken)
     {
-        List<UnitBattleLog> logs = [];
+        List<UnitBattleLog> logs = new(units.Count);
 
         foreach (var unit in units)
         {
