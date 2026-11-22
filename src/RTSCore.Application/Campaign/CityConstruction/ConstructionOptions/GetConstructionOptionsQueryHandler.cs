@@ -20,7 +20,7 @@ public sealed class GetConstructionOptionsQueryHandler(
         CancellationToken ct
     )
     {
-        var city = await repository.GetAsync(request.CityId, ct, trackChanges: false);
+        var city = await repository.GetAsync(request.CityId, ct, isTracking: false);
         Guard.Against.NotFound(request.CityId, city);
 
         return city.GetConstructableBuildings(catalog.Templates);

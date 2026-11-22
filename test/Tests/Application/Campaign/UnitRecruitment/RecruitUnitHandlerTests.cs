@@ -1,5 +1,3 @@
-using System.Numerics;
-
 using Ardalis.GuardClauses;
 
 using FluentAssertions;
@@ -11,7 +9,6 @@ using RTSCore.Application.Repositories;
 using RTSCore.Domain.Entities.Armies;
 using RTSCore.Domain.Entities.Campaigns;
 using RTSCore.Domain.Entities.Cities;
-using RTSCore.Domain.Entities.Factions;
 using RTSCore.Domain.Errors;
 
 using static Tests.TestData;
@@ -51,7 +48,7 @@ public sealed class RecruitUnitHandlerTests
     {
         var command = new RecruitUnitCommand(ArmyId.New(), CityId.New(), UnitType.Peasant);
         _unitOfWork.ArmyRepository.GetAsync(default(ArmyId), default).ReturnsForAnyArgs(CreateArmy());
-        _unitOfWork.CityRepository.GetAsync(default, default, default)
+        _unitOfWork.CityRepository.GetAsync(id: default, default)
             .ReturnsForAnyArgs(CreateCity(template: CreateCityTemplate()));
 
         var action = () => CreateHandler().Handle(command, CancellationToken.None);
@@ -117,7 +114,7 @@ public sealed class RecruitUnitHandlerTests
         }
 
         _unitOfWork.ArmyRepository.GetAsync(default(ArmyId), default).ReturnsForAnyArgs(army);
-        _unitOfWork.CityRepository.GetAsync(default, default, default).ReturnsForAnyArgs(city);
+        _unitOfWork.CityRepository.GetAsync(id: default, default).ReturnsForAnyArgs(city);
         _unitOfWork.FactionRepository.GetAsync(default, default, default).ReturnsForAnyArgs(faction);
 
         return (army, city);

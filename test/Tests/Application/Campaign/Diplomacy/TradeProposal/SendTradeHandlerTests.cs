@@ -35,7 +35,7 @@ public sealed class SendTradeHandlerTests
         relation.OpenTrade(standingBonus: 0);
         var command = new SendTradeOfferCommand(relation.CampaignId, relation.FactionA, relation.FactionB);
 
-        _unitOfWork.DiplomacyRelationRepository.GetAsync(default, default, default, default).ReturnsForAnyArgs(relation);
+        _unitOfWork.DiplomacyRelationRepository.GetAsync(default, default, default, default, true).ReturnsForAnyArgs(relation);
 
         var result = await CreateHandler().Handle(command, CancellationToken.None);
 

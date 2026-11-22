@@ -8,5 +8,5 @@ public interface IFactionRepository
 {
     void AddRange(IEnumerable<Faction> factions);
 
-    Task<Faction?> GetAsync(CampaignId campaignId, FactionType faction, CancellationToken ct);
+    Task<Faction?> GetAsync(CampaignId campaignId, FactionType faction, CancellationToken ct, bool isTracking = true);
 }

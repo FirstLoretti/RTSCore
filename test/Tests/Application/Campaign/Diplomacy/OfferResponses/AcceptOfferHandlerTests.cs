@@ -48,7 +48,7 @@ public sealed class AcceptOfferHandlerTests
     {
         var command = new AcceptOfferCommand(DiplomacyOfferId.New());
         _unitOfWork.DiplomacyOfferRepository.GetAsync(default, default).ReturnsForAnyArgs(CreateDiplomacyOffer(offerType: (OfferType)99));
-        _unitOfWork.DiplomacyRelationRepository.GetAsync(default, default, default, default).ReturnsForAnyArgs(CreateDiplomacyRelation());
+        _unitOfWork.DiplomacyRelationRepository.GetAsync(default, default, default, default, true).ReturnsForAnyArgs(CreateDiplomacyRelation());
 
         var action = () => CreateHandler().Handle(command, CancellationToken.None);
 
@@ -65,7 +65,7 @@ public sealed class AcceptOfferHandlerTests
         relation.OpenTrade(standingBonus: 0);
 
         _unitOfWork.DiplomacyOfferRepository.GetAsync(default, default).ReturnsForAnyArgs(offer);
-        _unitOfWork.DiplomacyRelationRepository.GetAsync(default, default, default, default).ReturnsForAnyArgs(relation);
+        _unitOfWork.DiplomacyRelationRepository.GetAsync(default, default, default, default, true).ReturnsForAnyArgs(relation);
 
         var result = await CreateHandler().Handle(command, CancellationToken.None);
 
@@ -82,7 +82,7 @@ public sealed class AcceptOfferHandlerTests
         var command = new AcceptOfferCommand(offer.Id);
 
         _unitOfWork.DiplomacyOfferRepository.GetAsync(default, default).ReturnsForAnyArgs(offer);
-        _unitOfWork.DiplomacyRelationRepository.GetAsync(default, default, default, default).ReturnsForAnyArgs(relation);
+        _unitOfWork.DiplomacyRelationRepository.GetAsync(default, default, default, default, true).ReturnsForAnyArgs(relation);
 
         var result = await CreateHandler().Handle(command, CancellationToken.None);
 

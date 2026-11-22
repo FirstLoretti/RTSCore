@@ -1,5 +1,3 @@
-using System.Collections.ObjectModel;
-
 using RTSCore.Domain;
 using RTSCore.Domain.Entities.Campaigns;
 using RTSCore.Domain.Entities.Diplomacy;
@@ -10,6 +8,18 @@ public interface IDiplomacyRelationRepository
 {
     void Add(DiplomacyRelation relation);
 
-    Task<DiplomacyRelation?> GetAsync(CampaignId campaignId, FactionType faction1, FactionType faction2, CancellationToken ct);
-    Task<ReadOnlyCollection<DiplomacyRelation>> GetAsync(CampaignId campaignId, FactionType faction, CancellationToken ct);
+    Task<DiplomacyRelation?> GetAsync(
+        CampaignId campaignId,
+        FactionType faction1,
+        FactionType faction2,
+        CancellationToken ct,
+        bool isTracking = true
+    );
+
+    Task<IReadOnlyList<DiplomacyRelation>> GetAsync(
+        CampaignId campaignId,
+        FactionType faction,
+        CancellationToken ct,
+        bool isTracking = true
+    );
 }

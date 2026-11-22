@@ -43,9 +43,9 @@ public sealed class TestFixture : IAsyncLifetime
         services.AddDbContext<AppDbContext>(options => options.UseNpgsql(connectionString));
         services.AddLogging();
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(StartCampaignCommanHandler).Assembly));
-        services.AddScoped<IUnitOfWork, EfUnitOfWork>();
-        services.AddScoped<ICityRepository, SqlCityRepository>();
-        services.AddScoped<IRefreshTokenRepository, SqlRefreshTokenRepository>();
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
+        services.AddScoped<ICityRepository, CityRepository>();
+        services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
         services.AddScoped<IRefreshTokenGenerator, RefreshTokenGenerator>();
         services.AddScoped<IJwtTokenProvider, JwtTokenProvider>();
         services.AddSingleton<AutoBattleCalculator>();

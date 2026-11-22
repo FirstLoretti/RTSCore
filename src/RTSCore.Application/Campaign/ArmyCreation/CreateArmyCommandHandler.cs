@@ -16,7 +16,7 @@ public sealed class CreateArmyCommandHandler(
 {
     public async Task<ArmyId> Handle(CreateArmyCommand request, CancellationToken ct)
     {
-        var city = await unitOfWork.CityRepository.GetAsync(request.CityId, ct, trackChanges: false);
+        var city = await unitOfWork.CityRepository.GetAsync(request.CityId, ct, isTracking: false);
         Guard.Against.NotFound(request.CityId, city);
 
         var army = city.CreateArmy(unitCatalog.GetTemplate(request.GeneralType));

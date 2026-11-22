@@ -1,6 +1,3 @@
-using System.Collections.Immutable;
-using System.Collections.ObjectModel;
-
 using Microsoft.EntityFrameworkCore;
 
 using RTSCore.Application.Repositories;
@@ -13,14 +10,19 @@ public sealed class SqlArmyRepository(AppDbContext context) : IArmyRepository
 {
     public void Add(Army army) => context.Armies.Add(army);
 
-    public async Task<Army?> GetAsync(ArmyId armyId, CancellationToken ct) =>
+    public async Task<Army?> GetAsync(ArmyId armyId, CancellationToken ct, bool isTracking = true) =>
         await context.Armies
+            .WithTracking(isTracking)
             .Include(a => a.Units)
             .FirstOrDefaultAsync(a => a.Id == armyId, ct);
 
-    public async Task<ReadOnlyCollection<Army>> GetAsync(FactionType faction, CancellationToken ct) =>
-        (await context.Armies
+    public async Task<IReadOnlyList<Army>> GetAsync(
+        FactionType faction,
+        CancellationToken ct,
+        bool isTracking = true
+    ) => await context.Armies
+            .WithTracking(isTracking)
             .Where(a => a.Faction == faction)
             .Include(a => a.Units)
-            .ToListAsync(ct)).AsReadOnly();
+            .ToListAsync(ct);
 }

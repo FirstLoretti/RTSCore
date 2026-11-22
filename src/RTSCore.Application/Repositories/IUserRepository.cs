@@ -5,6 +5,6 @@ public interface IUserRepository
     void Add(User user);
 
     Task<bool> ExistAsync(string name, CancellationToken ct);
-    Task<User?> GetAsync(string name, CancellationToken ct);
-    Task<User?> GetAsync(UserId id, CancellationToken ct);
+    Task<User?> GetAsync(string name, CancellationToken ct, bool isTracking = true);
+    Task<User?> GetAsync(UserId id, CancellationToken ct, bool isTracking = true);
 }

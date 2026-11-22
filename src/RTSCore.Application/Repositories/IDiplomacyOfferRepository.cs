@@ -6,5 +6,5 @@ public interface IDiplomacyOfferRepository
 {
     void Add(DiplomacyOffer offer);
 
-    Task<DiplomacyOffer?> GetAsync(DiplomacyOfferId id, CancellationToken ct);
+    Task<DiplomacyOffer?> GetAsync(DiplomacyOfferId id, CancellationToken ct, bool isTracking = true);
 }

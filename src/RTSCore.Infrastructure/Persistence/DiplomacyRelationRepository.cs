@@ -1,5 +1,3 @@
-using System.Collections.ObjectModel;
-
 using Microsoft.EntityFrameworkCore;
 
 using RTSCore.Application.Repositories;
@@ -9,7 +7,7 @@ using RTSCore.Domain.Entities.Diplomacy;
 
 namespace RTSCore.Infrastructure.Persistence;
 
-public sealed class SqlDiplomacyRelationRepository(AppDbContext context) : IDiplomacyRelationRepository
+public sealed class DiplomacyRelationRepository(AppDbContext context) : IDiplomacyRelationRepository
 {
     public void Add(DiplomacyRelation relation) => context.DiplomacyRelations.Add(relation);
 
@@ -17,27 +15,31 @@ public sealed class SqlDiplomacyRelationRepository(AppDbContext context) : IDipl
         CampaignId campaignId,
         FactionType factionA,
         FactionType factionB,
-        CancellationToken ct
+        CancellationToken ct,
+        bool isTracking = true
     )
     {
         var (first, second) = factionA < factionB
             ? (factionA, factionB)
             : (factionB, factionA);
 
-        return await context.DiplomacyRelations.FirstOrDefaultAsync(r =>
-            r.CampaignId == campaignId &&
-            r.FactionA == first &&
-            r.FactionB == second,
-            ct
+        return await context.DiplomacyRelations
+            .WithTracking(isTracking)
+            .FirstOrDefaultAsync(r =>
+                r.CampaignId == campaignId &&
+                r.FactionA == first &&
+                r.FactionB == second,
+                ct
         );
     }
 
-    public async Task<ReadOnlyCollection<DiplomacyRelation>> GetAsync(
+    public async Task<IReadOnlyList<DiplomacyRelation>> GetAsync(
         CampaignId campaignId,
         FactionType faction,
-        CancellationToken ct
-    ) => (await context.DiplomacyRelations
+        CancellationToken ct,
+        bool isTracking = true
+    ) => await context.DiplomacyRelations
+            .WithTracking(isTracking)
             .Where(r => r.CampaignId == campaignId && (r.FactionA == faction || r.FactionB == faction))
-            .ToListAsync(ct))
-            .AsReadOnly();
+            .ToListAsync(ct);
 }

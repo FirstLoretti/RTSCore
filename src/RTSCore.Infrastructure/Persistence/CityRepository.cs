@@ -10,19 +10,24 @@ using RTSCore.Domain.Entities.Cities;
 
 namespace RTSCore.Infrastructure.Persistence;
 
-public sealed class SqlCityRepository(AppDbContext context) : ICityRepository
+public sealed class CityRepository(AppDbContext context) : ICityRepository
 {
     public void Add(City city) => context.Cities.Add(city);
     public void AddRange(IEnumerable<City> cities) => context.Cities.AddRange(cities);
 
-    public async Task<City?> GetAsync(CityId id, CancellationToken ct, bool trackChanges = true) =>
+    public async Task<City?> GetAsync(CityId id, CancellationToken ct, bool isTracking = true) =>
         await context.Cities
+            .WithTracking(isTracking)
             .Include(c => c.Buildings)
             .FirstOrDefaultAsync(c => c.Id == id, ct);
 
-    public async Task<ReadOnlyCollection<City>> GetAsync(FactionType faction, CancellationToken ct) =>
-        (await context.Cities
+    public async Task<IReadOnlyList<City>> GetAsync(
+        FactionType faction,
+        CancellationToken ct,
+        bool isTracking = true
+    ) => await context.Cities
+            .WithTracking(isTracking)
             .Where(c => c.Faction == faction)
             .Include(c => c.Buildings)
-            .ToListAsync(ct)).AsReadOnly();
+            .ToListAsync(ct);
 }

@@ -1,5 +1,3 @@
-using System.Collections.ObjectModel;
-
 using RTSCore.Domain;
 using RTSCore.Domain.Entities.Armies;
 
@@ -9,6 +7,6 @@ public interface IArmyRepository
 {
     void Add(Army army);
 
-    Task<Army?> GetAsync(ArmyId armyId, CancellationToken ct);
-    Task<ReadOnlyCollection<Army>> GetAsync(FactionType faction, CancellationToken ct);
+    Task<Army?> GetAsync(ArmyId armyId, CancellationToken ct, bool isTracking = true);
+    Task<IReadOnlyList<Army>> GetAsync(FactionType faction, CancellationToken ct, bool isTracking = true);
 }
