@@ -13,5 +13,8 @@ public sealed class CampaignConfiguration : IEntityTypeConfiguration<Campaign>
             id => id.Value,
             dbId => new CampaignId(dbId)
         );
+
+        builder.PrimitiveCollection(c => c.Factions)
+            .ElementType(f => f.HasConversion<string>().HasMaxLength(256));
     }
 }

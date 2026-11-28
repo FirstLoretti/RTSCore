@@ -10,5 +10,5 @@ public sealed class BuildingCatalog(IReadOnlyList<BuildingTemplate> templates)
     private readonly FrozenDictionary<BuildingType, BuildingTemplate> _buildings = templates.ToFrozenDictionary(t => t.Type);
 
     public ImmutableArray<BuildingTemplate> AllTemplates => _buildings.Values;
-    public BuildingTemplate GetBuilding(BuildingType buildingType) => _buildings[buildingType];
+    public BuildingTemplate GetTemplate(BuildingType buildingType) => _buildings[buildingType];
 }

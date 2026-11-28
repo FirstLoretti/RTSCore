@@ -22,7 +22,7 @@ public sealed class ConstructBuildingCommandHandler(
         var faction = await unitOfWork.FactionRepository.GetAsync(city.CampaignId, city.Faction, ct);
         Guard.Against.NotFound(city.Faction, faction);
 
-        var template = catalog.GetBuilding(request.BuildingType);
+        var template = catalog.GetTemplate(request.BuildingType);
 
         var factionResult = faction.SpendGold(template.Cost);
         if (factionResult.IsFailure) return factionResult.Error;

@@ -6,10 +6,10 @@ namespace RTSCore.Domain.Entities.Diplomacy;
 
 public sealed class DiplomacyRelation
 {
-    public CampaignId CampaignId { get; }
-    public DiplomacyRelationId Id { get; }
-    public FactionType FactionA { get; }
-    public FactionType FactionB { get; }
+    public CampaignId CampaignId { get; init; }
+    public DiplomacyRelationId Id { get; init; }
+    public FactionType FactionA { get; init; }
+    public FactionType FactionB { get; init; }
 
     public int Standing { get; private set; }
     public bool HasTradeAgreement { get; private set; }

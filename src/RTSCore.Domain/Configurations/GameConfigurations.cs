@@ -1,3 +1,4 @@
+using RTSCore.Domain.AI;
 using RTSCore.Domain.AI.Personality;
 using RTSCore.Domain.Configurations.Armies;
 using RTSCore.Domain.Configurations.Armies.Combat;
@@ -17,6 +18,7 @@ public sealed class GameConfigurations
     public required BuildingCatalog Buildings { get; init; }
     public required CityCatalog Cities { get; init; }
     public required AiCatalog AiPersonalities { get; init; }
+    public required AiBudgetWeights AiBudgetWeights { get; init; }
 
     public required MovementConfiguration Movement { get; init; }
     public required DiplomacyConfiguration Diplomacy { get; init; }

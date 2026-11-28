@@ -115,7 +115,7 @@ public sealed class RecruitUnitHandlerTests
 
         _unitOfWork.ArmyRepository.GetAsync(default(ArmyId), default).ReturnsForAnyArgs(army);
         _unitOfWork.CityRepository.GetAsync(id: default, default).ReturnsForAnyArgs(city);
-        _unitOfWork.FactionRepository.GetAsync(default, default, default).ReturnsForAnyArgs(faction);
+        _unitOfWork.FactionRepository.GetAsync(default, default, default, default).ReturnsForAnyArgs(faction);
 
         return (army, city);
     }

@@ -10,6 +10,7 @@ namespace RTSCore.Infrastructure.Persistence;
 public sealed class DiplomacyRelationRepository(AppDbContext context) : IDiplomacyRelationRepository
 {
     public void Add(DiplomacyRelation relation) => context.DiplomacyRelations.Add(relation);
+    public void AddRange(IEnumerable<DiplomacyRelation> relations) => context.DiplomacyRelations.AddRange(relations);
 
     public async Task<DiplomacyRelation?> GetAsync(
         CampaignId campaignId,
@@ -41,5 +42,14 @@ public sealed class DiplomacyRelationRepository(AppDbContext context) : IDiploma
     ) => await context.DiplomacyRelations
             .WithTracking(isTracking)
             .Where(r => r.CampaignId == campaignId && (r.FactionA == faction || r.FactionB == faction))
+            .ToListAsync(ct);
+
+    public async Task<IReadOnlyList<DiplomacyRelation>> GetAsync(
+        CampaignId campaignId,
+        CancellationToken ct,
+        bool isTracking = true
+    ) => await context.DiplomacyRelations
+            .WithTracking(isTracking)
+            .Where(r => r.CampaignId == campaignId)
             .ToListAsync(ct);
 }

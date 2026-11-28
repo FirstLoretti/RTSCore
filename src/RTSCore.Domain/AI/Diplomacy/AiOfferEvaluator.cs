@@ -1,6 +1,8 @@
 using System.Runtime.CompilerServices;
 
+using RTSCore.Domain.AI.Personality;
 using RTSCore.Domain.Entities.Diplomacy;
+using RTSCore.Domain.Entities.Factions;
 
 namespace RTSCore.Domain.AI.Diplomacy;
 
@@ -9,62 +11,67 @@ public static class AiOfferEvaluator
     public static bool IsOfferProfitable(
         DiplomacyOffer offer,
         DiplomacyRelation relation,
-        AiFactionContext faction,
-        AiFactionContext opponentFaction
+        FactionContext faction,
+        AiPersonality personality,
+        FactionContext opponentFaction
     )
     {
         return offer.Type switch
         {
-            OfferType.TradeAgreement => IsTradeOfferProfitable(relation, faction, opponentFaction),
-            OfferType.PeaceTreaty => IsPeaceOfferProfitable(relation, faction, opponentFaction),
+            OfferType.TradeAgreement => IsTradeOfferProfitable(relation, faction, personality, opponentFaction),
+            OfferType.PeaceTreaty => IsPeaceOfferProfitable(relation, faction, personality, opponentFaction),
             _ => throw new SwitchExpressionException($"Unhandled offer type: {offer.Type}")
         };
     }
 
     internal static bool IsTradeOfferProfitable(
         DiplomacyRelation relation,
-        AiFactionContext faction,
-        AiFactionContext opponentFaction
+        FactionContext faction,
+        AiPersonality personality,
+        FactionContext opponentFaction
     )
     {
         if (relation.HasTradeAgreement || relation.InWar) return false;
 
-        var score = CalculateTradeScore(relation, faction, opponentFaction);
+        var score = CalculateTradeScore(relation, personality, opponentFaction);
 
-        return score > faction.AiPersonality.Diplomacy.TradeThreshold;
+        return score > personality.Diplomacy.TradeThreshold;
     }
 
     internal static bool IsPeaceOfferProfitable(
         DiplomacyRelation relation,
-        AiFactionContext faction,
-        AiFactionContext opponentFaction
+        FactionContext faction,
+        AiPersonality personality,
+        FactionContext opponentFaction
     )
     {
         if (!relation.InWar || opponentFaction.MilitaryPower == 0) return false;
 
-        var score = CalculatePeaceScore(faction, opponentFaction, relation);
+        var score = CalculatePeaceScore(faction, personality, opponentFaction, relation);
 
-        return score > faction.AiPersonality.Diplomacy.PeaсeThreshold;
+        return score > personality.Diplomacy.PeaсeThreshold;
     }
 
     internal static bool IsDeclareWarProfitable(
         DiplomacyRelation relation,
-        AiFactionContext faction,
-        AiFactionContext opponentFaction
+        FactionContext faction,
+        AiPersonality personality,
+        FactionContext opponentFaction
     )
     {
         if (relation.InWar) return false;
         if (opponentFaction.MilitaryPower == 0) return true;
 
-        var score = CalculateWarScore(relation, faction, opponentFaction);
+        var score = CalculateWarScore(relation, faction, personality, opponentFaction);
 
-        return score > faction.AiPersonality.Diplomacy.WarThreshold;
+        return score > personality.Diplomacy.WarThreshold;
     }
 
     private static int CalculateWarScore(
         DiplomacyRelation relation,
-        AiFactionContext faction,
-        AiFactionContext opponentFaction
+        FactionContext faction,
+        AiPersonality personality,
+        FactionContext opponentFaction
     )
     {
         var relationScore = (DiplomacyRelation.MaxStanding - relation.Standing) * 0.5f;
@@ -73,33 +80,34 @@ public static class AiOfferEvaluator
         var powerScore = float.Clamp((powerRatio - 1f) * 100f, 0f, 100f);
 
         return (int)(
-            (relationScore * faction.AiPersonality.Diplomacy.WarRelationWeight) +
-            (powerScore * faction.AiPersonality.Diplomacy.WarPowerWeight)
+            (relationScore * personality.Diplomacy.WarRelationWeight) +
+            (powerScore * personality.Diplomacy.WarPowerWeight)
         );
     }
 
     private static int CalculateTradeScore(
         DiplomacyRelation relation,
-        AiFactionContext faction,
-        AiFactionContext opponent
+        AiPersonality personality,
+        FactionContext opponent
     )
     {
         var standingScore = (int)((relation.Standing + DiplomacyRelation.MaxStanding) * 0.5f);
 
         var economicScore = Math.Min(
-            opponent.CitiesCount * faction.AiPersonality.Diplomacy.PartnerTradeScorePerCity,
+            opponent.CitiesCount * personality.Diplomacy.PartnerTradeScorePerCity,
             DiplomacyRelation.MaxStanding
         );
 
         return (int)(
-            (standingScore * faction.AiPersonality.Diplomacy.TradeStandingWeight) +
-            (economicScore * faction.AiPersonality.Diplomacy.TradeEconomicWeight)
+            (standingScore * personality.Diplomacy.TradeStandingWeight) +
+            (economicScore * personality.Diplomacy.TradeEconomicWeight)
         );
     }
 
     private static int CalculatePeaceScore(
-        AiFactionContext faction,
-        AiFactionContext opponentFaction,
+        FactionContext faction,
+        AiPersonality personality,
+        FactionContext opponentFaction,
         DiplomacyRelation relation
     )
     {
@@ -110,8 +118,8 @@ public static class AiOfferEvaluator
         var standingScore = (relation.Standing + 100) * 0.5f;
 
         return (int)(
-            (powerScore * faction.AiPersonality.Diplomacy.PeacePowerWeight) +
-            (standingScore * faction.AiPersonality.Diplomacy.PeaceStandingWeight)
+            (powerScore * personality.Diplomacy.PeacePowerWeight) +
+            (standingScore * personality.Diplomacy.PeaceStandingWeight)
         );
     }
 }

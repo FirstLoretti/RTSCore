@@ -70,7 +70,7 @@ public class CityTests
         {
             var city = TestData.CreateCity(template: TestData.CreateCityTemplate());
 
-            city.ConstructInstantly(TestData.BuildingCatalog.GetBuilding(BuildingType.ReqruitBarrack));
+            city.ConstructInstantly(TestData.BuildingCatalog.GetTemplate(BuildingType.ReqruitBarrack));
 
             var options = city.GetConstructableBuildings(TestData.BuildingCatalog.AllTemplates);
 
@@ -99,36 +99,38 @@ public class CityTests
         public void Should_GrowPopulation_CalculateIncome_AdvanceConstruction_AndRaiseTurnEndEvent()
         {
             var template = TestData.CreateCityTemplate() with { StartingPopulation = 1000 };
-            var city = TestData.CreateCity(template: template);
-            var market = TestData.BuildingCatalog.GetBuilding(BuildingType.Market);
-            var bigMarket = TestData.BuildingCatalog.GetBuilding(BuildingType.BigMarket);
-            var field = TestData.BuildingCatalog.GetBuilding(BuildingType.CultivatedField);
-            var fieldComplex = TestData.BuildingCatalog.GetBuilding(BuildingType.CultivatedFieldsComplex) with { TurnsToConstruct = 2 };
+            var city1 = TestData.CreateCity(template: template);
+            var city2 = TestData.CreateCity(template: template);
+            var market = TestData.BuildingCatalog.GetTemplate(BuildingType.Market);
+            var bigMarket = TestData.BuildingCatalog.GetTemplate(BuildingType.BigMarket);
+            var field = TestData.BuildingCatalog.GetTemplate(BuildingType.CultivatedField);
+            var fieldComplex = TestData.BuildingCatalog.GetTemplate(BuildingType.CultivatedFieldsComplex) with { TurnsToConstruct = 2 };
 
-            city.ConstructInstantly(market);
-            city.ConstructInstantly(field);
-            city.StartConstruction(bigMarket);
-            city.StartConstruction(fieldComplex);
+            city1.ConstructInstantly(market);
+            city2.ConstructInstantly(field);
+            city1.StartConstruction(bigMarket);
+            city2.StartConstruction(fieldComplex);
 
-            city.TurnEnd(TestData.BuildingCatalog, TestData.CityConfiguration);
+            city1.TurnEnd(TestData.BuildingCatalog, TestData.CityConfiguration);
+            city2.TurnEnd(TestData.BuildingCatalog, TestData.CityConfiguration);
 
-            var turnEvent = city.DomainEvents
+            var turnEvent = city1.DomainEvents
                 .OfType<CityTurnEndEvent>()
                 .Should()
                 .ContainSingle()
                 .Subject;
 
             var fieldGrowth = field.Effects.Single(e => e.Type == BuildingEffectType.PopulationGrowth).Value;
-            city.Population.Should().Be((int)(template.StartingPopulation + template.StartingPopulation * fieldGrowth));
+            city2.Population.Should().Be((int)(template.StartingPopulation + template.StartingPopulation * fieldGrowth));
 
             var marketIncome = (int)market.Effects.Single(e => e.Type == BuildingEffectType.GoldIncome).Value;
             var bigMarketIncome = (int)bigMarket.Effects.Single(e => e.Type == BuildingEffectType.GoldIncome).Value;
             turnEvent.BuildingsIncome.Should().Be(marketIncome + bigMarketIncome);
 
-            turnEvent.TaxesIncome.Should().Be((int)(city.Population * TestData.CityConfiguration.TaxPerCitizen));
+            turnEvent.TaxesIncome.Should().Be((int)(city1.Population * TestData.CityConfiguration.TaxPerCitizen));
 
-            city.Buildings.Single(b => b.Type == BuildingType.BigMarket).IsConstructed.Should().BeTrue();
-            city.Buildings.Single(b => b.Type == BuildingType.CultivatedFieldsComplex).TurnsToConstruct.Should().Be(1);
+            city1.Buildings.Single(b => b.Type == BuildingType.BigMarket).IsConstructed.Should().BeTrue();
+            city2.Buildings.Single(b => b.Type == BuildingType.CultivatedFieldsComplex).TurnsToConstruct.Should().Be(1);
         }
     }
 
@@ -152,7 +154,7 @@ public class CityTests
         {
             var city = TestData.CreateCity(template: TestData.CreateCityTemplate());
             var building = TestData.CreateBuildingTemplate() with { Type = BuildingType.Market };
-            city.StartConstruction(building);
+            city.ConstructInstantly(building);
 
             var result = city.CanConstruct(building);
 

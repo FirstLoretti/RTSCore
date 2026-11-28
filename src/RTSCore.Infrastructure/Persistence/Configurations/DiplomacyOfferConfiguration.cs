@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
+using RTSCore.Domain;
 using RTSCore.Domain.Entities.Campaigns;
 using RTSCore.Domain.Entities.Diplomacy;
 
@@ -20,9 +21,6 @@ public sealed class DiplomacyOfferConfiguration : IEntityTypeConfiguration<Diplo
             dbValue => new DiplomacyOfferId(dbValue)
         );
 
-        builder.Property(o => o.Initiator).HasConversion<string>();
-        builder.Property(o => o.Target).HasConversion<string>();
-        builder.Property(o => o.Type).HasConversion<string>();
-        builder.Property(o => o.Status).HasConversion<string>();
+        builder.HasIndex(o => new { o.CampaignId, o.Status, o.Target });
     }
 }

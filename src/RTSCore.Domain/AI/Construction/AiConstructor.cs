@@ -1,3 +1,6 @@
+using System.Collections.Frozen;
+using System.Collections.Immutable;
+
 using RTSCore.Domain.AI.Personality;
 using RTSCore.Domain.Configurations.Cities;
 using RTSCore.Domain.Entities.Cities;
@@ -5,57 +8,88 @@ using RTSCore.Domain.Entities.Factions;
 
 namespace RTSCore.Domain.AI.Construction;
 
-public static class AiConstructor
+public sealed class AiConstructor
 {
-    public static void StartConstruction(
-        Faction faction,
-        AiPersonality personality,
-        BuildingCatalog catalog,
-        IReadOnlyCollection<City> cities
-    )
+    private readonly AiBudgetWeights _budgetWeights;
+    private readonly BuildingCatalog _buildingCatalog;
+    private readonly FrozenDictionary<AiPersonalityType, ImmutableArray<ProductionOption<BuildingType>>> _buildingsByPersonality;
+
+    private readonly int _minBuildingCost;
+
+    public AiConstructor(AiCatalog aiCatalog, BuildingCatalog buildingCatalog, AiBudgetWeights budgetWeights)
     {
-        var sortedOptions = EvaluateAvailableBuildings(catalog, personality, cities);
+        _budgetWeights = budgetWeights;
+        _buildingCatalog = buildingCatalog;
+        _minBuildingCost = buildingCatalog.AllTemplates.Min(b => b.Cost);
 
-        foreach (var option in sortedOptions)
+        var tempDic = new Dictionary<AiPersonalityType, ImmutableArray<ProductionOption<BuildingType>>>(
+            aiCatalog.AllPersonalities.Length
+        );
+
+        foreach (var personality in aiCatalog.AllPersonalities)
         {
-            if (faction.Gold < option.Cost) continue;
-
-            var city = cities.First(c => c.Id == option.CityId);
-            var buildingTemplate = catalog.GetBuilding(option.BuildingType);
-
-            if (city.StartConstruction(buildingTemplate).IsFailure) continue;
-            faction.SpendGold(option.Cost);
+            tempDic[personality.Type] = EvaluateBuildings(_buildingCatalog, personality);
         }
+
+        _buildingsByPersonality = tempDic.ToFrozenDictionary();
     }
 
-    private static List<AiConstructionOption> EvaluateAvailableBuildings(
-        BuildingCatalog catalog,
-        AiPersonality personality,
-        IReadOnlyCollection<City> cities
-    )
+    public void StartConstruction(Faction faction, AiPersonalityType personalityType, IReadOnlyCollection<City> cities)
     {
-        var constructionOptions = new List<AiConstructionOption>();
+        var availableGold = (int)(faction.Gold * _budgetWeights.Construction);
+        if (availableGold < _minBuildingCost || cities.Count == 0) return;
 
-        foreach (var city in cities)
+        var orderedBuildings = _buildingsByPersonality[personalityType];
+
+        foreach (var building in orderedBuildings)
         {
-            var buildings = city.GetConstructableBuildings(catalog.AllTemplates);
+            if (availableGold < building.Cost) continue;
 
-            foreach (var building in buildings)
+            var template = _buildingCatalog.GetTemplate(building.Type);
+
+            foreach (var city in cities)
             {
-                var multiplier = building.ProductionCategory == ProductionCategory.Military
-                    ? personality.Building.MilitaryMultiplier
-                    : personality.Building.EconomicMultiplier;
+                if (availableGold < building.Cost) continue;
 
-                var utility = (int)(building.AiUtility * multiplier);
-
-                if (utility > 0)
+                if (city.StartConstruction(template).IsSuccess)
                 {
-                    var constructOption = new AiConstructionOption(city.Id, building.Type, building.Cost, utility);
-                    constructionOptions.Add(constructOption);
+                    faction.SpendGold(building.Cost);
+                    availableGold -= building.Cost;
                 }
             }
         }
+    }
 
-        return [.. constructionOptions.OrderByDescending(o => o.Utility)];
+    private static ImmutableArray<ProductionOption<BuildingType>> EvaluateBuildings(
+        BuildingCatalog catalog,
+        AiPersonality personality
+    )
+    {
+        var options = new List<ProductionOption<BuildingType>>();
+
+        foreach (var building in catalog.AllTemplates)
+        {
+            var multiplier = building.ProductionCategory == ProductionCategory.Military
+                ? personality.Building.MilitaryMultiplier
+                : personality.Building.EconomicMultiplier;
+
+            var utility = (int)(building.AiUtility * multiplier);
+
+            if (utility > 0)
+            {
+                var option = new ProductionOption<BuildingType>(
+                    building.DisplayName,
+                    building.Type,
+                    building.Cost,
+                    building.TurnsToConstruct,
+                    building.ProductionCategory,
+                    utility
+                );
+
+                options.Add(option);
+            }
+        }
+
+        return [.. options.OrderByDescending(o => o.AiUtility)];
     }
 }

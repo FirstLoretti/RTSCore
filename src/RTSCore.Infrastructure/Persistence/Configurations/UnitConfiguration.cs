@@ -26,8 +26,5 @@ public sealed class UnitConfigurations : IEntityTypeConfiguration<Unit>
         );
 
         builder.HasIndex(u => u.ArmyId);
-
-        builder.Property(u => u.Type).HasConversion<string>();
-        builder.Property(u => u.Faction).HasConversion<string>();
     }
 }

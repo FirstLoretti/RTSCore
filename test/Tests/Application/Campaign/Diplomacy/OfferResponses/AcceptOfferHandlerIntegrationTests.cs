@@ -61,7 +61,7 @@ public sealed class AcceptOfferHandlerIntegrationTests(TestFixture testFixture) 
     }
 
     [Fact]
-    public async Task Handle_ShouldAcceptPeaceOfferAndSaveChangesToDb_WhenAllConditionsMet()
+    public async Task Handle_ShouldAcceptPeaceOfferAndSaveChangesToDb()
     {
         var relation = CreateDiplomacyRelation(CampaignId.New(), FactionType.England, FactionType.France, standing: 0);
         var offer = CreateDiplomacyOffer(relation.CampaignId, FactionType.England, FactionType.France, OfferType.PeaceTreaty);

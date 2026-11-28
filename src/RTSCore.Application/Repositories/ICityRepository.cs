@@ -16,4 +16,5 @@ public interface ICityRepository
         CancellationToken ct,
         bool isTracking = true
     );
+    Task<IReadOnlyList<City>> GetAsync(CampaignId campaignId, CancellationToken ct, bool isTracking = true);
 }

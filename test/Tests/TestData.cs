@@ -132,27 +132,39 @@ public static class TestData
             coordinates ?? Vector2.Zero
         );
 
-    private static ImmutableArray<CityPreset> EnglandCityPresets { get; } =
+    private static IReadOnlyList<CityPreset> EnglandCityPresets { get; } =
     [
-        new(CityType.Settlement, DisplayName: "York", Vector2.One),
+        new(CityType.Settlement,"York", Vector2.One, [CreateBuildingTemplate() with {Type = BuildingType.Market}]),
+    ];
+    private static IReadOnlyList<ArmyPreset> EnglandArmyPresets { get; } =
+    [
+        new(FactionType.England, CreateUnitTemplate(maxHealth:100),[CreateUnitTemplate(maxHealth: 50)], Vector2.One)
     ];
 
-    private static ImmutableArray<CityPreset> FranceCityPresets { get; } =
+    private static IReadOnlyList<CityPreset> FranceCityPresets { get; } =
     [
-        new(CityType.Settlement, DisplayName: "Paris", new Vector2(2f,2f)),
+        new(CityType.Settlement, "Paris", new (2f,2f), [CreateBuildingTemplate() with {Type = BuildingType.ReqruitBarrack}]),
+    ];
+    private static IReadOnlyList<ArmyPreset> FranceArmyPresets { get; } =
+    [
+        new(FactionType.England, CreateUnitTemplate(maxHealth:100),[CreateUnitTemplate(maxHealth: 50)], new (2f,2f))
     ];
 
-    private static ImmutableArray<CityPreset> SpainCityPresets { get; } =
+    private static IReadOnlyList<CityPreset> SpainCityPresets { get; } =
     [
-        new(CityType.Village, DisplayName: "Madrid", new(3f, 3f)),
-        new(CityType.Village, DisplayName: "Seville", new(4f, 4f))
+        new(CityType.Village, "Madrid", new(3f, 3f), []),
+        new(CityType.Village, "Seville", new(4f, 4f), [CreateBuildingTemplate() with {Type = BuildingType.CultivatedField}])
+    ];
+    private static IReadOnlyList<ArmyPreset> SpainArmyPresets { get; } =
+    [
+        new(FactionType.England, CreateUnitTemplate(maxHealth:100),[CreateUnitTemplate(maxHealth: 50)], new Vector2(5f,5f))
     ];
 
     public static FactionCatalog FactionCatalog { get; } = new(
         [
-            new(FactionType.England, "England", 1000, EnglandCityPresets, AiPersonalityType.Conqueror),
-            new(FactionType.France, "France", 1000, FranceCityPresets, AiPersonalityType.Conqueror),
-            new(FactionType.Spain, "Spain", 1000, SpainCityPresets, AiPersonalityType.Defender)
+            new(FactionType.England, "England", 1000, EnglandCityPresets, EnglandArmyPresets, AiPersonalityType.Conqueror),
+            new(FactionType.France, "France", 1000, FranceCityPresets, FranceArmyPresets, AiPersonalityType.Conqueror),
+            new(FactionType.Spain, "Spain", 1000, SpainCityPresets, SpainArmyPresets, AiPersonalityType.Defender)
         ]
     );
 
@@ -243,6 +255,7 @@ public static class TestData
         "England",
         1000,
         CityPresets: [],
+        ArmyPresets: [],
         AiPersonalityType.Conqueror
     );
 
@@ -262,9 +275,8 @@ public static class TestData
         AiDiplomacyWeights
     );
 
-    public static AiFactionContext AiFactionContext { get; } = new(
+    public static FactionContext AiFactionContext { get; } = new(
         FactionType.England,
-        AiPersonality,
         Gold: 1,
         CitiesCount: 1,
         MilitaryPower: 1

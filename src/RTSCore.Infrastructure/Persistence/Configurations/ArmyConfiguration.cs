@@ -27,7 +27,6 @@ public sealed class ArmyConfiguration : IEntityTypeConfiguration<Army>
 
         builder.HasIndex(a => new { a.CampaignId, a.Faction });
 
-        builder.Property(a => a.Faction).HasConversion<string>();
         builder.ComplexProperty(a => a.Coordinates);
 
         builder.HasMany(a => a.Units)

@@ -1,5 +1,4 @@
 using System.Collections.Frozen;
-using System.Collections.Immutable;
 
 using RTSCore.Domain.Entities.Armies;
 using RTSCore.Domain.Entities.Cities;
@@ -15,8 +14,8 @@ public sealed record BuildingTemplate
     public required ProductionCategory ProductionCategory { get; init; }
     public required int AiUtility { get; init; }
 
-    public required ImmutableArray<CityType> AllowedCityTypes { get; init; }
-    public required ImmutableArray<BuildingType> RequiredBuildings { get; init; }
-    public required ImmutableArray<BuildingEffect> Effects { get; init; }
+    public required IReadOnlyList<CityType> AllowedCityTypes { get; init; }
+    public required IReadOnlyList<BuildingType> RequiredBuildings { get; init; }
+    public required IReadOnlyList<BuildingEffect> Effects { get; init; }
     public required FrozenDictionary<UnitType, int> Garrison { get; init; }
 }

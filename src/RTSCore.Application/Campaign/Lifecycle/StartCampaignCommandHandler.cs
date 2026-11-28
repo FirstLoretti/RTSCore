@@ -20,6 +20,7 @@ public sealed class StartCampaignCommanHandler(
         unitOfWork.CampaignRepository.Add(result.Campaign);
         unitOfWork.FactionRepository.AddRange(result.Factions);
         unitOfWork.CityRepository.AddRange(result.Cities);
+        unitOfWork.ArmyRepository.AddRange(result.Armies);
         unitOfWork.AiAgentRepository.AddRange(result.AiAgents);
 
         await unitOfWork.SaveChangesAsync(ct);

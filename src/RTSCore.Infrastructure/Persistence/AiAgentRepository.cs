@@ -18,7 +18,7 @@ public sealed class AiAgentRepository(AppDbContext context) : IAiAgentRepository
         bool isTracking = true
     ) => await context.AiFactionAgents
             .WithTracking(isTracking)
-            .FirstOrDefaultAsync(a => a.CampaignId == campaignId && a.Faction == factionType, ct);
+            .FirstOrDefaultAsync(a => a.CampaignId == campaignId && a.FactionType == factionType, ct);
 
 
     public async Task<IReadOnlyList<AiFactionAgent>> GetAsync(

@@ -7,6 +7,7 @@ namespace RTSCore.Application.Repositories;
 public interface IDiplomacyRelationRepository
 {
     void Add(DiplomacyRelation relation);
+    void AddRange(IEnumerable<DiplomacyRelation> relations);
 
     Task<DiplomacyRelation?> GetAsync(
         CampaignId campaignId,
@@ -19,6 +20,12 @@ public interface IDiplomacyRelationRepository
     Task<IReadOnlyList<DiplomacyRelation>> GetAsync(
         CampaignId campaignId,
         FactionType faction,
+        CancellationToken ct,
+        bool isTracking = true
+    );
+
+    Task<IReadOnlyList<DiplomacyRelation>> GetAsync(
+        CampaignId campaignId,
         CancellationToken ct,
         bool isTracking = true
     );

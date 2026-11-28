@@ -1,12 +1,13 @@
 using RTSCore.Domain.AI.Personality;
 using RTSCore.Domain.Entities.Diplomacy;
+using RTSCore.Domain.Entities.Factions;
 
 namespace RTSCore.Domain.AI.Diplomacy;
 
 public sealed record AiDiplomacyContext(
-    AiFactionContext Faction,
+    FactionContext FactionContext,
     AiPersonality AiPersonality,
-    IReadOnlyCollection<AiFactionContext> AnotherFactions,
+    IReadOnlyCollection<FactionContext> AnotherFactions,
     IReadOnlyCollection<DiplomacyRelation> FactionRelations,
     IReadOnlyCollection<DiplomacyOffer> IncomingOffers
 )
@@ -14,6 +15,6 @@ public sealed record AiDiplomacyContext(
     public DiplomacyRelation GetRelation(FactionType faction) =>
         FactionRelations.First(r => r.FactionA == faction || r.FactionB == faction);
 
-    public AiFactionContext GetOpponent(FactionType opponent) =>
+    public FactionContext GetOpponent(FactionType opponent) =>
         AnotherFactions.First(f => f.FactionType == opponent);
 }

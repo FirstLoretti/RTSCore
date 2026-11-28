@@ -1,5 +1,6 @@
 using FluentAssertions;
 
+using RTSCore.Domain.AI;
 using RTSCore.Domain.AI.Personality;
 using RTSCore.Domain.AI.Recruitment;
 using RTSCore.Domain.Configurations.Armies;
@@ -12,7 +13,7 @@ public class AiRecruiterTests
     [Fact]
     public void New_ShouldEvaluateUnitsAndOrder()
     {
-        var aiRecruiter = new AiRecruiter(UnitCatalog, TestData.AiCatalog);
+        var aiRecruiter = new AiRecruiter(UnitCatalog, TestData.AiCatalog, TestData.AiBudgetWeights);
 
         aiRecruiter.GetUnits(AiPersonalityType.Conqueror).First().Type.Should().Be(UnitType.Peasant);
         aiRecruiter.GetUnits(AiPersonalityType.Defender).First().Type.Should().Be(UnitType.PeasantArcher);
@@ -22,18 +23,22 @@ public class AiRecruiterTests
     public void RecruitUnit_ShouldEvaulateAndRecruitUsefulest()
     {
         var faction = TestData.CreateFaction();
+        var initialGold = faction.Gold;
         var army = TestData.CreateArmy();
         var unit1 = TestData.CreateProductionOption(UnitType.PeasantArcher) with { Cost = 2 };
-        var unit2 = TestData.CreateProductionOption(UnitType.Peasant) with { Cost = (int)((faction.Gold - 1) / 2f) };
-        var aiRecruiter = new AiRecruiter(UnitCatalog, TestData.AiCatalog);
+        var unit2 = TestData.CreateProductionOption(UnitType.Peasant) with
+        {
+            Cost = (int)((faction.Gold * TestData.AiBudgetWeights.Recruitment - 1) / 2f)
+        };
+        var aiRecruiter = new AiRecruiter(UnitCatalog, TestData.AiCatalog, TestData.AiBudgetWeights);
 
-        aiRecruiter.RecruitUnits(faction, army, AiPersonalityType.Conqueror, [unit1, unit2]);
+        aiRecruiter.StartRecruitment(faction, AiPersonalityType.Conqueror, [army], [unit1, unit2]);
 
         army.Units.Count.Should().Be(4);
         army.Units[1].Type.Should().Be(UnitType.Peasant);
         army.Units[2].Type.Should().Be(UnitType.Peasant);
         army.Units[3].Type.Should().Be(UnitType.PeasantArcher);
-        faction.Gold.Should().Be(0);
+        faction.Gold.Should().Be((int)(initialGold - initialGold * TestData.AiBudgetWeights.Construction));
     }
 
     [Fact]
@@ -43,9 +48,9 @@ public class AiRecruiterTests
         var initialGold = faction.Gold;
         var army = TestData.CreateArmy();
         var option = TestData.CreateProductionOption(UnitType.Peasant) with { Cost = faction.Gold + 1 };
-        var aiRecruiter = new AiRecruiter(UnitCatalog, TestData.AiCatalog);
+        var aiRecruiter = new AiRecruiter(UnitCatalog, TestData.AiCatalog, TestData.AiBudgetWeights);
 
-        aiRecruiter.RecruitUnits(faction, army, AiPersonalityType.Conqueror, [option]);
+        aiRecruiter.StartRecruitment(faction, AiPersonalityType.Conqueror, [army], [option]);
 
         army.Units.Should().ContainSingle();
         faction.Gold.Should().Be(initialGold);
@@ -57,11 +62,11 @@ public class AiRecruiterTests
         var faction = TestData.CreateFaction();
         var initialGold = faction.Gold;
         var army = TestData.CreateArmy();
-        var option = TestData.CreateProductionOption(UnitType.Peasant) with { Cost = faction.Gold };
-        var aiRecruiter = new AiRecruiter(UnitCatalog, TestData.AiCatalog);
+        var option = TestData.CreateProductionOption(UnitType.Peasant);
+        var aiRecruiter = new AiRecruiter(UnitCatalog, TestData.AiCatalog, TestData.AiBudgetWeights);
         FillArmy(army);
 
-        aiRecruiter.RecruitUnits(faction, army, AiPersonalityType.Conqueror, [option]);
+        aiRecruiter.StartRecruitment(faction, AiPersonalityType.Conqueror, [army], [option]);
 
         army.Units.Count.Should().Be(Army.MaxSize);
         faction.Gold.Should().Be(initialGold);

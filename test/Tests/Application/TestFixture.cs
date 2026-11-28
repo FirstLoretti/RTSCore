@@ -10,6 +10,9 @@ using RTSCore.Application.Authentication;
 using RTSCore.Application.Campaign.Lifecycle;
 using RTSCore.Application.Common;
 using RTSCore.Application.Repositories;
+using RTSCore.Domain.AI;
+using RTSCore.Domain.AI.Construction;
+using RTSCore.Domain.AI.Recruitment;
 using RTSCore.Domain.Configurations;
 using RTSCore.Domain.Entities.Armies;
 using RTSCore.Domain.Entities.Armies.Combat;
@@ -44,10 +47,14 @@ public sealed class TestFixture : IAsyncLifetime
         services.AddLogging();
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(StartCampaignCommanHandler).Assembly));
         services.AddScoped<IUnitOfWork, UnitOfWork>();
+        services.AddScoped<IDiplomacyOfferRepository, DiplomacyOfferRepository>();
         services.AddScoped<ICityRepository, CityRepository>();
         services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
         services.AddScoped<IRefreshTokenGenerator, RefreshTokenGenerator>();
         services.AddScoped<IJwtTokenProvider, JwtTokenProvider>();
+        services.AddSingleton<AiConstructor>();
+        services.AddSingleton<AiRecruiter>();
+        services.AddSingleton<AiTurnOrchestrator>();
         services.AddSingleton<AutoBattleCalculator>();
         services.AddSingleton<UnitStatsCalculator>();
         RegisterGameConfigs(services);
@@ -98,6 +105,7 @@ public sealed class TestFixture : IAsyncLifetime
             Buildings = TestData.BuildingCatalog,
             Cities = TestData.CityCatalog,
             AiPersonalities = TestData.AiCatalog,
+            AiBudgetWeights = TestData.AiBudgetWeights,
 
             Movement = TestData.MovementConfiguration,
             Diplomacy = TestData.DiplomacyConfig,

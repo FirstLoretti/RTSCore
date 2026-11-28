@@ -1,7 +1,3 @@
-using System.Collections.Immutable;
-using System.Collections.ObjectModel;
-using System.Numerics;
-
 using Microsoft.EntityFrameworkCore;
 
 using RTSCore.Application.Repositories;
@@ -30,6 +26,16 @@ public sealed class CityRepository(AppDbContext context) : ICityRepository
     ) => await context.Cities
             .WithTracking(isTracking)
             .Where(c => c.CampaignId == campaignId && c.Faction == faction)
+            .Include(c => c.Buildings)
+            .ToListAsync(ct);
+
+    public async Task<IReadOnlyList<City>> GetAsync(
+        CampaignId campaignId,
+        CancellationToken ct,
+        bool isTracking = true
+    ) => await context.Cities
+            .WithTracking(isTracking)
+            .Where(c => c.CampaignId == campaignId)
             .Include(c => c.Buildings)
             .ToListAsync(ct);
 }

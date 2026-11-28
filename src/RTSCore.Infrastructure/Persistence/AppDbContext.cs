@@ -33,5 +33,6 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
     protected override void ConfigureConventions(ModelConfigurationBuilder builder)
     {
         builder.Properties<string>().HaveMaxLength(256);
+        builder.Properties<Enum>().HaveConversion<string>();
     }
 }

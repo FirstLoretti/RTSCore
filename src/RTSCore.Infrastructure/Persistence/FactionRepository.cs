@@ -19,4 +19,13 @@ public sealed class FactionRepository(AppDbContext context) : IFactionRepository
     ) => await context.Factions
             .WithTracking(isTracking)
             .FirstOrDefaultAsync(f => f.CampaignId == campaignId && f.Type == type, ct);
+
+    public async Task<IReadOnlyList<Faction>> GetAsync(
+        CampaignId campaignId,
+        CancellationToken ct,
+        bool isTracking = true
+    ) => await context.Factions
+            .WithTracking(isTracking)
+            .Where(f => f.CampaignId == campaignId)
+            .ToListAsync(ct);
 }

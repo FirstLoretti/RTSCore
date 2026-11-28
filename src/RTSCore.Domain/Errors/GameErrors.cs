@@ -22,6 +22,8 @@ public static class GameErrors
 
     public static Error CantConstructThisBuildingType { get; }
         = new("City.CityCantConstructThisBuildingType", "This building do not allowed for construction in this city type.");
+    public static Error CantConstructNoSlot { get; }
+        = new("City.CantConstructNoSlot", "Cannot construct building. City does not have available construction slot.");
     public static Error CantRecruitBuildingNotConstructed { get; }
         = new("City.CityCantRecruitBuildingNotConstructed", "Cannot recruit unit, construct required building first.");
     public static Error CantConstructBuildingDuplicate { get; }
@@ -49,5 +51,6 @@ public static class GameErrors
         new("Diplomacy.RelationNotContainFactions",
             $"Initiator: {initiator} or target: {target} is not part of relation: {id}");
 
-    public static Error NotEnoughGold { get; } = new("NotEnoughGold", "Not enough gold");
+    public static Error NotEnoughGold { get; } = new("Faction.NotEnoughGold", "Not enough gold");
+    public static Error NotYourTurn { get; } = new("Faction.NotYourTurn", "Cannot do that. It is not your turn.");
 }

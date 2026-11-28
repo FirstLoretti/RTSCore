@@ -6,11 +6,11 @@ namespace RTSCore.Domain.Entities.Diplomacy;
 
 public sealed class DiplomacyOffer
 {
-    public CampaignId CampaignId { get; }
-    public DiplomacyOfferId Id { get; }
-    public FactionType Initiator { get; }
-    public FactionType Target { get; }
-    public OfferType Type { get; }
+    public CampaignId CampaignId { get; init; }
+    public DiplomacyOfferId Id { get; init; }
+    public FactionType Initiator { get; init; }
+    public FactionType Target { get; init; }
+    public OfferType Type { get; init; }
 
     public OfferStatus Status { get; private set; }
 

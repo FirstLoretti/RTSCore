@@ -19,7 +19,7 @@ public class WorldInitializerTests
         result.Factions.Count.Should().Be(TestData.FactionCatalog.AllTemplates.Length);
 
         result.AiAgents.Count.Should().Be(TestData.FactionCatalog.AllTemplates.Length - playersFactions.Count);
-        result.AiAgents.Select(a => a.Faction).Should().Contain(FactionType.Spain);
-        result.AiAgents.Select(a => a.Faction).Should().NotContain(playersFactions);
+        result.AiAgents.Select(a => a.FactionType).Should().Contain(FactionType.Spain);
+        result.AiAgents.Select(a => a.FactionType).Should().NotContain(playersFactions);
     }
 }

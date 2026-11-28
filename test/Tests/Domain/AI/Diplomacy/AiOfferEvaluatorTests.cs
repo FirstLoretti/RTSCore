@@ -21,7 +21,7 @@ public class AiOfferEvaluatorTests
             var target = AiFactionContext with { FactionType = relation.FactionB, CitiesCount = 10 };
             relation.OpenTrade(standingBonus: 0);
 
-            var result = AiOfferEvaluator.IsTradeOfferProfitable(relation, initiator, target);
+            var result = AiOfferEvaluator.IsTradeOfferProfitable(relation, initiator, AiPersonality, target);
 
             result.Should().BeFalse();
         }
@@ -34,7 +34,7 @@ public class AiOfferEvaluatorTests
             var target = AiFactionContext with { FactionType = relation.FactionB, CitiesCount = 10 };
             relation.DeclareWar(standingPenalty: 0);
 
-            var result = AiOfferEvaluator.IsTradeOfferProfitable(relation, initiator, target);
+            var result = AiOfferEvaluator.IsTradeOfferProfitable(relation, initiator, AiPersonality, target);
 
             result.Should().BeFalse();
         }
@@ -46,7 +46,7 @@ public class AiOfferEvaluatorTests
             var initiator = AiFactionContext with { FactionType = relation.FactionA };
             var target = AiFactionContext with { FactionType = relation.FactionB };
 
-            var result = AiOfferEvaluator.IsTradeOfferProfitable(relation, initiator, target);
+            var result = AiOfferEvaluator.IsTradeOfferProfitable(relation, initiator, AiPersonality, target);
 
             result.Should().BeFalse();
         }
@@ -58,7 +58,7 @@ public class AiOfferEvaluatorTests
             var initiator = AiFactionContext with { FactionType = relation.FactionA };
             var target = AiFactionContext with { FactionType = relation.FactionB, CitiesCount = 10 };
 
-            var result = AiOfferEvaluator.IsTradeOfferProfitable(relation, initiator, target);
+            var result = AiOfferEvaluator.IsTradeOfferProfitable(relation, initiator, AiPersonality, target);
 
             result.Should().BeTrue();
         }
@@ -73,7 +73,7 @@ public class AiOfferEvaluatorTests
             var initiator = AiFactionContext with { FactionType = relation.FactionA };
             var target = AiFactionContext with { FactionType = relation.FactionB, MilitaryPower = 100 };
 
-            var result = AiOfferEvaluator.IsPeaceOfferProfitable(relation, initiator, target);
+            var result = AiOfferEvaluator.IsPeaceOfferProfitable(relation, initiator, AiPersonality, target);
 
             result.Should().BeFalse();
         }
@@ -86,7 +86,7 @@ public class AiOfferEvaluatorTests
             var target = AiFactionContext with { FactionType = relation.FactionB, MilitaryPower = 0 };
             relation.DeclareWar(standingPenalty: 0);
 
-            var result = AiOfferEvaluator.IsPeaceOfferProfitable(relation, initiator, target);
+            var result = AiOfferEvaluator.IsPeaceOfferProfitable(relation, initiator, AiPersonality, target);
 
             result.Should().BeFalse();
         }
@@ -99,7 +99,7 @@ public class AiOfferEvaluatorTests
             var target = AiFactionContext with { FactionType = relation.FactionB };
             relation.DeclareWar(standingPenalty: 0);
 
-            var result = AiOfferEvaluator.IsPeaceOfferProfitable(relation, initiator, target);
+            var result = AiOfferEvaluator.IsPeaceOfferProfitable(relation, initiator, AiPersonality, target);
 
             result.Should().BeFalse();
         }
@@ -112,7 +112,7 @@ public class AiOfferEvaluatorTests
             var target = AiFactionContext with { FactionType = relation.FactionB, MilitaryPower = 100 };
             relation.DeclareWar(standingPenalty: 0);
 
-            var result = AiOfferEvaluator.IsPeaceOfferProfitable(relation, initiator, target);
+            var result = AiOfferEvaluator.IsPeaceOfferProfitable(relation, initiator, AiPersonality, target);
 
             result.Should().BeTrue();
         }
@@ -128,7 +128,7 @@ public class AiOfferEvaluatorTests
             var target = AiFactionContext with { FactionType = relation.FactionB };
             relation.DeclareWar(standingPenalty: 0);
 
-            var result = AiOfferEvaluator.IsDeclareWarProfitable(relation, initiator, target);
+            var result = AiOfferEvaluator.IsDeclareWarProfitable(relation, initiator, AiPersonality, target);
 
             result.Should().BeFalse();
         }
@@ -140,7 +140,7 @@ public class AiOfferEvaluatorTests
             var initiator = AiFactionContext with { FactionType = relation.FactionA };
             var target = AiFactionContext with { FactionType = relation.FactionB, MilitaryPower = 100 };
 
-            var result = AiOfferEvaluator.IsDeclareWarProfitable(relation, initiator, target);
+            var result = AiOfferEvaluator.IsDeclareWarProfitable(relation, initiator, AiPersonality, target);
 
             result.Should().BeFalse();
         }
@@ -152,7 +152,7 @@ public class AiOfferEvaluatorTests
             var initiator = AiFactionContext with { FactionType = relation.FactionA };
             var target = AiFactionContext with { FactionType = relation.FactionB, MilitaryPower = 0 };
 
-            var result = AiOfferEvaluator.IsDeclareWarProfitable(relation, initiator, target);
+            var result = AiOfferEvaluator.IsDeclareWarProfitable(relation, initiator, AiPersonality, target);
 
             result.Should().BeTrue();
         }
@@ -164,7 +164,7 @@ public class AiOfferEvaluatorTests
             var initiator = AiFactionContext with { FactionType = relation.FactionA, MilitaryPower = 100 };
             var target = AiFactionContext with { FactionType = relation.FactionB };
 
-            var result = AiOfferEvaluator.IsDeclareWarProfitable(relation, initiator, target);
+            var result = AiOfferEvaluator.IsDeclareWarProfitable(relation, initiator, AiPersonality, target);
 
             result.Should().BeTrue();
         }

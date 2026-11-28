@@ -18,10 +18,12 @@ public sealed class AiRecruiter
 
     private readonly UnitCatalog _unitCatalog;
     private readonly FrozenDictionary<AiPersonalityType, ImmutableArray<ProductionOption<UnitType>>> _unitsByPersonality;
+    private readonly AiBudgetWeights _budgetWeights;
 
-    public AiRecruiter(UnitCatalog unitCatalog, AiCatalog aiCatalog)
+    public AiRecruiter(UnitCatalog unitCatalog, AiCatalog aiCatalog, AiBudgetWeights budgetWeights)
     {
         _unitCatalog = unitCatalog;
+        _budgetWeights = budgetWeights;
 
         var tempDic = new Dictionary<AiPersonalityType, ImmutableArray<ProductionOption<UnitType>>>();
 
@@ -44,25 +46,35 @@ public sealed class AiRecruiter
         _unitsByPersonality = tempDic.ToFrozenDictionary();
     }
 
-    public void RecruitUnits(
+    public void StartRecruitment(
         Faction faction,
-        Army army,
-        AiPersonalityType personality,
+        AiPersonalityType personalityType,
+        IReadOnlyCollection<Army> armies,
         IReadOnlyCollection<ProductionOption<UnitType>> availableUnits
     )
     {
-        var allUnits = _unitsByPersonality[personality];
+        var orderedUnits = _unitsByPersonality[personalityType];
+        var availableGold = (int)(faction.Gold * _budgetWeights.Recruitment);
 
-        foreach (var unit in allUnits)
+        foreach (var unit in orderedUnits)
         {
+            if (availableGold < unit.Cost) continue;
+
             var availableUnit = availableUnits.FirstOrDefault(u => u.Type == unit.Type);
 
             if (availableUnit != default)
             {
-                while (faction.Gold >= availableUnit.Cost && army.HasFreeSlots)
+                foreach (var army in armies)
                 {
-                    army.RecruitUnit(_unitCatalog.GetTemplate(availableUnit.Type));
-                    faction.SpendGold(availableUnit.Cost);
+                    while (availableGold >= availableUnit.Cost)
+                    {
+                        if (army.RecruitUnit(_unitCatalog.GetTemplate(availableUnit.Type)).IsSuccess)
+                        {
+                            faction.SpendGold(availableUnit.Cost);
+                            availableGold -= availableUnit.Cost;
+                        }
+                        else break;
+                    }
                 }
             }
         }

@@ -3,10 +3,10 @@ using RTSCore.Domain.Entities.Campaigns;
 
 namespace RTSCore.Domain.AI;
 
-public sealed class AiFactionAgent(CampaignId campaignId, FactionType faction, AiPersonalityType personality)
+public sealed class AiFactionAgent(CampaignId campaignId, FactionType factionType, AiPersonalityType personalityType)
 {
     public CampaignId CampaignId { get; } = campaignId;
-    public FactionType Faction { get; } = faction;
+    public FactionType FactionType { get; } = factionType;
 
-    public AiPersonalityType Personality { get; private set; } = personality;
+    public AiPersonalityType PersonalityType { get; private set; } = personalityType;
 }

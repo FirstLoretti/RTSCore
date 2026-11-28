@@ -19,6 +19,7 @@ public sealed class City : AggregateRoot
     public FactionType Faction { get; private set; }
     public CityType Type { get; private set; }
     public int Population { get; private set; }
+    public bool InBuildingConstructionProcess { get; private set; }
 
     private readonly List<Building> _buildings = [];
     public IReadOnlyList<Building> Buildings => _buildings;
@@ -68,10 +69,7 @@ public sealed class City : AggregateRoot
     public ImmutableArray<ProductionOption<BuildingType>> GetConstructableBuildings(
         IReadOnlyCollection<BuildingTemplate> buildingTemplates
     ) => [.. buildingTemplates
-            .Where(b =>
-                b.AllowedCityTypes.Contains(Type) &&
-                !IsConstructed(b.Type) &&
-                b.RequiredBuildings.All(type => IsConstructed(type)))
+            .Where(b => CanConstruct(b).IsSuccess)
             .Select(b => new ProductionOption<BuildingType>(
                 b.DisplayName,
                 b.Type,
@@ -90,11 +88,14 @@ public sealed class City : AggregateRoot
         foreach (var building in _buildings)
         {
             if (!building.IsConstructed)
+            {
                 building.AdvanceConstruction();
 
-            if (!building.IsConstructed) continue;
+                if (!building.IsConstructed) continue;
+                else InBuildingConstructionProcess = false;
+            }
 
-            var template = catalog.GetBuilding(building.Type);
+            var template = catalog.GetTemplate(building.Type);
 
             foreach (var effect in template.Effects)
             {
@@ -122,6 +123,7 @@ public sealed class City : AggregateRoot
 
         var building = Building.CreateUnderConstruction(CampaignId, template, Faction, Id);
         _buildings.Add(building);
+        InBuildingConstructionProcess = true;
 
         return building.Id;
     }
@@ -143,10 +145,11 @@ public sealed class City : AggregateRoot
         var building = _buildings.FirstOrDefault(b => b.Id == id);
         if (building == null) return GameErrors.BuildingNotInTargetCity(id, Id);
 
-        if (building.IsConstructed)
-            return Result.Failure(GameErrors.CantCancelAlreadyConstructed);
+        if (building.IsConstructed) return GameErrors.CantCancelAlreadyConstructed;
 
         _buildings.Remove(building);
+
+        InBuildingConstructionProcess = false;
 
         AddDomainEvent(new ConstructionCanceledEvent(CampaignId, Faction, building.Cost));
 
@@ -155,17 +158,16 @@ public sealed class City : AggregateRoot
 
     internal Result CanConstruct(BuildingTemplate building)
     {
-        if (!building.AllowedCityTypes.Contains(Type))
-            return Result.Failure(GameErrors.CantConstructThisBuildingType);
+        if (InBuildingConstructionProcess) return GameErrors.CantConstructNoSlot;
 
-        if (_buildings.Any(b => b.Type == building.Type))
-            return Result.Failure(GameErrors.CantConstructBuildingDuplicate);
+        if (!building.AllowedCityTypes.Contains(Type)) return GameErrors.CantConstructThisBuildingType;
 
-        var hasRequiredBuildings = building.RequiredBuildings.All(reqType =>
-            _buildings.Any(b => b.Type == reqType));
+        if (_buildings.Any(b => b.Type == building.Type)) return GameErrors.CantConstructBuildingDuplicate;
+
+        var hasRequiredBuildings = building.RequiredBuildings.All(IsConstructed);
 
         return !hasRequiredBuildings
-            ? Result.Failure(GameErrors.ChainUnavailableConstructionOption)
+            ? GameErrors.ChainUnavailableConstructionOption
             : Result.Success();
     }
 

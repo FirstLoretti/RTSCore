@@ -23,8 +23,6 @@ public sealed class CityConfiguration : IEntityTypeConfiguration<City>
         builder.HasIndex(c => new { c.CampaignId, c.Faction });
 
         builder.ComplexProperty(c => c.Coordinates);
-        builder.Property(c => c.Type).HasConversion<string>();
-        builder.Property(c => c.Faction).HasConversion<string>();
 
         builder.HasMany(c => c.Buildings)
             .WithOne()

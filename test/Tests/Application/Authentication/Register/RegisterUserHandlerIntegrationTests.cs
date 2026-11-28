@@ -5,7 +5,6 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
-using RTSCore.Application;
 using RTSCore.Application.Authentication.Register;
 using RTSCore.Infrastructure.Persistence;
 

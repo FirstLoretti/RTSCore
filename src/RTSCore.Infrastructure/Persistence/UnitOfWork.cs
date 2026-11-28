@@ -14,7 +14,7 @@ public sealed class UnitOfWork(AppDbContext context, IMediator mediator) : IUnit
     public IDiplomacyOfferRepository DiplomacyOfferRepository => _offerRepository ??= new DiplomacyOfferRepository(context);
     public IUserRepository UserRepository => _userRepository ??= new UserRepository(context);
     public IRefreshTokenRepository RefreshTokenRepository => _tokenRepository ??= new RefreshTokenRepository(context);
-    public IArmyRepository ArmyRepository => _armyRepository ??= new SqlArmyRepository(context);
+    public IArmyRepository ArmyRepository => _armyRepository ??= new ArmyRepository(context);
     public IAiAgentRepository AiAgentRepository => _aiFactionAgent ??= new AiAgentRepository(context);
     public ICampaignRepository CampaignRepository => _campaignRepository ??= new CampaignRepository(context);
 
@@ -24,7 +24,7 @@ public sealed class UnitOfWork(AppDbContext context, IMediator mediator) : IUnit
     private DiplomacyOfferRepository? _offerRepository;
     private UserRepository? _userRepository;
     private RefreshTokenRepository? _tokenRepository;
-    private SqlArmyRepository? _armyRepository;
+    private ArmyRepository? _armyRepository;
     private AiAgentRepository? _aiFactionAgent;
     private CampaignRepository? _campaignRepository;
 

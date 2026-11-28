@@ -26,8 +26,5 @@ public sealed class BuildingConfiguration : IEntityTypeConfiguration<Building>
         );
 
         builder.HasIndex(b => b.CityId);
-
-        builder.Property(b => b.Type).HasConversion<string>();
-        builder.Property(b => b.Faction).HasConversion<string>();
     }
 }

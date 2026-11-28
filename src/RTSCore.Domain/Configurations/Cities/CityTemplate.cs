@@ -1,5 +1,3 @@
-using System.Collections.Immutable;
-
 using RTSCore.Domain.Entities.Cities;
 
 namespace RTSCore.Domain.Configurations.Cities;
@@ -9,5 +7,5 @@ public sealed record CityTemplate(
     string DisplayName,
     int StartingPopulation,
     int PopulationForUpgrade,
-    ImmutableArray<BuildingType> ConstructableBuildings
+    IReadOnlyList<BuildingType> ConstructableBuildings
 );
